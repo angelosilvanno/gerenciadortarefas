@@ -1,0 +1,60 @@
+@media (max-width: 768px) {
+  .card {
+    margin: 10px;
+  }
+
+  #login-container .row {
+    flex-direction: column;
+  }
+
+  #login-container .col-md-6 {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #login-container img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    margin-bottom: 15px;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  h1, h2 {
+    font-size: 1.5rem;
+  }
+
+  #task-form input,
+  #task-form textarea,
+  #task-form select {
+    font-size: 0.9rem;
+  }
+
+  #task-form button {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  h1, h2 {
+    font-size: 1.2rem;
+  }
+
+  #task-form input,
+  #task-form textarea,
+  #task-form select {
+    font-size: 0.8rem;
+  }
+
+  #task-form button {
+    font-size: 0.9rem;
+  }
+}
+@media (max-width: 768px) {
+  h1.text-center.mb-4 {
+    display: none;
+  }
+}

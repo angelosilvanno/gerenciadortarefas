@@ -18,3 +18,7 @@ Mencione todos aqueles que ajudaram a levantar o projeto desde o seu início, co
 * **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
 * **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
 * **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
+
+## 📄 Licença
+
+* Esse projeto está sob a licença (nome da licença) - acesse os detalhes [LICENSE.md](https://github.com/link_da_licenca).

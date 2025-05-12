@@ -25,17 +25,17 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => (message.textContent = ""), 4000);
   };
 
-  showRegister.addEventListener("click", () => {
+  showRegister?.addEventListener("click", () => {
     loginContainer.style.display = "none";
     registerContainer.style.display = "block";
   });
 
-  showLogin.addEventListener("click", () => {
+  showLogin?.addEventListener("click", () => {
     registerContainer.style.display = "none";
     loginContainer.style.display = "block";
   });
 
-  registerForm.addEventListener("submit", (e) => {
+  registerForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = document.getElementById("register-username").value.trim();
     const email = document.getElementById("register-email").value.trim();
@@ -59,19 +59,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const users = JSON.parse(localStorage.getItem("users")) || [];
     const emailExists = users.some(user => user.email === email);
+    const usernameExists = users.some(user => user.username === username);
+
     if (emailExists) {
       showMessage("Este e-mail já está cadastrado.");
       return;
     }
 
-    const usernameExists = users.some(user => user.username === username);
     if (usernameExists) {
       showMessage("Nome de usuário já existe.");
       return;
     }
 
-    const newUser = { username, email, password };
-    users.push(newUser);
+    users.push({ username, email, password });
     localStorage.setItem("users", JSON.stringify(users));
 
     showMessage("Cadastro realizado com sucesso!", false);
@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loginContainer.style.display = "block";
   });
 
-  loginForm.addEventListener("submit", (e) => {
+  loginForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = document.getElementById("login-username").value.trim();
     const password = document.getElementById("login-password").value.trim();
@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  taskForm.addEventListener("submit", (e) => {
+  taskForm?.addEventListener("submit", (e) => {
     e.preventDefault();
 
     const title = document.getElementById("title").value.trim();
@@ -123,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const task = { title, description, dueDate, priority, status, category, tags };
-
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
     if (editingTaskIndex !== null) {
@@ -134,9 +133,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     localStorage.setItem("tasks", JSON.stringify(tasks));
-    renderTasks();
     taskForm.reset();
     showMessage("Tarefa salva com sucesso!", false);
+    renderTasks();
     renderDashboard();
   });
 
@@ -159,31 +158,25 @@ document.addEventListener("DOMContentLoaded", () => {
       taskList.appendChild(taskDiv);
     });
 
-    document.querySelectorAll("button.btn-warning").forEach(button => {
-      button.addEventListener("click", (e) => {
-        const index = e.target.getAttribute("data-index");
-        editTask(index);
-      });
+    taskList.querySelectorAll(".btn-warning").forEach(button => {
+      button.addEventListener("click", (e) => editTask(e.target.getAttribute("data-index")));
     });
 
-    document.querySelectorAll("button.btn-danger").forEach(button => {
-      button.addEventListener("click", (e) => {
-        const index = e.target.getAttribute("data-index");
-        deleteTask(index);
-      });
+    taskList.querySelectorAll(".btn-danger").forEach(button => {
+      button.addEventListener("click", (e) => deleteTask(e.target.getAttribute("data-index")));
     });
   }
 
-  window.deleteTask = (index) => {
+  function deleteTask(index) {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
     tasks.splice(index, 1);
     localStorage.setItem("tasks", JSON.stringify(tasks));
-    renderTasks();
     showMessage("Tarefa removida com sucesso!", false);
+    renderTasks();
     renderDashboard();
-  };
+  }
 
-  window.editTask = (index) => {
+  function editTask(index) {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
     const task = tasks[index];
 
@@ -197,22 +190,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     editingTaskIndex = index;
     showMessage("Editando tarefa...", false);
-  };
+  }
 
-  // Função para renderizar o Dashboard
   function renderDashboard() {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-
-    // Total de tarefas
     document.getElementById("total-tasks").textContent = tasks.length;
 
-    // Tarefas concluídas e pendentes
     const completed = tasks.filter(task => task.status.toLowerCase() === "concluída").length;
     const pending = tasks.length - completed;
     document.getElementById("completed-tasks").textContent = completed;
     document.getElementById("pending-tasks").textContent = pending;
 
-    // Gráfico de status
     const statusCtx = document.getElementById("statusChart").getContext("2d");
     new Chart(statusCtx, {
       type: "doughnut",
@@ -225,11 +213,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Gráfico de prioridades
     const priorityMap = { alta: 0, média: 0, baixa: 0 };
     tasks.forEach(task => {
       const key = task.priority.toLowerCase();
-      if (priorityMap[key] !== undefined) priorityMap[key]++;
+      if (priorityMap.hasOwnProperty(key)) priorityMap[key]++;
     });
 
     const priorityCtx = document.getElementById("priorityChart").getContext("2d");
@@ -245,12 +232,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Tarefas urgentes (prazo dentro de 2 dias)
     const urgentList = document.getElementById("urgent-tasks");
     urgentList.innerHTML = "";
 
     const hoje = new Date();
-    const doisDias = new Date(hoje);
+    const doisDias = new Date();
     doisDias.setDate(hoje.getDate() + 2);
 
     const urgentes = tasks.filter(task => {

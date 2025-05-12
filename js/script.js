@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginContainer = document.getElementById("login-container");
   const registerContainer = document.getElementById("register-container");
   const taskContainer = document.getElementById("task-container");
+  const dashboardContainer = document.getElementById("dashboard-container");
 
   const showRegister = document.getElementById("show-register");
   const showLogin = document.getElementById("show-login");
@@ -89,6 +90,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (user) {
       loginContainer.style.display = "none";
       taskContainer.style.display = "block";
+      dashboardContainer.style.display = "block";
+      renderTasks();
+      renderDashboard();
     } else {
       showMessage("Usuário ou senha inválidos.");
     }
@@ -133,6 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTasks();
     taskForm.reset();
     showMessage("Tarefa salva com sucesso!", false);
+    renderDashboard();
   });
 
   function renderTasks() {
@@ -175,6 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
     renderTasks();
     showMessage("Tarefa removida com sucesso!", false);
+    renderDashboard();
   };
 
   window.editTask = (index) => {
@@ -193,5 +199,77 @@ document.addEventListener("DOMContentLoaded", () => {
     showMessage("Editando tarefa...", false);
   };
 
+  // Função para renderizar o Dashboard
+  function renderDashboard() {
+    const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+    // Total de tarefas
+    document.getElementById("total-tasks").textContent = tasks.length;
+
+    // Tarefas concluídas e pendentes
+    const completed = tasks.filter(task => task.status.toLowerCase() === "concluída").length;
+    const pending = tasks.length - completed;
+    document.getElementById("completed-tasks").textContent = completed;
+    document.getElementById("pending-tasks").textContent = pending;
+
+    // Gráfico de status
+    const statusCtx = document.getElementById("statusChart").getContext("2d");
+    new Chart(statusCtx, {
+      type: "doughnut",
+      data: {
+        labels: ["Concluídas", "Pendentes"],
+        datasets: [{
+          data: [completed, pending],
+          backgroundColor: ["#28a745", "#ffc107"]
+        }]
+      }
+    });
+
+    // Gráfico de prioridades
+    const priorityMap = { alta: 0, média: 0, baixa: 0 };
+    tasks.forEach(task => {
+      const key = task.priority.toLowerCase();
+      if (priorityMap[key] !== undefined) priorityMap[key]++;
+    });
+
+    const priorityCtx = document.getElementById("priorityChart").getContext("2d");
+    new Chart(priorityCtx, {
+      type: "bar",
+      data: {
+        labels: ["Alta", "Média", "Baixa"],
+        datasets: [{
+          label: "Tarefas",
+          data: [priorityMap.alta, priorityMap.média, priorityMap.baixa],
+          backgroundColor: ["#dc3545", "#fd7e14", "#17a2b8"]
+        }]
+      }
+    });
+
+    // Tarefas urgentes (prazo dentro de 2 dias)
+    const urgentList = document.getElementById("urgent-tasks");
+    urgentList.innerHTML = "";
+
+    const hoje = new Date();
+    const doisDias = new Date(hoje);
+    doisDias.setDate(hoje.getDate() + 2);
+
+    const urgentes = tasks.filter(task => {
+      const taskDate = new Date(task.dueDate);
+      return taskDate <= doisDias && task.status.toLowerCase() !== "concluída";
+    });
+
+    if (urgentes.length === 0) {
+      urgentList.innerHTML = "<li class='list-group-item'>Nenhuma tarefa urgente</li>";
+    } else {
+      urgentes.forEach(task => {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.textContent = `${task.title} (prazo: ${task.dueDate})`;
+        urgentList.appendChild(li);
+      });
+    }
+  }
+
   renderTasks();
+  renderDashboard();
 });

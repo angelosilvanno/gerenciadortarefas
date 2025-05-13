@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const registerContainer = document.getElementById("register-container");
   const taskContainer = document.getElementById("task-container");
   const dashboardContainer = document.getElementById("dashboard-container");
+  const mainPanel = document.getElementById("main-panel");
 
   const showRegister = document.getElementById("show-register");
   const showLogin = document.getElementById("show-login");
@@ -89,8 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (user) {
       loginContainer.style.display = "none";
-      taskContainer.style.display = "block";
-      dashboardContainer.style.display = "block";
+      mainPanel.style.display = "block"; // Agora exibe o painel principal
       renderTasks();
       renderDashboard();
     } else {

@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const sanitizeInput = (input) => {
     const div = document.createElement("div");
     div.textContent = input;
-    return div.innerHTML; // Prevenção básica contra XSS
+    return div.innerHTML; 
   };
 
   async function hashPassword(password) {

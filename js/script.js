@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   const loginContainer = document.getElementById("login-container");
   const registerContainer = document.getElementById("register-container");
+  const mainPanel = document.getElementById("main-panel");
+  const logoutButton = document.getElementById("logout-button");
 
   const showRegister = document.getElementById("show-register");
   const showLogin = document.getElementById("show-login");
@@ -11,6 +13,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const taskList = document.getElementById("task-list");
 
   const message = document.getElementById("message");
+  const loadingSpinner = document.getElementById("loading-spinner");
+
   let editingTaskIndex = null;
 
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
@@ -24,16 +28,27 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => message.classList.add('d-none'), 4000);
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Show register form
   showRegister.addEventListener("click", () => {
     loginContainer.style.display = "none";
     registerContainer.style.display = "block";
   });
 
+  // Show login form
   showLogin.addEventListener("click", () => {
     registerContainer.style.display = "none";
     loginContainer.style.display = "block";
   });
 
+  // Register form submission
   registerForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = document.getElementById("register-username").value.trim();
@@ -72,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loginContainer.style.display = "block";
   });
 
+  // Login form submission
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = document.getElementById("login-username").value.trim();
@@ -81,6 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const user = users.find(u => u.username === username && u.password === password);
 
     if (user) {
+      localStorage.setItem("loggedIn", true);
       loginContainer.style.display = "none";
       mainPanel.style.display = "block";
       renderTasks();
@@ -89,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Task form submission
   taskForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const title = document.getElementById("title").value.trim();
@@ -127,41 +145,51 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTasks();
   });
 
+  // Render tasks
   function renderTasks() {
-    const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    taskList.innerHTML = "";
+    document.getElementById("loading-spinner").classList.remove("d-none");
+    setTimeout(() => {
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      taskList.innerHTML = "";
+      
+      tasks.forEach((task, index) => {
+        const div = document.createElement("div");
+        div.className = "border rounded p-3 mb-3 task";
+        div.innerHTML = `
+          <h5>${task.title}</h5>
+          <p>${task.description}</p>
+          <p><strong>Prazo:</strong> ${formatDate(task.dueDate)}</p>
+          <p><strong>Prioridade:</strong> ${task.priority} | <strong>Status:</strong> ${task.status}</p>
+          <p><strong>Categoria:</strong> ${task.category} | <strong>Tags:</strong> ${task.tags.join(", ")}</p>
+          <button class="btn btn-warning btn-sm me-2" data-index="${index}">Editar</button>
+          <button class="btn btn-danger btn-sm" data-index="${index}">Excluir</button>
+        `;
+        taskList.appendChild(div);
+      });
 
-    tasks.forEach((task, index) => {
-      const div = document.createElement("div");
-      div.className = "border rounded p-3 mb-3 task";
-      div.innerHTML = `
-        <h5>${task.title}</h5>
-        <p>${task.description}</p>
-        <p><strong>Prazo:</strong> ${task.dueDate}</p>
-        <p><strong>Prioridade:</strong> ${task.priority} | <strong>Status:</strong> ${task.status}</p>
-        <p><strong>Categoria:</strong> ${task.category} | <strong>Tags:</strong> ${task.tags.join(", ")}</p>
-        <button class="btn btn-warning btn-sm me-2" data-index="${index}">Editar</button>
-        <button class="btn btn-danger btn-sm" data-index="${index}">Excluir</button>
-      `;
-      taskList.appendChild(div);
-    });
+      taskList.querySelectorAll(".btn-warning").forEach(btn => {
+        btn.addEventListener("click", e => editTask(e.target.getAttribute("data-index")));
+      });
+      taskList.querySelectorAll(".btn-danger").forEach(btn => {
+        btn.addEventListener("click", e => deleteTask(e.target.getAttribute("data-index")));
+      });
 
-    taskList.querySelectorAll(".btn-warning").forEach(btn => {
-      btn.addEventListener("click", e => editTask(e.target.getAttribute("data-index")));
-    });
-    taskList.querySelectorAll(".btn-danger").forEach(btn => {
-      btn.addEventListener("click", e => deleteTask(e.target.getAttribute("data-index")));
-    });
+      document.getElementById("loading-spinner").classList.add("d-none");
+    }, 500);
   }
 
+  // Delete task
   function deleteTask(index) {
-    const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    tasks.splice(index, 1);
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-    showMessage("Tarefa removida com sucesso!", false);
-    renderTasks();
+    if (confirm("Você tem certeza que deseja excluir esta tarefa?")) {
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      tasks.splice(index, 1);
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+      showMessage("Tarefa removida com sucesso!", false);
+      renderTasks();
+    }
   }
 
+  // Edit task
   function editTask(index) {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
     const task = tasks[index];
@@ -174,6 +202,25 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("tags").value = task.tags.join(", ");
     editingTaskIndex = index;
     showMessage("Editando tarefa...", false);
+  }
+
+  // Logout
+  if (logoutButton) {
+    logoutButton.addEventListener("click", () => {
+      localStorage.removeItem("loggedIn");
+      window.location.reload();
+    });
+  }
+
+  // Check if user is logged in
+  if (localStorage.getItem("loggedIn") === "true") {
+    loginContainer.style.display = "none";
+    mainPanel.style.display = "block";
+    renderTasks();
+  } else {
+    loginContainer.style.display = "block";
+    registerContainer.style.display = "none";
+    mainPanel.style.display = "none";
   }
 
   renderTasks();

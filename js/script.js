@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const loginContainer = document.getElementById("login-container");
   const registerContainer = document.getElementById("register-container");
-  const taskContainer = document.getElementById("task-container");
-  const dashboardContainer = document.getElementById("dashboard-container");
   const mainPanel = document.getElementById("main-panel");
 
   const showRegister = document.getElementById("show-register");
@@ -22,21 +20,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const showMessage = (msg, isError = true) => {
     message.textContent = msg;
-    message.className = isError ? "text-danger mb-3" : "text-success mb-3";
-    setTimeout(() => (message.textContent = ""), 4000);
+    message.className = isError ? "alert alert-danger text-center" : "alert alert-success text-center";
+    message.classList.remove('d-none');
+    setTimeout(() => message.classList.add('d-none'), 4000);
   };
 
-  showRegister?.addEventListener("click", () => {
+  showRegister.addEventListener("click", () => {
     loginContainer.style.display = "none";
     registerContainer.style.display = "block";
   });
 
-  showLogin?.addEventListener("click", () => {
+  showLogin.addEventListener("click", () => {
     registerContainer.style.display = "none";
     loginContainer.style.display = "block";
   });
 
-  registerForm?.addEventListener("submit", (e) => {
+  registerForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = document.getElementById("register-username").value.trim();
     const email = document.getElementById("register-email").value.trim();
@@ -47,27 +46,21 @@ document.addEventListener("DOMContentLoaded", () => {
       showMessage("Nome de usuário inválido. Use de 3 a 15 letras ou números.");
       return;
     }
-
     if (!passwordRegex.test(password)) {
       showMessage("Senha inválida. Mínimo 6 caracteres, com pelo menos uma letra e um número.");
       return;
     }
-
     if (password !== confirmPassword) {
       showMessage("As senhas não coincidem.");
       return;
     }
 
     const users = JSON.parse(localStorage.getItem("users")) || [];
-    const emailExists = users.some(user => user.email === email);
-    const usernameExists = users.some(user => user.username === username);
-
-    if (emailExists) {
+    if (users.some(u => u.email === email)) {
       showMessage("Este e-mail já está cadastrado.");
       return;
     }
-
-    if (usernameExists) {
+    if (users.some(u => u.username === username)) {
       showMessage("Nome de usuário já existe.");
       return;
     }
@@ -80,27 +73,25 @@ document.addEventListener("DOMContentLoaded", () => {
     loginContainer.style.display = "block";
   });
 
-  loginForm?.addEventListener("submit", (e) => {
+  loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = document.getElementById("login-username").value.trim();
     const password = document.getElementById("login-password").value.trim();
 
     const users = JSON.parse(localStorage.getItem("users")) || [];
-    const user = users.find(user => user.username === username && user.password === password);
+    const user = users.find(u => u.username === username && u.password === password);
 
     if (user) {
       loginContainer.style.display = "none";
-      mainPanel.style.display = "block"; // Agora exibe o painel principal
+      mainPanel.style.display = "block";
       renderTasks();
-      renderDashboard();
     } else {
       showMessage("Usuário ou senha inválidos.");
     }
   });
 
-  taskForm?.addEventListener("submit", (e) => {
+  taskForm.addEventListener("submit", (e) => {
     e.preventDefault();
-
     const title = document.getElementById("title").value.trim();
     const description = document.getElementById("description").value.trim();
     const dueDate = document.getElementById("dueDate").value;
@@ -111,10 +102,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const tags = tagsInput ? tagsInput.split(",").map(tag => tag.trim()) : [];
 
     if (!title || !description || !dueDate) {
-      showMessage("Por favor, preencha todos os campos obrigatórios.");
+      showMessage("Preencha todos os campos obrigatórios.");
       return;
     }
-
     for (let tag of tags) {
       if (tag && !tagRegex.test(tag)) {
         showMessage("Tag inválida. Use apenas letras, números ou traços.");
@@ -122,21 +112,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    const task = { title, description, dueDate, priority, status, category, tags };
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    const taskObj = { title, description, dueDate, priority, status, category, tags };
 
     if (editingTaskIndex !== null) {
-      tasks[editingTaskIndex] = task;
+      tasks[editingTaskIndex] = taskObj;
       editingTaskIndex = null;
     } else {
-      tasks.push(task);
+      tasks.push(taskObj);
     }
 
     localStorage.setItem("tasks", JSON.stringify(tasks));
     taskForm.reset();
     showMessage("Tarefa salva com sucesso!", false);
     renderTasks();
-    renderDashboard();
   });
 
   function renderTasks() {
@@ -144,26 +133,25 @@ document.addEventListener("DOMContentLoaded", () => {
     taskList.innerHTML = "";
 
     tasks.forEach((task, index) => {
-      const taskDiv = document.createElement("div");
-      taskDiv.classList.add("border", "rounded", "p-2", "mb-2");
-      taskDiv.innerHTML = `
+      const div = document.createElement("div");
+      div.className = "border rounded p-3 mb-3 task";
+      div.innerHTML = `
         <h5>${task.title}</h5>
         <p>${task.description}</p>
         <p><strong>Prazo:</strong> ${task.dueDate}</p>
         <p><strong>Prioridade:</strong> ${task.priority} | <strong>Status:</strong> ${task.status}</p>
         <p><strong>Categoria:</strong> ${task.category} | <strong>Tags:</strong> ${task.tags.join(", ")}</p>
-        <button class="btn btn-sm btn-warning" data-index="${index}">Editar</button>
-        <button class="btn btn-sm btn-danger" data-index="${index}">Excluir</button>
+        <button class="btn btn-warning btn-sm me-2" data-index="${index}">Editar</button>
+        <button class="btn btn-danger btn-sm" data-index="${index}">Excluir</button>
       `;
-      taskList.appendChild(taskDiv);
+      taskList.appendChild(div);
     });
 
-    taskList.querySelectorAll(".btn-warning").forEach(button => {
-      button.addEventListener("click", (e) => editTask(e.target.getAttribute("data-index")));
+    taskList.querySelectorAll(".btn-warning").forEach(btn => {
+      btn.addEventListener("click", e => editTask(e.target.getAttribute("data-index")));
     });
-
-    taskList.querySelectorAll(".btn-danger").forEach(button => {
-      button.addEventListener("click", (e) => deleteTask(e.target.getAttribute("data-index")));
+    taskList.querySelectorAll(".btn-danger").forEach(btn => {
+      btn.addEventListener("click", e => deleteTask(e.target.getAttribute("data-index")));
     });
   }
 
@@ -173,13 +161,11 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
     showMessage("Tarefa removida com sucesso!", false);
     renderTasks();
-    renderDashboard();
   }
 
   function editTask(index) {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
     const task = tasks[index];
-
     document.getElementById("title").value = task.title;
     document.getElementById("description").value = task.description;
     document.getElementById("dueDate").value = task.dueDate;
@@ -187,75 +173,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("status").value = task.status;
     document.getElementById("category").value = task.category;
     document.getElementById("tags").value = task.tags.join(", ");
-
     editingTaskIndex = index;
     showMessage("Editando tarefa...", false);
   }
 
-  function renderDashboard() {
-    const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    document.getElementById("total-tasks").textContent = tasks.length;
-
-    const completed = tasks.filter(task => task.status.toLowerCase() === "concluída").length;
-    const pending = tasks.length - completed;
-    document.getElementById("completed-tasks").textContent = completed;
-    document.getElementById("pending-tasks").textContent = pending;
-
-    const statusCtx = document.getElementById("statusChart").getContext("2d");
-    new Chart(statusCtx, {
-      type: "doughnut",
-      data: {
-        labels: ["Concluídas", "Pendentes"],
-        datasets: [{
-          data: [completed, pending],
-          backgroundColor: ["#28a745", "#ffc107"]
-        }]
-      }
-    });
-
-    const priorityMap = { alta: 0, média: 0, baixa: 0 };
-    tasks.forEach(task => {
-      const key = task.priority.toLowerCase();
-      if (priorityMap.hasOwnProperty(key)) priorityMap[key]++;
-    });
-
-    const priorityCtx = document.getElementById("priorityChart").getContext("2d");
-    new Chart(priorityCtx, {
-      type: "bar",
-      data: {
-        labels: ["Alta", "Média", "Baixa"],
-        datasets: [{
-          label: "Tarefas",
-          data: [priorityMap.alta, priorityMap.média, priorityMap.baixa],
-          backgroundColor: ["#dc3545", "#fd7e14", "#17a2b8"]
-        }]
-      }
-    });
-
-    const urgentList = document.getElementById("urgent-tasks");
-    urgentList.innerHTML = "";
-
-    const hoje = new Date();
-    const doisDias = new Date();
-    doisDias.setDate(hoje.getDate() + 2);
-
-    const urgentes = tasks.filter(task => {
-      const taskDate = new Date(task.dueDate);
-      return taskDate <= doisDias && task.status.toLowerCase() !== "concluída";
-    });
-
-    if (urgentes.length === 0) {
-      urgentList.innerHTML = "<li class='list-group-item'>Nenhuma tarefa urgente</li>";
-    } else {
-      urgentes.forEach(task => {
-        const li = document.createElement("li");
-        li.className = "list-group-item";
-        li.textContent = `${task.title} (prazo: ${task.dueDate})`;
-        urgentList.appendChild(li);
-      });
-    }
-  }
-
   renderTasks();
-  renderDashboard();
 });

@@ -48,7 +48,7 @@
     </div>
 
     <!-- Cadastro -->
-    <div class="card" id="register-container" style="display: none;">
+    <div class="card mt-4" id="register-container" style="display: none;">
       <div class="card-body">
         <h2 class="card-title text-center">Cadastro</h2>
         <form id="register-form">
@@ -79,55 +79,56 @@
     </div>
 
     <!-- DASHBOARD -->
-    <div id="dashboard-container" class="container mt-5" style="display: none;">
-      <h2 class="text-center mb-4">Dashboard</h2>
+    <div id="dashboard-container" class="card mt-4" style="display: none;">
+      <div class="card-body">
+        <h2 class="text-center mb-4">Dashboard</h2>
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="card p-3 text-center">
+              <h5>Total de Tarefas</h5>
+              <p id="total-tasks">0</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-3 text-center">
+              <h5>Tarefas Concluídas</h5>
+              <p id="completed-tasks">0</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-3 text-center">
+              <h5>Tarefas Pendentes</h5>
+              <p id="pending-tasks">0</p>
+            </div>
+          </div>
+        </div>
 
-      <div class="row mb-4">
-        <div class="col-md-4">
-          <div class="card p-3 text-center">
-            <h5>Total de Tarefas</h5>
-            <p id="total-tasks">0</p>
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h5>Status das Tarefas</h5>
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h5>Prioridade das Tarefas</h5>
+              <canvas id="priorityChart"></canvas>
+            </div>
           </div>
         </div>
-        <div class="col-md-4">
-          <div class="card p-3 text-center">
-            <h5>Tarefas Concluídas</h5>
-            <p id="completed-tasks">0</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card p-3 text-center">
-            <h5>Tarefas Pendentes</h5>
-            <p id="pending-tasks">0</p>
-          </div>
-        </div>
-      </div>
 
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <div class="card p-3">
-            <h5>Status das Tarefas</h5>
-            <canvas id="statusChart"></canvas>
-          </div>
+        <div class="card p-3">
+          <h5>Tarefas Urgentes</h5>
+          <ul id="urgent-tasks" class="list-group">
+            <!-- Vai ser preenchido via JS -->
+          </ul>
         </div>
-        <div class="col-md-6">
-          <div class="card p-3">
-            <h5>Prioridade das Tarefas</h5>
-            <canvas id="priorityChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <div class="card p-3">
-        <h5>Tarefas Urgentes</h5>
-        <ul id="urgent-tasks" class="list-group">
-          <!-- Vai ser preenchido via JS -->
-        </ul>
       </div>
     </div>
 
     <!-- Tarefas -->
-    <div class="card" id="task-container" style="display: none;">
+    <div class="card mt-4" id="task-container" style="display: none;">
       <div class="card-body">
         <h2 class="card-title">Gerenciador Tarefas</h2>
         <form id="task-form">

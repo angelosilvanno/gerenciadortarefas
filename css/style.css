@@ -1,4 +1,3 @@
-/* Reset e estilização básica */
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f8f9fa;
@@ -6,14 +5,12 @@ body {
   padding: 0;
 }
 
-/* Cartões com sombra e centralizados */
 .card {
   max-width: 800px;
   margin: 20px auto;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Tarefas no painel */
 #task-list .border {
   background-color: #fff;
 }
@@ -28,9 +25,8 @@ body {
   font-size: 0.9rem;
 }
 
-/* Responsividade geral */
+/* Responsividade */
 @media (max-width: 768px) {
-  /* Ajuste no login e cadastro */
   #login-container .row,
   #register-container .row {
     flex-direction: column;
@@ -43,7 +39,6 @@ body {
     max-width: 100%;
   }
 
-  /* Imagens no login e cadastro */
   #login-container img,
   #register-container img {
     width: 100%;
@@ -52,7 +47,6 @@ body {
     margin-bottom: 15px;
   }
 
-  /* Formulário */
   #task-form input,
   #task-form textarea,
   #task-form select {
@@ -66,7 +60,6 @@ body {
     margin-top: 0.5rem;
   }
 
-  /* Títulos menores, mas visíveis */
   h1, h2,
   h1.text-center.mb-4 {
     font-size: 1.4rem;

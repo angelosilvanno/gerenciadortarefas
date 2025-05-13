@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // --- Elementos DOM ---
   const loginContainer = document.getElementById("login-container");
   const registerContainer = document.getElementById("register-container");
   const mainPanel = document.getElementById("main-panel");

@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const loginContainer = document.getElementById("login-container");
   const registerContainer = document.getElementById("register-container");
-  const mainPanel = document.getElementById("main-panel");
 
   const showRegister = document.getElementById("show-register");
   const showLogin = document.getElementById("show-login");

@@ -1,14 +1,19 @@
+/* Reset e estilização básica */
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
 }
 
+/* Cartões com sombra e centralizados */
 .card {
   max-width: 800px;
   margin: 20px auto;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Tarefas no painel */
 #task-list .border {
   background-color: #fff;
 }
@@ -23,19 +28,92 @@ body {
   font-size: 0.9rem;
 }
 
-/* Responsividade */
-#login-container .row {
-  display: flex;
-  justify-content: center;
+/* Responsividade geral */
+@media (max-width: 768px) {
+  /* Ajuste no login e cadastro */
+  #login-container .row,
+  #register-container .row {
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  #login-container .col-md-6,
+  #register-container .col-md-6 {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Imagens no login e cadastro */
+  #login-container img,
+  #register-container img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    margin-bottom: 15px;
+  }
+
+  /* Formulário */
+  #task-form input,
+  #task-form textarea,
+  #task-form select {
+    font-size: 0.95rem;
+    padding: 0.5rem;
+  }
+
+  #task-form button {
+    font-size: 1rem;
+    padding: 0.6rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Títulos menores, mas visíveis */
+  h1, h2,
+  h1.text-center.mb-4 {
+    font-size: 1.4rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  /* Espaçamento entre tarefas */
+  .task {
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+
+  /* Mensagem centralizada */
+  #message {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+  }
 }
 
-#login-container img {
-  width: 100%;
-  max-width: 400px;
-  height: auto;
-  object-fit: cover;
+@media (max-width: 576px) {
+  h1, h2 {
+    font-size: 1.2rem;
+  }
+
+  #task-form input,
+  #task-form textarea,
+  #task-form select {
+    font-size: 0.85rem;
+  }
+
+  #task-form button {
+    font-size: 0.95rem;
+  }
+
+  .task {
+    font-size: 0.85rem;
+  }
+
+  /* Ajustes nos botões */
+  .btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+  }
 }
 
-.card-body {
-  padding: 20px;
+/* Ajuste para scroll suave */
+html {
+  scroll-behavior: smooth;
 }

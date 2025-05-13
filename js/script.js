@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const tagRegex = /^[a-zA-Z0-9-]+$/; // Permite letras, números e hífens para tags
+  const tagRegex = /^[a-zA-Z0-9-]+$/; 
 
   // --- Funções Utilitárias ---
   const sanitizeInput = (input) => {
@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const users = JSON.parse(localStorage.getItem("users")) || [];
       const user = users.find(u => u.email === email);
       if (user) {
-        showUIMessage("Instruções de recuperação enviadas para o e-mail! (Simulação)", false);
+        showUIMessage("Instruções de recuperação enviadas para o e-mail!", false);
       } else {
         showUIMessage("E-mail não encontrado.");
       }

@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Gerenciador de tarefas online para organizar suas atividades diárias.">
+  <meta name="keywords" content="gerenciador de tarefas, produtividade, organização">
+  <meta property="og:title" content="Gerenciador Tarefas">
+  <meta property="og:description" content="Organize suas tarefas com nosso gerenciador online.">
+  <meta property="og:image" content="/image/programação.png">
   <title>Gerenciador Tarefas</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
@@ -14,13 +19,14 @@
     <h1 class="text-center mb-4">Gerenciador Tarefas</h1>
 
     <!-- Mensagens -->
-    <div id="message" class="alert alert-info text-center d-none" role="alert"></div>
+    <div id="message" class="alert alert-info text-center d-none" role="alert" tabindex="-1"></div>
 
     <!-- Login -->
     <div class="card" id="login-container">
       <div class="row g-0">
-        <div class="col-md-6">
-          <img src="image/programação.png" class="img-fluid" alt="Imagem de login" />
+        <div class="col-md-6 position-relative">
+          <img src="image/programação.png" class="img-fluid" alt="Ilustração de uma interface de programação para login" loading="lazy" />
+          <div class="fallback-text position-absolute top-50 start-50 translate-middle text-muted d-none">Imagem não carregada</div>
         </div>
         <div class="col-md-6">
           <div class="card-body">
@@ -28,19 +34,45 @@
             <form id="login-form">
               <div class="mb-3 input-group">
                 <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-                <input type="text" class="form-control" id="login-username" placeholder="Usuário" required />
+                <input type="text" class="form-control" id="login-username" placeholder="Usuário" aria-label="Nome de usuário" required />
+                <div class="invalid-feedback">Nome de usuário inválido.</div>
               </div>
               <div class="mb-3 input-group">
                 <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                <input type="password" class="form-control" id="login-password" placeholder="Senha" required />
+                <input type="password" class="form-control" id="login-password" placeholder="Senha" aria-label="Senha" required />
+                <div class="invalid-feedback">Senha inválida.</div>
               </div>
-              <button type="submit" class="btn btn-primary w-100">
+              <button type="submit" class="btn btn-primary w-100" id="login-btn" aria-label="Entrar no sistema">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                 <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
               </button>
             </form>
             <p class="mt-3 text-center">
+              <a href="#" id="forgot-password">Esqueceu a senha?</a> |
               Não tem conta? <a href="#" id="show-register">Cadastre-se aqui</a>
             </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Esquecer Senha -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="forgotPasswordModalLabel">Recuperar Senha</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <p>Insira seu e-mail para receber instruções de recuperação.</p>
+            <form id="forgot-password-form">
+              <div class="mb-3">
+                <label for="forgot-email" class="form-label">E-mail</label>
+                <input type="email" class="form-control" id="forgot-email" placeholder="E-mail" required />
+              </div>
+              <button type="submit" class="btn btn-primary">Enviar</button>
+            </form>
           </div>
         </div>
       </div>
@@ -53,21 +85,25 @@
         <form id="register-form">
           <div class="mb-3 input-group">
             <span class="input-group-text"><i class="bi bi-person-plus-fill"></i></span>
-            <input type="text" class="form-control" id="register-username" placeholder="Usuário" required />
+            <input type="text" class="form-control" id="register-username" placeholder="Usuário" aria-label="Nome de usuário" required />
+            <div class="invalid-feedback">Use 3 a 15 letras ou números.</div>
           </div>
           <div class="mb-3 input-group">
             <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
-            <input type="email" class="form-control" id="register-email" placeholder="E-mail" required />
+            <input type="email" class="form-control" id="register-email" placeholder="E-mail" aria-label="E-mail" required />
+            <div class="invalid-feedback">E-mail inválido.</div>
           </div>
           <div class="mb-3 input-group">
             <span class="input-group-text"><i class="bi bi-shield-lock-fill"></i></span>
-            <input type="password" class="form-control" id="register-password" placeholder="Senha" required />
+            <input type="password" class="form-control" id="register-password" placeholder="Senha" aria-label="Senha" required />
+            <div class="invalid-feedback">Mínimo 6 caracteres, com letra e número.</div>
           </div>
           <div class="mb-3 input-group">
             <span class="input-group-text"><i class="bi bi-shield-lock-fill"></i></span>
-            <input type="password" class="form-control" id="register-password-confirm" placeholder="Confirmar Senha" required />
+            <input type="password" class="form-control" id="register-password-confirm" placeholder="Confirmar Senha" aria-label="Confirmar senha" required />
+            <div class="invalid-feedback">As senhas não coincidem.</div>
           </div>
-          <button type="submit" class="btn btn-success w-100">
+          <button type="submit" class="btn btn-success w-100" aria-label="Cadastrar usuário">
             <i class="bi bi-person-check-fill me-1"></i> Cadastrar
           </button>
         </form>
@@ -77,27 +113,87 @@
       </div>
     </div>
 
+    <!-- Modal de Boas-Vindas -->
+    <div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="welcomeModalLabel">Bem-vindo ao Gerenciador de Tarefas!</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <p>Adicione, edite e organize suas tarefas com facilidade. Use filtros e prioridades para manter tudo sob controle!</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            Deseja realmente excluir esta tarefa?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="confirmDelete">Excluir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Gerenciador de Tarefas -->
     <div class="row mt-4" style="display: none;" id="main-panel">
       <div class="col-md-12">
         <div class="card h-100" id="task-container">
           <div class="card-body">
+            <div class="d-flex justify-content-between mb-3">
+              <h4 class="mt-2">Tarefas</h4>
+              <button class="btn btn-danger" id="logout-btn" aria-label="Sair do sistema">
+                <i class="bi bi-box-arrow-left me-1"></i> Sair
+              </button>
+            </div>
+            <div class="mb-3">
+              <input type="text" id="search-tasks" class="form-control" placeholder="Buscar tarefas por título ou tags..." aria-label="Buscar tarefas" />
+            </div>
+            <div class="mb-3">
+              <label for="filter-status" class="form-label">Filtrar por Status:</label>
+              <select id="filter-status" class="form-select" aria-label="Filtrar por status">
+                <option value="todos">Todos</option>
+                <option value="pendente">Pendente</option>
+                <option value="em andamento">Em andamento</option>
+                <option value="concluída">Concluída</option>
+              </select>
+            </div>
+            <div class="progress mb-3">
+              <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <p id="progress-text">0 de 0 tarefas concluídas</p>
+            <button class="btn btn-secondary mb-3" id="export-tasks" aria-label="Exportar tarefas como CSV">Exportar Tarefas</button>
             <form id="task-form">
               <div class="mb-2 input-group">
                 <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                <input type="text" class="form-control" id="title" placeholder="Título da tarefa" required />
+                <input type="text" class="form-control" id="title" placeholder="Título da tarefa" aria-label="Título da tarefa" required />
               </div>
               <div class="mb-2 input-group">
                 <span class="input-group-text"><i class="bi bi-body-text"></i></span>
-                <textarea class="form-control" id="description" placeholder="Descrição" required></textarea>
+                <textarea class="form-control" id="description" placeholder="Descrição" aria-label="Descrição da tarefa" required></textarea>
               </div>
               <div class="mb-2 input-group">
                 <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
-                <input type="date" class="form-control" id="dueDate" required />
+                <input type="date" class="form-control" id="dueDate" aria-label="Data de vencimento" required />
               </div>
               <div class="mb-2 input-group">
                 <span class="input-group-text"><i class="bi bi-arrow-up-circle-fill"></i></span>
-                <select id="priority" class="form-select">
+                <select id="priority" class="form-select" aria-label="Prioridade">
                   <option value="baixa">Baixa</option>
                   <option value="média" selected>Média</option>
                   <option value="alta">Alta</option>
@@ -105,7 +201,7 @@
               </div>
               <div class="mb-2 input-group">
                 <span class="input-group-text"><i class="bi bi-list-check"></i></span>
-                <select id="status" class="form-select">
+                <select id="status" class="form-select" aria-label="Status">
                   <option value="pendente">Pendente</option>
                   <option value="em andamento">Em andamento</option>
                   <option value="concluída">Concluída</option>
@@ -113,25 +209,23 @@
               </div>
               <div class="mb-2 input-group">
                 <span class="input-group-text"><i class="bi bi-folder-fill"></i></span>
-                <input type="text" class="form-control" id="category" placeholder="Categoria" />
+                <input type="text" class="form-control" id="category" placeholder="Categoria" aria-label="Categoria" />
               </div>
               <div class="mb-2 input-group">
                 <span class="input-group-text"><i class="bi bi-tags-fill"></i></span>
-                <input type="text" class="form-control" id="tags" placeholder="Etiquetas (separadas por vírgula)" />
+                <input type="text" class="form-control" id="tags" placeholder="Etiquetas (separadas por vírgula)" aria-label="Etiquetas" />
               </div>
-              <button type="submit" class="btn btn-primary w-100">
+              <button type="submit" class="btn btn-primary w-100" aria-label="Criar ou salvar tarefa">
                 <i class="bi bi-plus-circle me-1"></i> Criar Tarefa
               </button>
             </form>
-
             <hr />
-            <h4 class="mt-4 text-center">Tarefas</h4>
-            <div id="task-list"></div>
+            <h4 class="mt-4 text-center">Lista de Tarefas</h4>
+            <div id="task-list" role="list"></div>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,120 +1,71 @@
-body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f8f9fa;
-  margin: 0;
-  padding: 0;
+/* Estilos para novos elementos */
+#search-tasks, #filter-status {
+  max-width: 300px;
 }
 
-.card {
-  max-width: 800px;
-  margin: 20px auto;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.progress {
+  height: 1.5rem;
 }
 
-#task-list .border {
-  background-color: #fff;
+.progress-bar {
+  transition: width 0.3s ease-in-out;
 }
 
-#task-list h5 {
-  margin-bottom: 5px;
-  font-weight: 600;
+.task[data-priority="alta"] {
+  border-left: 5px solid #dc3545; /* Vermelho */
 }
 
-#task-list p {
-  margin-bottom: 5px;
-  font-size: 0.9rem;
+.task[data-priority="média"] {
+  border-left: 5px solid #ffc107; /* Amarelo */
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
-  #login-container .row,
-  #register-container .row {
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  #login-container .col-md-6,
-  #register-container .col-md-6 {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  #login-container img,
-  #register-container img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-    margin-bottom: 15px;
-  }
-
-  #task-form input,
-  #task-form textarea,
-  #task-form select {
-    font-size: 0.95rem;
-    padding: 0.5rem;
-  }
-
-  #task-form button {
-    font-size: 1rem;
-    padding: 0.6rem;
-    margin-top: 0.5rem;
-  }
-
-  h1, h2,
-  h1.text-center.mb-4 {
-    font-size: 1.4rem;
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-
-  .task {
-    margin-bottom: 1rem;
-    padding: 1rem;
-  }
-
-  #message {
-    font-size: 0.9rem;
-    padding: 0.75rem;
-  }
+.task[data-priority="baixa"] {
+  border-left: 5px solid #28a745; /* Verde */
 }
 
-@media (max-width: 576px) {
-  h1, h2 {
-    font-size: 1.2rem;
-  }
-
-  #task-form input,
-  #task-form textarea,
-  #task-form select {
-    font-size: 0.85rem;
-  }
-
-  #task-form button {
-    font-size: 0.95rem;
-  }
-
-  .task {
-    font-size: 0.85rem;
-  }
-
-  .btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.9rem;
-  }
-
-  #login-container button,
-  #register-container button {
-    width: 100%;
-    font-size: 0.95rem;
-  }
-
-  #login-container img,
-  #register-container img {
-    max-width: 300px;
-    margin-bottom: 10px;
-  }
+.task[data-status="concluída"]::before {
+  content: "\f00c";
+  font-family: "Bootstrap Icons";
+  color: #28a745;
+  margin-right: 5px;
 }
 
-html {
-  scroll-behavior: smooth;
+.task[data-status="pendente"]::before {
+  content: "\f017";
+  font-family: "Bootstrap Icons";
+  color: #dc3545;
+  margin-right: 5px;
+}
+
+.task[data-status="em andamento"]::before {
+  content: "\f110";
+  font-family: "Bootstrap Icons";
+  color: #ffc107;
+  margin-right: 5px;
+}
+
+/* Animação para tarefas */
+.task {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilos de foco para acessibilidade */
+input:focus, button:focus, select:focus, textarea:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* Fallback para imagem */
+img:not([src]) + .fallback-text {
+  display: block !important;
+}
+
+/* Ajustes para modais */
+.modal-content {
+  border-radius: 0.5rem;
 }

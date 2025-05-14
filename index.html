@@ -8,7 +8,6 @@
     <meta property="og:title" content="Gerenciador Tarefas" />
     <meta property="og:description" content="Organize suas tarefas com nosso gerenciador online." />
     <meta property="og:image" content="/image/programação.png" />
-    <link rel="stylesheet" href="css/style.css">
     <title>Gerenciador Tarefas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
@@ -20,10 +19,8 @@
     <main class="container mt-5">
         <h1 class="text-center mb-4">Gerenciador Tarefas</h1>
 
-        <!-- Mensagens de Feedback -->
         <div id="message" class="alert alert-info text-center d-none" role="alert" tabindex="-1"></div>
 
-        <!-- Seção de Login -->
         <section id="login-container" class="card">
             <div class="row g-0">
                 <div class="col-md-6 position-relative">
@@ -75,9 +72,8 @@
                     </div>
                 </div>
             </div>
-        </section> <!-- Fim Seção de Login -->
+        </section>
 
-        <!-- Modal: Esquecer Senha -->
         <div class="modal fade"
              id="forgotPasswordModal"
              tabindex="-1"
@@ -105,9 +101,8 @@
                     </div>
                 </div>
             </div>
-        </div> <!-- Fim Modal: Esquecer Senha -->
+        </div>
 
-        <!-- Seção de Cadastro -->
         <section id="register-container" class="card" style="display: none;">
             <div class="card-body">
                 <h2 class="card-title text-center">Cadastro</h2>
@@ -162,9 +157,8 @@
                     Já tem conta? <a href="#" id="show-login">Voltar ao login</a>
                 </p>
             </div>
-        </section> <!-- Fim Seção de Cadastro -->
+        </section>
 
-        <!-- Modal: Boas-Vindas -->
         <div class="modal fade"
              id="welcomeModal"
              tabindex="-1"
@@ -184,9 +178,8 @@
                     </div>
                 </div>
             </div>
-        </div> <!-- Fim Modal: Boas-Vindas -->
+        </div>
 
-        <!-- Modal: Confirmação de Exclusão -->
         <div class="modal fade"
              id="deleteModal"
              tabindex="-1"
@@ -207,9 +200,8 @@
                     </div>
                 </div>
             </div>
-        </div> <!-- Fim Modal: Confirmação de Exclusão -->
+        </div>
 
-        <!-- Seção Principal: Gerenciador de Tarefas -->
         <section id="main-panel" class="row mt-4" style="display: none;">
             <div class="col-md-12">
                 <div id="task-container" class="card h-100">
@@ -221,27 +213,34 @@
                             </button>
                         </header>
 
-                        <div class="mb-3">
-                            <input type="text"
-                                   id="search-tasks"
-                                   class="form-control"
-                                   placeholder="Buscar tarefas por título ou tags..."
-                                   aria-label="Buscar tarefas" />
+                        <div class="row g-3 mb-3 align-items-end">
+                            <div class="col-lg-6 col-md-12 order-lg-1 order-md-1">
+                                <label for="search-tasks" class="form-label visually-hidden">Buscar tarefas por título ou tags</label>
+                                <input type="text"
+                                       id="search-tasks"
+                                       class="form-control"
+                                       placeholder="Buscar tarefas por título ou tags..."
+                                       aria-label="Buscar tarefas por título ou tags" />
+                            </div>
+                            <div class="col-lg-3 col-md-6 order-lg-2 order-md-2">
+                                <label for="filter-status" class="form-label">Filtrar por Status:</label>
+                                <select id="filter-status" class="form-select" aria-label="Filtrar por status da tarefa">
+                                    <option value="todos">Todos</option>
+                                    <option value="pendente">Pendente</option>
+                                    <option value="em andamento">Em andamento</option>
+                                    <option value="concluída">Concluída</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-6 order-lg-3 order-md-3">
+                                <button id="export-tasks" class="btn btn-outline-secondary w-100" aria-label="Exportar tarefas como CSV">
+                                    <i class="bi bi-download me-1"></i> Exportar
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="filter-status" class="form-label">Filtrar por Status:</label>
-                            <select id="filter-status" class="form-select" aria-label="Filtrar por status">
-                                <option value="todos">Todos</option>
-                                <option value="pendente">Pendente</option>
-                                <option value="em andamento">Em andamento</option>
-                                <option value="concluída">Concluída</option>
-                            </select>
-                        </div>
-
-                        <div class="progress mb-1">
+                        <div class="progress mb-1" style="height: 10px;">
                             <div id="progress-bar"
-                                 class="progress-bar"
+                                 class="progress-bar bg-primary"
                                  role="progressbar"
                                  style="width: 0%;"
                                  aria-valuenow="0"
@@ -249,20 +248,14 @@
                                  aria-valuemax="100">
                             </div>
                         </div>
-                        <p id="progress-text" class="mb-3 small text-muted">0 de 0 tarefas concluídas</p>
+                        <p id="progress-text" class="mb-3 small text-muted text-end">0 de 0 tarefas concluídas</p>
 
-                        <button id="export-tasks" class="btn btn-secondary mb-3" aria-label="Exportar tarefas como CSV">
-                            Exportar Tarefas
-                        </button>
-
-                        <!-- Divisão horizontal: formulário à esquerda, lista à direita -->
-                        <div class="row">
-                            <!-- Coluna do Formulário -->
-                            <div class="col-md-6">
-                                <h4 class="text-center visually-hidden">Criar/Editar Tarefa</h4> <!-- Título opcional, escondido visualmente -->
+                        <div class="row mt-4">
+                            <div class="col-lg-5 col-md-12 mb-4 mb-lg-0">
+                                <h5 class="mb-3">Adicionar/Editar Tarefa</h5>
                                 <form id="task-form">
                                     <div class="row">
-                                        <div class="col-md-12"> <!-- Mantendo uma coluna para o formulário para simplicidade por enquanto -->
+                                        <div class="col-md-12">
                                             <div class="mb-2 input-group">
                                                 <span class="input-group-text"><i class="bi bi-card-text"></i></span>
                                                 <input type="text"
@@ -309,7 +302,7 @@
                                                 <input type="text"
                                                        id="category"
                                                        class="form-control"
-                                                       placeholder="Categoria"
+                                                       placeholder="Categoria (opcional)"
                                                        aria-label="Categoria" />
                                             </div>
                                             <div class="mb-2 input-group">
@@ -317,7 +310,7 @@
                                                 <input type="text"
                                                        id="tags"
                                                        class="form-control"
-                                                       placeholder="Etiquetas (separadas por vírgula)"
+                                                       placeholder="Etiquetas (separadas por vírgula, opcional)"
                                                        aria-label="Etiquetas" />
                                             </div>
                                             <button type="submit"
@@ -328,21 +321,19 @@
                                         </div>
                                     </div>
                                 </form>
-                            </div> <!-- Fim Coluna do Formulário -->
+                            </div>
 
-                            <!-- Coluna da Lista de Tarefas -->
-                            <div class="col-md-6">
-                                <h4 class="text-center mt-3 mt-md-0">Lista de Tarefas</h4> <!-- mt-3 para mobile, mt-md-0 para desktop -->
-                                <div id="task-list" role="list" style="max-height: 700px; overflow-y: auto;">
-                                    <!-- As tarefas serão inseridas aqui pelo JavaScript -->
+                            <div class="col-lg-7 col-md-12">
+                                <h5 class="mb-3">Lista de Tarefas</h5>
+                                <div id="task-list" role="list" style="max-height: 700px; overflow-y: auto; min-height: 200px; border: 1px solid #eee; padding: 10px; border-radius: .25rem;">
+                                    <p class="text-center text-muted d-none" id="no-tasks-message">Nenhuma tarefa para exibir.</p>
                                 </div>
-                            </div> <!-- Fim Coluna da Lista de Tarefas -->
-                        </div> <!-- Fim .row (Formulário/Lista) -->
-
-                    </div> <!-- Fim .card-body -->
-                </div> <!-- Fim #task-container -->
-            </div> <!-- Fim .col-md-12 -->
-        </section> <!-- Fim #main-panel -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
     </main>
 

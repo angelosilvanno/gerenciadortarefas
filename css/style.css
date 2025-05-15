@@ -139,3 +139,41 @@ main.container {
         margin-bottom: 2rem;
     }
 }
+
+/* === NexTask Header e Logo === */
+
+.nex-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.nex-header .logo{
+    height: 50px;
+    width: auto;
+}
+
+.nex-header h1{
+    font-size: 2rem;
+    color: #343a40;
+    margin: 0;
+    font-weight: 600;
+}
+
+/* === Ajuste na imagem a login === */
+
+#login-image {
+    width: 100%;
+    object-fit: cover;
+    height: 100%;
+    border-top-left-radius: var(--bs-card-border-radius);
+    border-bottom-left-radius: var(--bs-card-border-radius);
+    border-top-right-radius: 0;
+    border-top-right-radius: 0;
+}

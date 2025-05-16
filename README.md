@@ -1,4 +1,4 @@
-# Gerenciador Tarefas
+# NextTask
 Uma breve descrição do projeto aqui.
 
 ## 🔥 Introdução

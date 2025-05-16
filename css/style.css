@@ -18,7 +18,8 @@ main.container {
 }
 
 #login-container {
-    max-width: 850px; 
+    max-width: 1000px; 
+    width: 100%;
 }
 
 #register-container {

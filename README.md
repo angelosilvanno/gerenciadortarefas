@@ -13,7 +13,7 @@ Coloque aqui as ferramentas que você usou para criar seu projeto.
 
 Mencione todos aqueles que ajudaram a levantar o projeto desde o seu início, colaboradores.
 
-* **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
+* **Ângelo** - *Membro* - [angelosilvanno](https://github.com/angelosilvanno)
 * **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
 * **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
 * **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)

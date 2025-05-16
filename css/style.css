@@ -142,10 +142,9 @@ main.container {
 
 #login-image {
     width: 100%;
-    object-fit: cover;
-    height: 100%;
-    border-top-left-radius: var(--bs-card-border-radius);
-    border-bottom-left-radius: var(--bs-card-border-radius);
-    border-top-right-radius: 0;
-    border-top-right-radius: 0;
+    height: auto; 
+    max-width: 300px; 
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
 }

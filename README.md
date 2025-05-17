@@ -15,7 +15,7 @@ Mencione todos aqueles que ajudaram a levantar o projeto desde o seu início, co
 
 * **Ângelo** - *Membro* - [angelosilvanno](https://github.com/angelosilvanno)
 * **Ludmila Monteiro** - *Membro* - [ludmilamonteiro](https://github.com/LudmilaMonteiro)
-* **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
+* **Mateus Gomes** - *Membro* - [GSmateus07](https://github.com/GSmateus07)
 * **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
 * **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
 

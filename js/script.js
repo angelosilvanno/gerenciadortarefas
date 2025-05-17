@@ -499,7 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
 
-  let currentDeleteHandler = null; // To manage the confirm delete event listener
+  let currentDeleteHandler = null; 
 
   function confirmTaskDeletion(index) {
     if (!DOM.deleteModalElement || !DOM.confirmDeleteButton || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
@@ -514,7 +514,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const modal = bootstrap.Modal.getOrCreateInstance(DOM.deleteModalElement);
 
-    // Remove previous listener if any, then add the new one
+
     if (currentDeleteHandler) {
         DOM.confirmDeleteButton.removeEventListener('click', currentDeleteHandler);
     }

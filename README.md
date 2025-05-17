@@ -16,7 +16,7 @@ Mencione todos aqueles que ajudaram a levantar o projeto desde o seu início, co
 * **Ângelo** - *Membro* - [angelosilvanno](https://github.com/angelosilvanno)
 * **Ludmila Monteiro** - *Membro* - [ludmilamonteiro](https://github.com/LudmilaMonteiro)
 * **Mateus Gomes** - *Membro* - [GSmateus07](https://github.com/GSmateus07)
-* **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
+* **Levítico Rimon** - *Membro* - [LEVEL303](https://github.com/LEVEL303)
 * **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
 
 ## 📄 Licença

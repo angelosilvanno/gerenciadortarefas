@@ -40,6 +40,20 @@ main.container {
     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
+/* botão de logout mais discreto */
+#logout-btn {
+    background-color: transparent;
+    border: none;
+    color: #dc3545;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+}
+
+#logout-btn:hover {
+    color: #a71d2a;
+    text-decoration: underline;
+}
+
 .task-item {
     background-color: #fff;
     transition: box-shadow 0.2s ease-in-out;
@@ -143,9 +157,46 @@ main.container {
 
 #login-image {
     width: 100%;
-    height: auto; 
-    max-width: 300px; 
-    display: block;
-    margin: 0 auto;
-    object-fit: contain;
+    object-fit: cover;
+    height: 100%;
+    border-top-left-radius: var(--bs-card-border-radius);
+    border-bottom-left-radius: var(--bs-card-border-radius);
+    border-top-right-radius: 0;
+    border-top-right-radius: 0;
 }
+
+/* Cars mais compactos */
+
+.task-card {
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    border-radius:0.5rem;
+}
+
+/* Cores por status */
+.task-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.task-card.task-status-pendente {
+    border-left: 4px solid #ffc107;
+    background-color: #fff3cd;
+}
+
+.task-card.task-status-em-andamento {
+    border-left: 5px solid #007bff;
+    background-color: #d0ebff;
+}
+
+.task-card.task-status-concluida {
+    border-left: 5px solid #28a745;
+    background-color: #d4edda;
+    opacity: 0.95;
+}
+
+

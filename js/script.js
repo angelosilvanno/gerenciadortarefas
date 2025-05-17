@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     taskTagsInput: document.getElementById("tags"),
   };
 
+  
   // --- Estado da Aplicação ---
   let editingTaskIndex = null;
   let tasksCache = JSON.parse(localStorage.getItem("tasks")) || [];
@@ -312,6 +313,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const tagsValue = DOM.taskTagsInput.value.trim();
         const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
 
+        console.log("Título:", title);
+        console.log("Descrição:", description);
+        console.log("Prazo:", dueDate);
+
         if (!title || !description || !dueDate) {
           showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");
           return;
@@ -357,15 +362,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function renderTasks(tasksToDisplay = tasksCache) {
-    if (!DOM.taskList) return;
-    DOM.taskList.innerHTML = "";
-    const noTasksMessage = DOM.taskList.querySelector("#no-tasks-message") || document.createElement('p');
-    noTasksMessage.id = "no-tasks-message";
-    noTasksMessage.className = "text-center text-muted";
-    noTasksMessage.textContent = "Nenhuma tarefa para exibir.";
-
-
     if (tasksToDisplay.length === 0) {
       DOM.taskList.appendChild(noTasksMessage);
       noTasksMessage.classList.remove('d-none');
@@ -398,11 +394,110 @@ document.addEventListener("DOMContentLoaded", () => {
         DOM.taskList.appendChild(div);
       });
     }
-    DOM.taskList.removeEventListener('click', handleTaskActions);
-    DOM.taskList.addEventListener('click', handleTaskActions);
+  
+  // Função para tratar ações de clique (checkbox)
+  function handleCheckboxClick(e) {
+    const checkbox = e.target.closest(".complete-checkbox");
+    if (!checkbox) return;
 
+    const index = parseInt(checkbox.dataset.index);
+    if (isNaN(index)) return;
+
+    const task = tasksCache[index];
+    if (!task) return;
+
+    task.status = checkbox.checked ? "concluida" : "pendente";
+    console.log("Tarefa atualizada:", index, task.status, task.title);
+
+    saveTasks();
+    renderTasks(); 
+  }
+
+  function normalizeStatus(status) {
+    return status
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s/g, "")
+    .toLowerCase();
+  }  
+
+  // Função principal para renderizar as tarefas
+  function renderTasks(tasksToDisplay = tasksCache) {
+    if (!DOM.taskList) return;
+  
+    const statusClass = {
+      "pendente": "task-status-pendente",
+      "emandamento": "task-status-em-andamento",
+      "concluida": "task-status-concluida"
+    };
+  
+    // Ordena: Tarefas concluídas vão para o fim
+    tasksToDisplay.sort((a, b) => {
+      const aNorm = normalizeStatus(a.status);
+      const bNorm = normalizeStatus(b.status);
+      if (aNorm === "concluida" && bNorm !== "concluida") return 1;
+      if (aNorm !== "concluida" && bNorm === "concluida") return -1;
+      return 0;
+    });
+  
+    DOM.taskList.innerHTML = "";
+  
+    if (tasksToDisplay.length === 0) {
+      DOM.taskList.innerHTML = '<p class="text-center text-muted">Nenhuma tarefa para exibir.</p>';
+      return;
+    }
+  
+    tasksToDisplay.forEach((task) => {
+      const originalIndex = tasksCache.findIndex(t => t === task);
+      if (originalIndex === -1) return;
+  
+      const div = document.createElement("div");
+      div.classList.add("task-card", "card", "p-3", "mb-2");
+  
+      const normStatus = normalizeStatus(task.status);
+      if (statusClass[normStatus]) {
+        div.classList.add(statusClass[normStatus]);
+      }
+  
+      div.setAttribute("role", "listitem");
+      div.setAttribute("data-priority", task.priority);
+      div.setAttribute("data-status", task.status);
+  
+      div.innerHTML = `
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input complete-checkbox" data-index="${originalIndex}" ${normStatus === "concluida" ? "checked" : ""}>
+          </div>
+          <h5 class="mb-0 flex-grow-1 ms-2 ${normStatus === "concluida" ? "text-decoration-line-through text-muted" : ""}">
+            ${sanitizeInput(task.title)}
+          </h5>
+          <div>
+            <button class="btn btn-warning btn-sm me-2 edit-btn" data-index="${originalIndex}" title="Editar tarefa">
+              <i class="bi bi-pencil-fill"></i>
+            </button>
+            <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" title="Excluir tarefa">
+              <i class="bi bi-trash-fill"></i>
+            </button>
+          </div>
+        </div>
+        <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
+        <small class="text-muted d-block"><strong>Prazo:</strong> ${sanitizeInput(task.dueDate)}</small>
+        <small class="text-muted d-block"><strong>Prioridade:</strong> ${sanitizeInput(task.priority)} | <strong>Status:</strong> ${sanitizeInput(task.status)}</small>
+        ${task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : ""}
+        ${task.tags && task.tags.length > 0 ? `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : ""}
+      `;
+  
+      DOM.taskList.appendChild(div);
+    });
+  
+    DOM.taskList.removeEventListener("click", handleTaskActions);
+    DOM.taskList.addEventListener("click", handleTaskActions);
+    DOM.taskList.addEventListener("click", handleCheckboxClick);
+  
     updateProgress();
   }
+  
 
   let currentDeleteHandler = null; // To manage the confirm delete event listener
 
@@ -571,6 +666,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     renderTasks();
   }
+
+  document.querySelectorAll('[title]').forEach(el => new bootstrap.Tooltip(el));
+
 
   initializeApp();
 });

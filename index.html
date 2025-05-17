@@ -1,88 +1,74 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="Gerenciador de tarefas online para organizar suas atividades diárias." />
-        <meta name="keywords" content="gerenciador de tarefas, produtividade, organização" />
-        <meta property="og:title" content="Gerenciador Tarefas" />
-        <meta property="og:description" content="Organize suas tarefas com nosso gerenciador online." />
-        <meta property="og:image" content="/image/logo.png" />
-        <title>NexTask</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
-        <link rel="stylesheet" href="css/style.css" />
-        <link rel="shortcut icon" href="image/icone.png" type="image/x-icon">
-    </head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Gerenciador de tarefas online para organizar suas atividades diárias." />
+    <meta name="keywords" content="gerenciador de tarefas, produtividade, organização" />
+    <meta property="og:title" content="Gerenciador Tarefas" />
+    <meta property="og:description" content="Organize suas tarefas com nosso gerenciador online." />
+    <meta property="og:image" content="/image/logo.png" />
+    <title>NexTask</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="shortcut icon" href="image/icone.png" type="image/x-icon" />
+  </head>
 
-    <body class="bg-light">
-        <div id="message"
-             class="alert alert-info text-center d-none shadow p-3"
-             role="alert"
-             tabindex="-1"
-             style="position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; min-width: 280px; max-width: 450px; width: auto;">
-        </div>
+  <body class="bg-light">
+    <div id="message"
+         class="alert alert-info text-center d-none shadow p-3"
+         role="alert"
+         tabindex="-1"
+         style="position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; min-width: 280px; max-width: 450px; width: auto;">
+    </div>
 
-        <main class="container d-flex justify-content-center align-items-center min-vh-100">
-            <section id="login-container" class="card w-100" style="max-width: 800px;">
-                <div class="row g-0">
-                    <div class="col-md-6 position-relative">
-                        <img id="login-image"
-                             class="img-fluid h-100"
-                             src="image/logo.png"
-                             alt="Logo NexTask"
-                             loading="lazy"
-                             style="object-fit: cover;" />
-                        <div class="fallback-text position-absolute top-50 start-50 translate-middle text-muted d-none">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card-body d-flex flex-column justify-content-center h-100">
-                            <h2 class="card-title text-center">Login</h2>
-                            <form id="login-form">
-                                <div class="mb-3 input-group">
-                                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-                                    <input type="text"
-                                           id="login-username"
-                                           class="form-control"
-                                           placeholder="Usuário"
-                                           aria-label="Nome de usuário"
-                                           required />
-                                    <div class="invalid-feedback">Nome de usuário inválido.</div>
-                                </div>
-                                <div class="mb-3 input-group">
-                                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                                    <input type="password"
-                                           id="login-password"
-                                           class="form-control"
-                                           placeholder="Senha"
-                                           aria-label="Senha"
-                                           required />
-                                    <div class="invalid-feedback">Senha inválida.</div>
-                                </div>
-                                <button type="submit"
-                                        id="login-btn"
-                                        class="btn btn-primary w-100"
-                                        aria-label="Entrar no sistema">
-                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                    <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
-                                </button>
-                            </form>
-                            <p class="mt-3 text-center mb-0">
-                                <a href="#" id="forgot-password">Esqueceu a senha?</a><br />
-                                Não tem conta? <a href="#" id="show-register">Cadastre-se aqui</a>
-                            </p>
-                        </div>
-                    </div>
+    <main class="container d-flex justify-content-center align-items-center min-vh-100">
+      <section id="login-container" class="card w-100" style="max-width: 800px;">
+        <div class="row g-0">
+          <div class="col-md-6 position-relative">
+            <img id="login-image"
+                 class="img-fluid h-100"
+                 src="image/logo.png"
+                 alt="Logo NexTask"
+                 loading="lazy"
+                 style="object-fit: cover;" />
+            <div class="fallback-text position-absolute top-50 start-50 translate-middle text-muted d-none"></div>
+          </div>
+          <div class="col-md-6">
+            <div class="card-body d-flex flex-column justify-content-center h-100">
+              <h2 class="card-title text-center">Login</h2>
+              <form id="login-form">
+                <div class="mb-3 input-group">
+                  <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                  <input type="text" id="login-username" class="form-control" placeholder="Usuário" aria-label="Nome de usuário" required />
+                  <div class="invalid-feedback">Nome de usuário inválido.</div>
                 </div>
-            </section>
+                <div class="mb-3 input-group">
+                  <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                  <input type="password" id="login-password" class="form-control" placeholder="Senha" aria-label="Senha" required />
+                  <div class="invalid-feedback">Senha inválida.</div>
+                </div>
+                <button type="submit" id="login-btn" class="btn btn-primary w-100" aria-label="Entrar no sistema">
+                 <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                  <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+                </button>
+              </form>
+              <p class="mt-3 text-center mb-0">
+                <a href="#" id="forgot-password">Esqueceu a senha?</a><br />
+                Não tem conta? <a href="#" id="show-register">Cadastre-se aqui</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            <section id="register-container" class="card w-100" style="display: none; max-width: 800px;">
-                <div class="card-body">
-                    <div class="row justify-content-center">
-                        <div class="col-sm-11 col-md-10 col-lg-8">
-                            <h2 class="card-title text-center">Cadastro</h2>
-                            <form id="register-form">
+      <section id="register-container" class="card w-100" style="display: none; max-width: 800px;">
+        <div class="card-body">
+          <div class="row justify-content-center">
+            <div class="col-sm-11 col-md-10 col-lg-8">
+              <h2 class="card-title text-center">Cadastro</h2>
+              <form id="register-form">
                                 <div class="mb-3 input-group">
                                     <span class="input-group-text"><i class="bi bi-person-plus-fill"></i></span>
                                     <input type="text"
@@ -343,7 +329,148 @@
             </div>
         </div>
 
+<<<<<<< HEAD
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="js/script.js"></script>
     </body>
+=======
+        <section id="main-panel" class="row mt-4" style="display: none;">
+            <div class="col-md-12">
+                <div id="task-container" class="card h-100">
+                    <div class="card-body">
+                        <header class="d-flex justify-content-between mb-3 align-items-center">
+                            <h4 class="mt-2 mb-0">Tarefas</h4>
+                            <button id="logout-btn" class="btn btn-danger" aria-label="Sair do sistema">
+                                <i class="bi bi-box-arrow-left me-1"></i> Sair
+                            </button>
+                        </header>
+
+                        <div class="row g-3 mb-3 align-items-end">
+                            <div class="col-lg-6 col-md-12 order-lg-1 order-md-1">
+                                <label for="search-tasks" class="form-label visually-hidden">Buscar tarefas por título ou tags</label>
+                                <input type="text"
+                                       id="search-tasks"
+                                       class="form-control"
+                                       placeholder="Buscar tarefas por título ou tags..."
+                                       aria-label="Buscar tarefas por título ou tags" />
+                            </div>
+                            <div class="col-lg-3 col-md-6 order-lg-2 order-md-2">
+                                <label for="filter-status" class="form-label">Filtrar por Status:</label>
+                                <select id="filter-status" class="form-select" aria-label="Filtrar por status da tarefa">
+                                    <option value="todos">Todos</option>
+                                    <option value="pendente">Pendente</option>
+                                    <option value="em andamento">Em andamento</option>
+                                    <option value="concluida">Concluída</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-6 order-lg-3 order-md-3">
+                                <button id="export-tasks" class="btn btn-outline-secondary w-100" aria-label="Exportar tarefas como CSV">
+                                    <i class="bi bi-download me-1"></i> Exportar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="progress mb-1" style="height: 10px;">
+                            <div id="progress-bar"
+                                 class="progress-bar bg-primary"
+                                 role="progressbar"
+                                 style="width: 0%;"
+                                 aria-valuenow="0"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        <p id="progress-text" class="mb-3 small text-muted text-end">0 de 0 tarefas concluídas</p>
+
+                        <div class="row mt-4">
+                            <div class="col-lg-5 col-md-12 mb-4 mb-lg-0">
+                                <h5 class="mb-3">Adicionar/Editar Tarefa</h5>
+                                <form id="task-form">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="mb-2 input-group">
+                                                <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                                <input type="text"
+                                                       id="title"
+                                                       class="form-control"
+                                                       placeholder="Título da tarefa"
+                                                       aria-label="Título da tarefa"
+                                                       required />
+                                            </div>
+                                            <div class="mb-2 input-group">
+                                                <span class="input-group-text"><i class="bi bi-body-text"></i></span>
+                                                <textarea id="description"
+                                                          class="form-control"
+                                                          placeholder="Descrição"
+                                                          aria-label="Descrição da tarefa"
+                                                          rows="3" required></textarea>
+                                            </div>
+                                            <div class="mb-2 input-group">
+                                                <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                                <input type="date"
+                                                       id="dueDate"
+                                                       class="form-control"
+                                                       aria-label="Data de vencimento"
+                                                       required />
+                                            </div>
+                                            <div class="mb-2 input-group">
+                                                <span class="input-group-text"><i class="bi bi-arrow-up-circle-fill"></i></span>
+                                                <select id="priority" class="form-select" aria-label="Prioridade">
+                                                    <option value="baixa">Baixa</option>
+                                                    <option value="média" selected>Média</option>
+                                                    <option value="alta">Alta</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-2 input-group">
+                                                <span class="input-group-text"><i class="bi bi-list-check"></i></span>
+                                                <select id="status" class="form-select" aria-label="Status">
+                                                    <option value="pendente">Pendente</option>
+                                                    <option value="em andamento">Em andamento</option>
+                                                    <option value="concluída">Concluída</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-2 input-group">
+                                                <span class="input-group-text"><i class="bi bi-folder-fill"></i></span>
+                                                <input type="text"
+                                                       id="category"
+                                                       class="form-control"
+                                                       placeholder="Categoria (opcional)"
+                                                       aria-label="Categoria" />
+                                            </div>
+                                            <div class="mb-2 input-group">
+                                                <span class="input-group-text"><i class="bi bi-tags-fill"></i></span>
+                                                <input type="text"
+                                                       id="tags"
+                                                       class="form-control"
+                                                       placeholder="Etiquetas (separadas por vírgula, opcional)"
+                                                       aria-label="Etiquetas" />
+                                            </div>
+                                            <button type="submit"
+                                                    class="btn btn-primary w-100 mt-2"
+                                                    aria-label="Criar ou salvar tarefa">
+                                                <i class="bi bi-plus-circle me-1"></i> Criar Tarefa
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="col-lg-7 col-md-12">
+                                <h5 class="mb-3">Lista de Tarefas</h5>
+                                <div id="task-list" role="list" style="max-height: 700px; overflow-y: auto; min-height: 200px; border: 1px solid #eee; padding: 10px; border-radius: .25rem;">
+                                    <p class="text-center text-muted d-none" id="no-tasks-message">Nenhuma tarefa para exibir.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+>>>>>>> 740363d (feat: melhorias visuais, cores por status, checkbox e tooltips)
 </html>

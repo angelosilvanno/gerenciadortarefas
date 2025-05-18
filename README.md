@@ -2,7 +2,7 @@
 
 Um gerenciador de tarefas online projetado para ajudar os usuários a organizar suas atividades diárias de forma eficiente e intuitiva.
 
-## 🔥 Introdução
+## ✍🏽 Introdução
 
 O NextTask é uma aplicação web que visa simplificar o gerenciamento de tarefas, permitindo que os usuários criem, editem, priorizem e acompanhem o progresso de suas atividades. O objetivo principal é fornecer uma ferramenta de produtividade que seja fácil de usar, acessível e que ajude os usuários a manterem o foco em suas metas.
 

@@ -4,7 +4,7 @@ require('dotenv').config({ path: '../../.env' });
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  const token = authHeader && authHeader.split(' ')[1]; 
 
   if (token == null) {
     return res.status(401).json({ message: 'Token de autenticação não fornecido.' });

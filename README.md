@@ -63,8 +63,6 @@ Coloque aqui as ferramentas que você usou para criar seu projeto.
 
 ## 👷 Autores
 
-Mencione todos aqueles que ajudaram a levantar o projeto desde o seu início, colaboradores.
-
 * **Ângelo** - *Membro* - [angelosilvanno](https://github.com/angelosilvanno)
 * **Ludmila Monteiro** - *Membro* - [ludmilamonteiro](https://github.com/LudmilaMonteiro)
 * **Mateus Gomes** - *Membro* - [GSmateus07](https://github.com/GSmateus07)

@@ -45,6 +45,18 @@ Com o NextTask, você pode se livrar de listas de papel desorganizadas e central
     *   **Mensagens de Feedback:** Alertas visuais para o usuário sobre o sucesso ou falha de operações.
     *   **Modal de Boas-vindas:** Apresentação inicial para novos usuários.
 
+## 🔨 Guia de Instalação  
+
+1. Clone o repositório:  
+   ```bash  
+   git clone https://github.com/angelosilvanno/gerenciadortarefas.git  
+   ```  
+
+2. Entre na pasta do projeto:  
+   ```bash  
+   cd gerenciadortarefas  
+   ```
+   
 ## 📦 Tecnologias usadas:
 
 Coloque aqui as ferramentas que você usou para criar seu projeto.

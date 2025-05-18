@@ -432,15 +432,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "concluida": "task-status-concluida"
     };
   
-    // Ordena: Tarefas concluídas vão para o fim
-    tasksToDisplay.sort((a, b) => {
-      const aNorm = normalizeStatus(a.status);
-      const bNorm = normalizeStatus(b.status);
-      if (aNorm === "concluida" && bNorm !== "concluida") return 1;
-      if (aNorm !== "concluida" && bNorm === "concluida") return -1;
-      return 0;
-    });
-  
     DOM.taskList.innerHTML = "";
   
     if (tasksToDisplay.length === 0) {
@@ -448,47 +439,67 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
   
-    tasksToDisplay.forEach((task) => {
-      const originalIndex = tasksCache.findIndex(t => t === task);
-      if (originalIndex === -1) return;
+    // Agrupar tarefas por data
+    const groupedByDate = {};
+    tasksToDisplay.forEach(task => {
+       const [year, month, day] = task.dueDate.split("-");
+       const date = new Date(year, month - 1, day).toISOString().split("T")[0];
+       if (!groupedByDate[date]) groupedByDate[date] = [];
+       groupedByDate[date].push(task);
+});
+    // Ordenar datas
+    const sortedDates = Object.keys(groupedByDate).sort((a, b) => new Date(a) - new Date(b));
   
-      const div = document.createElement("div");
-      div.classList.add("task-card", "card", "p-3", "mb-2");
+    sortedDates.forEach(date => {
+      const [y, m, d] = date.split("-");
+      const formatted = `${d}/${m}/${y}`;
+      const dateHeader = document.createElement("h6");
+      dateHeader.className = "mt-4 text-primary border-bottom pb-1";
+      dateHeader.textContent = `📅 ${formatted}`;
+      DOM.taskList.appendChild(dateHeader);
+    
+      groupedByDate[date].forEach(task => {
+        const originalIndex = tasksCache.findIndex(t => t === task);
+        if (originalIndex === -1) return;
+    
+        const div = document.createElement("div");
+        div.classList.add("task-card", "card", "p-3", "mb-2");
+    
+        const normStatus = normalizeStatus(task.status);
+        if (statusClass[normStatus]) {
+          div.classList.add(statusClass[normStatus]);
+        }
   
-      const normStatus = normalizeStatus(task.status);
-      if (statusClass[normStatus]) {
-        div.classList.add(statusClass[normStatus]);
-      }
+        div.setAttribute("role", "listitem");
+        div.setAttribute("data-priority", task.priority);
+        div.setAttribute("data-status", task.status);
   
-      div.setAttribute("role", "listitem");
-      div.setAttribute("data-priority", task.priority);
-      div.setAttribute("data-status", task.status);
-  
-      div.innerHTML = `
-        <div class="d-flex justify-content-between align-items-start mb-2">
-          <div class="form-check">
-            <input type="checkbox" class="form-check-input complete-checkbox" data-index="${originalIndex}" ${normStatus === "concluida" ? "checked" : ""}>
+        div.innerHTML = `
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input complete-checkbox" data-index="${originalIndex}" ${normStatus === "concluida" ? "checked" : ""}>
+            </div>
+            <h5 class="mb-0 flex-grow-1 ms-2 ${normStatus === "concluida" ? "text-decoration-line-through text-muted" : ""}">
+              ${sanitizeInput(task.title)}
+            </h5>
+            <div>
+              <button class="btn btn-warning btn-sm me-2 edit-btn" data-index="${originalIndex}" title="Editar tarefa">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" title="Excluir tarefa">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </div>
           </div>
-          <h5 class="mb-0 flex-grow-1 ms-2 ${normStatus === "concluida" ? "text-decoration-line-through text-muted" : ""}">
-            ${sanitizeInput(task.title)}
-          </h5>
-          <div>
-            <button class="btn btn-warning btn-sm me-2 edit-btn" data-index="${originalIndex}" title="Editar tarefa">
-              <i class="bi bi-pencil-fill"></i>
-            </button>
-            <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" title="Excluir tarefa">
-              <i class="bi bi-trash-fill"></i>
-            </button>
-          </div>
-        </div>
-        <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
-        <small class="text-muted d-block"><strong>Prazo:</strong> ${sanitizeInput(task.dueDate)}</small>
-        <small class="text-muted d-block"><strong>Prioridade:</strong> ${sanitizeInput(task.priority)} | <strong>Status:</strong> ${sanitizeInput(task.status)}</small>
-        ${task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : ""}
-        ${task.tags && task.tags.length > 0 ? `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : ""}
-      `;
+          <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
+          <small class="text-muted d-block"><strong>Prazo:</strong> ${sanitizeInput(task.dueDate)}</small>
+          <small class="text-muted d-block"><strong>Prioridade:</strong> ${sanitizeInput(task.priority)} | <strong>Status:</strong> ${sanitizeInput(task.status)}</small>
+          ${task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : ""}
+          ${task.tags && task.tags.length > 0 ? `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : ""}
+        `;
   
-      DOM.taskList.appendChild(div);
+        DOM.taskList.appendChild(div);
+      });
     });
   
     DOM.taskList.removeEventListener("click", handleTaskActions);
@@ -672,3 +683,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initializeApp();
 });
+

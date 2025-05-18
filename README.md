@@ -13,7 +13,7 @@ Com o NextTask, você pode se livrar de listas de papel desorganizadas e central
 *   **Autenticação de Usuário:**
     *   Cadastro de novos usuários com nome de usuário, e-mail e senha.
     *   Login seguro para usuários existentes.
-    *   Funcionalidade de "Esqueci minha senha" (simulada, envia mensagem de confirmação).
+    *   Funcionalidade de "Esqueci minha senha" (envia mensagem de confirmação).
 *   **Gerenciamento de Tarefas:**
   
     *   **Criação de Tarefas:** Adicione novas tarefas com título, descrição detalhada, data de vencimento, prioridade (baixa, média, alta) e status inicial (pendente).

@@ -22,18 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
     forgotPasswordModalElement: document.getElementById("forgotPasswordModal"),
     deleteModalElement: document.getElementById("deleteModal"),
     confirmDeleteButton: document.getElementById("confirmDelete"),
-    // Login form inputs
     loginUsernameInput: document.getElementById("login-username"),
     loginPasswordInput: document.getElementById("login-password"),
     loginButton: document.getElementById("login-btn"),
-    // Register form inputs
     registerUsernameInput: document.getElementById("register-username"),
     registerEmailInput: document.getElementById("register-email"),
     registerPasswordInput: document.getElementById("register-password"),
     registerConfirmPasswordInput: document.getElementById("register-password-confirm"),
-    // Forgot password form inputs
     forgotEmailInput: document.getElementById("forgot-email"),
-    // Task form inputs
     taskTitleInput: document.getElementById("title"),
     taskDescriptionInput: document.getElementById("description"),
     taskDueDateInput: document.getElementById("dueDate"),
@@ -43,18 +39,14 @@ document.addEventListener("DOMContentLoaded", () => {
     taskTagsInput: document.getElementById("tags"),
   };
 
-  
-  // --- Estado da Aplicação ---
   let editingTaskIndex = null;
   let tasksCache = JSON.parse(localStorage.getItem("tasks")) || [];
 
-  // --- Regex para Validações ---
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const tagRegex = /^[a-zA-Z0-9-]+$/;
 
-  // --- Funções Utilitárias ---
   const sanitizeInput = (input) => {
     const div = document.createElement("div");
     div.textContent = input;
@@ -84,12 +76,18 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const saveTasks = () => {
-    localStorage.setItem("tasks", JSON.stringify(tasksCache));
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (currentUser && currentUser.username) {
+      localStorage.setItem(`tasks_${currentUser.username}`, JSON.stringify(tasksCache));
+    } else {
+      localStorage.setItem("tasks", JSON.stringify(tasksCache)); // Fallback for general or if no user
+    }
   };
+  
 
   const updateProgress = () => {
     if (!DOM.progressBar || !DOM.progressText) return;
-    const completed = tasksCache.filter(task => task.status === "concluída").length;
+    const completed = tasksCache.filter(task => normalizeStatus(task.status) === "concluida").length;
     const total = tasksCache.length;
     const progress = total ? (completed / total) * 100 : 0;
     DOM.progressBar.style.width = `${progress}%`;
@@ -98,8 +96,11 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const filterTasksByStatus = (status = "todos") => {
-    return status === "todos" ? tasksCache : tasksCache.filter(task => task.status === status);
+    if (status === "todos") return tasksCache;
+    const normalizedFilterStatus = normalizeStatus(status);
+    return tasksCache.filter(task => normalizeStatus(task.status) === normalizedFilterStatus);
   };
+  
 
   const filterTasksBySearchQuery = (query) => {
     if (!query) return tasksCache;
@@ -122,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   };
 
-  // --- Funções de Controle de UI (Painéis) ---
   function showLoginPanel() {
     if (DOM.loginContainer) DOM.loginContainer.style.display = "block";
     if (DOM.registerContainer) DOM.registerContainer.style.display = "none";
@@ -138,8 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (DOM.registerContainer) DOM.registerContainer.style.display = "none";
     if (DOM.mainPanel) DOM.mainPanel.style.display = "block";
   }
-
-  // --- Inicialização e Event Listeners ---
 
   if (!localStorage.getItem("welcomeShown")) {
     if (DOM.welcomeModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
@@ -204,12 +202,13 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.logoutBtn) {
     DOM.logoutBtn.addEventListener("click", () => {
       localStorage.removeItem("currentUser");
-      tasksCache = JSON.parse(localStorage.getItem("tasks")) || []; // Reset local cache or fetch default
+      tasksCache = []; 
       showLoginPanel();
       renderTasks();
       showUIMessage("Você saiu do sistema.", false);
     });
   }
+  
 
   if (DOM.registerForm && DOM.registerUsernameInput && DOM.registerEmailInput && DOM.registerPasswordInput && DOM.registerConfirmPasswordInput) {
     DOM.registerForm.addEventListener("submit", async (e) => {
@@ -284,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (user) {
         localStorage.setItem("currentUser", JSON.stringify(user));
-        tasksCache = JSON.parse(localStorage.getItem(`tasks_${user.username}`)) || JSON.parse(localStorage.getItem("tasks")) || []; // Load user-specific tasks or general
+        tasksCache = JSON.parse(localStorage.getItem(`tasks_${user.username}`)) || [];
         showMainAppPanel();
         renderTasks();
         DOM.loginForm.reset();
@@ -297,6 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.loginButton.disabled = false;
     });
   }
+  
 
   if (DOM.taskForm) {
     const submitButton = DOM.taskForm.querySelector('button[type="submit"]');
@@ -313,10 +313,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const tagsValue = DOM.taskTagsInput.value.trim();
         const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
 
-        console.log("Título:", title);
-        console.log("Descrição:", description);
-        console.log("Prazo:", dueDate);
-
         if (!title || !description || !dueDate) {
           showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");
           return;
@@ -328,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        const taskObj = { title, description, dueDate, priority, status, category, tags };
+        const taskObj = { title, description, dueDate, priority, status, category, tags, id: editingTaskIndex !== null ? tasksCache[editingTaskIndex].id : Date.now()  };
         if (editingTaskIndex !== null) {
           tasksCache[editingTaskIndex] = taskObj;
           editingTaskIndex = null;
@@ -349,9 +345,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const target = event.target.closest('button');
     if (!target) return;
 
-    const index = parseInt(target.dataset.index, 10);
+    const taskCard = target.closest('.task-card');
+    if (!taskCard) return;
+    
+    const taskId = parseInt(taskCard.dataset.taskId, 10);
+    const index = tasksCache.findIndex(task => task.id === taskId);
+
+
     if (isNaN(index) || index < 0 || index >= tasksCache.length) {
-      console.error("Índice de tarefa inválido:", index);
+      console.error("Índice de tarefa inválido ou tarefa não encontrada:", index, "para taskId:", taskId);
       return;
     }
 
@@ -362,131 +364,101 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-    if (tasksToDisplay.length === 0) {
-      DOM.taskList.appendChild(noTasksMessage);
-      noTasksMessage.classList.remove('d-none');
-    } else {
-      noTasksMessage.classList.add('d-none'); // Hide if there are tasks
-      tasksToDisplay.forEach((task) => {
-        const originalIndex = tasksCache.findIndex(t => t === task);
-        if (originalIndex === -1) return;
-
-        const div = document.createElement("div");
-        div.className = "border rounded p-3 mb-3 task-item";
-        div.setAttribute("role", "listitem");
-        div.setAttribute("data-priority", task.priority);
-        div.setAttribute("data-status", task.status);
-
-        div.innerHTML = `
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <h5 class="mb-0">${sanitizeInput(task.title)}</h5>
-                <div>
-                    <button class="btn btn-warning btn-sm me-2 edit-btn" data-index="${originalIndex}" aria-label="Editar tarefa ${sanitizeInput(task.title)}"><i class="bi bi-pencil-fill"></i></button>
-                    <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" aria-label="Excluir tarefa ${sanitizeInput(task.title)}"><i class="bi bi-trash-fill"></i></button>
-                </div>
-            </div>
-            <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
-            <small class="text-muted d-block"><strong>Prazo:</strong> ${sanitizeInput(task.dueDate)}</small>
-            <small class="text-muted d-block"><strong>Prioridade:</strong> ${sanitizeInput(task.priority)} | <strong>Status:</strong> ${sanitizeInput(task.status)}</small>
-            ${task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : ''}
-            ${task.tags && task.tags.length > 0 ? `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : ''}
-        `;
-        DOM.taskList.appendChild(div);
-      });
-    }
-  
-  // Função para tratar ações de clique (checkbox)
   function handleCheckboxClick(e) {
     const checkbox = e.target.closest(".complete-checkbox");
     if (!checkbox) return;
 
-    const index = parseInt(checkbox.dataset.index);
-    if (isNaN(index)) return;
+    const taskCard = checkbox.closest('.task-card');
+    if (!taskCard) return;
 
+    const taskId = parseInt(taskCard.dataset.taskId, 10);
+    const index = tasksCache.findIndex(task => task.id === taskId);
+
+    if (isNaN(index) || index < 0 || index >= tasksCache.length) {
+        console.error("Índice de tarefa inválido no checkbox:", index, "para taskId:", taskId);
+        return;
+    }
+    
     const task = tasksCache[index];
     if (!task) return;
 
-    task.status = checkbox.checked ? "concluida" : "pendente";
-    console.log("Tarefa atualizada:", index, task.status, task.title);
+    task.status = checkbox.checked ? "concluída" : "pendente";
 
     saveTasks();
-    renderTasks(); 
+    renderTasks();
   }
 
   function normalizeStatus(status) {
+    if (typeof status !== 'string') return "";
     return status
     .trim()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s/g, "")
     .toLowerCase();
-  }  
+  }
 
-  // Função principal para renderizar as tarefas
   function renderTasks(tasksToDisplay = tasksCache) {
     if (!DOM.taskList) return;
-  
+
     const statusClass = {
       "pendente": "task-status-pendente",
       "emandamento": "task-status-em-andamento",
       "concluida": "task-status-concluida"
     };
-  
+
     DOM.taskList.innerHTML = "";
-  
+
     if (tasksToDisplay.length === 0) {
-      DOM.taskList.innerHTML = '<p class="text-center text-muted">Nenhuma tarefa para exibir.</p>';
+      DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir.</p>';
+      updateProgress();
       return;
     }
-  
-    // Agrupar tarefas por data
+
     const groupedByDate = {};
     tasksToDisplay.forEach(task => {
        const [year, month, day] = task.dueDate.split("-");
-       const date = new Date(year, month - 1, day).toISOString().split("T")[0];
+       const date = new Date(year, parseInt(month) - 1, day).toISOString().split("T")[0];
        if (!groupedByDate[date]) groupedByDate[date] = [];
        groupedByDate[date].push(task);
-});
-    // Ordenar datas
+    });
     const sortedDates = Object.keys(groupedByDate).sort((a, b) => new Date(a) - new Date(b));
-  
+
     sortedDates.forEach(date => {
       const [y, m, d] = date.split("-");
-      const formatted = `${d}/${m}/${y}`;
+      const formattedDate = `${d}/${m}/${y}`;
       const dateHeader = document.createElement("h6");
       dateHeader.className = "mt-4 text-primary border-bottom pb-1";
-      dateHeader.textContent = `📅 ${formatted}`;
+      dateHeader.textContent = `📅 ${formattedDate}`;
       DOM.taskList.appendChild(dateHeader);
-    
+
       groupedByDate[date].forEach(task => {
-        const originalIndex = tasksCache.findIndex(t => t === task);
-        if (originalIndex === -1) return;
-    
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
-    
+        div.dataset.taskId = task.id; 
+
         const normStatus = normalizeStatus(task.status);
         if (statusClass[normStatus]) {
           div.classList.add(statusClass[normStatus]);
         }
-  
+
         div.setAttribute("role", "listitem");
         div.setAttribute("data-priority", task.priority);
         div.setAttribute("data-status", task.status);
-  
+
         div.innerHTML = `
           <div class="d-flex justify-content-between align-items-start mb-2">
             <div class="form-check">
-              <input type="checkbox" class="form-check-input complete-checkbox" data-index="${originalIndex}" ${normStatus === "concluida" ? "checked" : ""}>
+              <input type="checkbox" class="form-check-input complete-checkbox" ${normStatus === "concluida" ? "checked" : ""}>
             </div>
             <h5 class="mb-0 flex-grow-1 ms-2 ${normStatus === "concluida" ? "text-decoration-line-through text-muted" : ""}">
               ${sanitizeInput(task.title)}
             </h5>
             <div>
-              <button class="btn btn-warning btn-sm me-2 edit-btn" data-index="${originalIndex}" title="Editar tarefa">
+              <button class="btn btn-warning btn-sm me-2 edit-btn" title="Editar tarefa">
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" title="Excluir tarefa">
+              <button class="btn btn-danger btn-sm delete-btn" title="Excluir tarefa">
                 <i class="bi bi-trash-fill"></i>
               </button>
             </div>
@@ -497,20 +469,20 @@ document.addEventListener("DOMContentLoaded", () => {
           ${task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : ""}
           ${task.tags && task.tags.length > 0 ? `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : ""}
         `;
-  
         DOM.taskList.appendChild(div);
       });
     });
-  
+
     DOM.taskList.removeEventListener("click", handleTaskActions);
     DOM.taskList.addEventListener("click", handleTaskActions);
-    DOM.taskList.addEventListener("click", handleCheckboxClick);
-  
+    DOM.taskList.removeEventListener("change", handleCheckboxClick); // Use change for checkboxes
+    DOM.taskList.addEventListener("change", handleCheckboxClick);
+
+
     updateProgress();
   }
-  
 
-  let currentDeleteHandler = null; 
+  let currentDeleteHandler = null;
 
   function confirmTaskDeletion(index) {
     if (!DOM.deleteModalElement || !DOM.confirmDeleteButton || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
@@ -525,16 +497,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const modal = bootstrap.Modal.getOrCreateInstance(DOM.deleteModalElement);
 
-
     if (currentDeleteHandler) {
         DOM.confirmDeleteButton.removeEventListener('click', currentDeleteHandler);
     }
-    
+
     currentDeleteHandler = function onConfirm() {
       tasksCache.splice(index, 1);
       saveTasks();
       showUIMessage("Tarefa removida com sucesso!", false);
-      
+
       const currentFilterStatus = DOM.filterStatusSelect ? DOM.filterStatusSelect.value : "todos";
       const currentSearchQuery = DOM.searchTasksInput ? DOM.searchTasksInput.value : "";
       let tasksToRenderAfterDelete = filterTasksByStatus(currentFilterStatus);
@@ -542,14 +513,13 @@ document.addEventListener("DOMContentLoaded", () => {
         tasksToRenderAfterDelete = filterTasksBySearchQuery(currentSearchQuery).filter(task => tasksToRenderAfterDelete.includes(task));
       }
       renderTasks(tasksToRenderAfterDelete);
-      
+
       modal.hide();
     };
-    
+
     DOM.confirmDeleteButton.addEventListener('click', currentDeleteHandler, { once: true });
     modal.show();
   }
-
 
   function editTask(index) {
     const task = tasksCache[index];
@@ -636,7 +606,7 @@ document.addEventListener("DOMContentLoaded", () => {
     today.setHours(0, 0, 0, 0);
 
     tasksCache.forEach(task => {
-      if (task.status !== "concluída" && task.dueDate) {
+      if (normalizeStatus(task.status) !== "concluida" && task.dueDate) {
         const [year, month, day] = task.dueDate.split('-').map(Number);
         const dueDate = new Date(year, month - 1, day);
         dueDate.setHours(0, 0, 0, 0);
@@ -660,16 +630,16 @@ document.addEventListener("DOMContentLoaded", () => {
   if ('Notification' in window) {
     Notification.requestPermission().then(permission => {
       if (permission === "granted") {
-        checkDueDates(); 
-        setInterval(checkDueDates, 60 * 60 * 1000); 
+        checkDueDates();
+        setInterval(checkDueDates, 60 * 60 * 1000);
       }
     });
   }
 
   function initializeApp() {
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-    if (currentUser) {
-      tasksCache = JSON.parse(localStorage.getItem(`tasks_${currentUser.username}`)) || JSON.parse(localStorage.getItem("tasks")) || [];
+    if (currentUser && currentUser.username) {
+      tasksCache = JSON.parse(localStorage.getItem(`tasks_${currentUser.username}`)) || [];
       showMainAppPanel();
     } else {
       showLoginPanel();
@@ -678,9 +648,11 @@ document.addEventListener("DOMContentLoaded", () => {
     renderTasks();
   }
 
-  document.querySelectorAll('[title]').forEach(el => new bootstrap.Tooltip(el));
-
+  document.querySelectorAll('[title]').forEach(el => {
+    if (bootstrap && bootstrap.Tooltip) {
+      new bootstrap.Tooltip(el);
+    }
+  });
 
   initializeApp();
 });
-

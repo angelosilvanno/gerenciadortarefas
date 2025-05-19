@@ -49,6 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
     editTagsInput: document.getElementById('edit-tags'),
   };
 
+  const API_BASE_URL = 'https://gerenciador-de-tarefas-d0zd.onrender.com'; // Adicionado
+
   let editingTaskIndex = null;
   let tasksCache = [];
 
@@ -63,11 +65,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return div.innerHTML;
   };
 
-  async function hashPassword(password) {
-    const msgBuffer = new TextEncoder().encode(password);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
-  }
+  // Removido hashPassword, pois o backend fará o hashing
+  // async function hashPassword(password) { ... }
 
   const showUIMessage = (msg, isError = true) => {
     if (!DOM.messageDiv) return;
@@ -85,12 +84,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 4000);
   };
 
-  const saveTasks = () => {
+  // Modificado para usar API (ou localStorage como fallback se API falhar/não implementado)
+  const saveTasks = async () => {
     const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-    if (currentUser && currentUser.username) {
+    const token = localStorage.getItem("authToken");
+
+    if (currentUser && currentUser.username && token) {
+      // TODO: Implementar chamada de API para salvar todas as tarefas se necessário,
+      // ou salvar cada tarefa individualmente ao criar/editar/excluir.
+      // Por agora, continuaremos usando localStorage para tarefas,
+      // assumindo que a API lida com persistência individual.
       localStorage.setItem(`tasks_${currentUser.username}`, JSON.stringify(tasksCache));
     } else {
-      console.error("Tentativa de salvar tarefas sem usuário logado.");
+      console.warn("Usuário não logado ou token ausente, salvando tarefas localmente como fallback.");
       localStorage.setItem("tasks", JSON.stringify(tasksCache));
     }
   };
@@ -192,19 +198,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (DOM.forgotPasswordForm && DOM.forgotEmailInput) {
-    DOM.forgotPasswordForm.addEventListener("submit", (e) => {
+    DOM.forgotPasswordForm.addEventListener("submit", async (e) => { // Adicionado async para futura chamada de API
       e.preventDefault();
       const email = DOM.forgotEmailInput.value.trim();
       if (!emailRegex.test(email)) {
         showUIMessage("E-mail inválido.");
         return;
       }
-      const users = JSON.parse(localStorage.getItem("users")) || [];
+      // TODO: Implementar chamada de API para /api/auth/forgot-password
+      // Por enquanto, mantém a lógica local
+      const users = JSON.parse(localStorage.getItem("users")) || []; // Temporário, deve vir da API
       const user = users.find(u => u.email === email);
       if (user) {
-        showUIMessage("Instruções de recuperação enviadas para o e-mail!", false);
+        showUIMessage("Se o e-mail existir, instruções de recuperação serão enviadas!", false);
       } else {
-        showUIMessage("E-mail não encontrado.");
+        showUIMessage("Se o e-mail existir, instruções de recuperação serão enviadas!", false); // Mensagem genérica por segurança
       }
       if (DOM.forgotPasswordModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
         const modalInstance = bootstrap.Modal.getInstance(DOM.forgotPasswordModalElement);
@@ -225,6 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // MODIFICADO: Registro com API
   if (DOM.registerForm && DOM.registerUsernameInput && DOM.registerEmailInput && DOM.registerPasswordInput && DOM.registerConfirmPasswordInput) {
     DOM.registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -255,25 +264,41 @@ document.addEventListener("DOMContentLoaded", () => {
         showUIMessage("As senhas não coincidem.");
         return;
       }
-      const users = JSON.parse(localStorage.getItem("users")) || [];
-      if (users.some(u => u.email === email)) {
-        DOM.registerEmailInput.classList.add("is-invalid");
-        showUIMessage("Este e-mail já está cadastrado.");
-        return;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/tarefas/api/cadastrar/`, { // Usando a URL da sua API
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, email, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showUIMessage(data.message || `Erro no cadastro: ${response.statusText}`, true);
+          if (data.message && data.message.toLowerCase().includes("e-mail")) {
+            DOM.registerEmailInput.classList.add("is-invalid");
+          }
+          if (data.message && data.message.toLowerCase().includes("usuário")) {
+            DOM.registerUsernameInput.classList.add("is-invalid");
+          }
+          return;
+        }
+
+        showUIMessage("Cadastro realizado com sucesso! Faça o login.", false);
+        showLoginPanel();
+        DOM.registerForm.reset();
+
+      } catch (error) {
+        console.error("Erro ao registrar:", error);
+        showUIMessage("Erro de conexão ao tentar registrar. Tente novamente.", true);
       }
-      if (users.some(u => u.username === username)) {
-        DOM.registerUsernameInput.classList.add("is-invalid");
-        showUIMessage("Nome de usuário já existe.");
-        return;
-      }
-      const hashedPassword = await hashPassword(password);
-      users.push({ username, email, password: hashedPassword });
-      localStorage.setItem("users", JSON.stringify(users));
-      showUIMessage("Cadastro realizado com sucesso!", false);
-      showLoginPanel();
-      DOM.registerForm.reset();
     });
   }
+
+  // TODO: Adaptar login, e todas as operações de tarefas (criar, ler, atualizar, deletar) para usar fetch com a API_BASE_URL e o authToken.
 
   if (DOM.loginForm && DOM.loginUsernameInput && DOM.loginPasswordInput && DOM.loginButton) {
     DOM.loginForm.addEventListener("submit", async (e) => {
@@ -285,11 +310,15 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.loginButton.disabled = true;
       const username = DOM.loginUsernameInput.value.trim();
       const password = DOM.loginPasswordInput.value.trim();
-      const hashedPassword = await hashPassword(password);
-      const users = JSON.parse(localStorage.getItem("users")) || [];
+      
+      // MANTENDO LOCALSTORAGE POR ENQUANTO, ATÉ IMPLEMENTAR API DE LOGIN
+      const users = JSON.parse(localStorage.getItem("users")) || []; 
+      const hashedPassword = await hashPassword(password); // Ainda necessário se users vem do localStorage
       const user = users.find(u => u.username === username && u.password === hashedPassword);
+
       if (user) {
         localStorage.setItem("currentUser", JSON.stringify({ username: user.username, email: user.email }));
+        // TODO: Após login via API, carregar tarefas da API
         tasksCache = JSON.parse(localStorage.getItem(`tasks_${user.username}`)) || [];
         showMainAppPanel();
         renderTasks();
@@ -305,6 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (DOM.taskForm) {
+    // ... (manter como está por enquanto, será adaptado para API depois)
     const submitButton = DOM.taskForm.querySelector('button[type="submit"]');
     if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskStatusInput && DOM.taskCategoryInput && DOM.taskTagsInput && submitButton) {
       DOM.taskForm.addEventListener("submit", (e) => {
@@ -338,6 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (DOM.editTaskForm) {
+    // ... (manter como está por enquanto, será adaptado para API depois)
     DOM.editTaskForm.addEventListener("submit", (e) => {
       e.preventDefault();
       if (editingTaskIndex === null || !tasksCache[editingTaskIndex]) {

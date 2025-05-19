@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loginForm: document.getElementById("login-form"),
     registerForm: document.getElementById("register-form"),
     forgotPasswordForm: document.getElementById("forgot-password-form"),
-    taskForm: document.getElementById("task-form"), 
+    taskForm: document.getElementById("task-form"),
     taskList: document.getElementById("task-list"),
     searchTasksInput: document.getElementById("search-tasks"),
     filterStatusSelect: document.getElementById("filter-status"),
@@ -22,9 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
     forgotPasswordModalElement: document.getElementById("forgotPasswordModal"),
     deleteModalElement: document.getElementById("deleteModal"),
     confirmDeleteButton: document.getElementById("confirmDelete"),
-    editTaskModalElement: document.getElementById("editTaskModal"), 
-    editTaskForm: document.getElementById("edit-task-form"),       
-    saveEditButton: document.getElementById("save-edit-btn"),  
+    editTaskModalElement: document.getElementById("editTaskModal"),
+    editTaskForm: document.getElementById("edit-task-form"),
+    saveEditButton: document.getElementById("save-edit-btn"),
     loginUsernameInput: document.getElementById("login-username"),
     loginPasswordInput: document.getElementById("login-password"),
     loginButton: document.getElementById("login-btn"),
@@ -49,8 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
     editTagsInput: document.getElementById('edit-tags'),
   };
 
-  let editingTaskIndex = null; // Mantém o índice da tarefa sendo editada no tasksCache
-  let tasksCache = []; // Será carregado em initializeApp
+  let editingTaskIndex = null;
+  let tasksCache = [];
 
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
@@ -91,10 +91,10 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem(`tasks_${currentUser.username}`, JSON.stringify(tasksCache));
     } else {
       console.error("Tentativa de salvar tarefas sem usuário logado.");
-      localStorage.setItem("tasks", JSON.stringify(tasksCache)); 
+      localStorage.setItem("tasks", JSON.stringify(tasksCache));
     }
   };
-  
+
   const updateProgress = () => {
     if (!DOM.progressBar || !DOM.progressText) return;
     const completed = tasksCache.filter(task => normalizeStatus(task.status) === "concluida").length;
@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const normalizedFilterStatus = normalizeStatus(status);
     return tasksCache.filter(task => normalizeStatus(task.status) === normalizedFilterStatus);
   };
-  
+
   const filterTasksBySearchQuery = (query) => {
     if (!query) return tasksCache;
     const lowerCaseQuery = query.toLowerCase();
@@ -148,7 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (DOM.mainPanel) DOM.mainPanel.style.display = "block";
   }
 
-  // --- MODAL HANDLERS ---
   function showWelcomeModal() {
     if (!localStorage.getItem("welcomeShown")) {
       if (DOM.welcomeModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
@@ -163,16 +162,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function showForgotPasswordModal() {
-     if (DOM.forgotPasswordModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        try {
-          new bootstrap.Modal(DOM.forgotPasswordModalElement).show();
-        } catch (err) {
-          console.error("Erro ao mostrar modal de esquecer senha:", err);
-        }
+    if (DOM.forgotPasswordModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      try {
+        new bootstrap.Modal(DOM.forgotPasswordModalElement).show();
+      } catch (err) {
+        console.error("Erro ao mostrar modal de esquecer senha:", err);
       }
+    }
   }
-  
-  // --- EVENT LISTENERS ---
 
   if (DOM.showRegisterLink) {
     DOM.showRegisterLink.addEventListener("click", (e) => {
@@ -198,7 +195,6 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.forgotPasswordForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const email = DOM.forgotEmailInput.value.trim();
-
       if (!emailRegex.test(email)) {
         showUIMessage("E-mail inválido.");
         return;
@@ -221,21 +217,19 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.logoutBtn) {
     DOM.logoutBtn.addEventListener("click", () => {
       localStorage.removeItem("currentUser");
-      localStorage.removeItem("authToken"); // Se você estiver usando token para API
-      tasksCache = []; 
+      localStorage.removeItem("authToken");
+      tasksCache = [];
       showLoginPanel();
-      renderTasks(); // Para limpar a lista de tarefas da UI
+      renderTasks();
       showUIMessage("Você saiu do sistema.", false);
     });
   }
-  
+
   if (DOM.registerForm && DOM.registerUsernameInput && DOM.registerEmailInput && DOM.registerPasswordInput && DOM.registerConfirmPasswordInput) {
     DOM.registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      // ... (código de validação e registro como antes, usando localStorage para "users")
       const inputs = [DOM.registerUsernameInput, DOM.registerEmailInput, DOM.registerPasswordInput, DOM.registerConfirmPasswordInput];
       inputs.forEach(input => input.classList.remove("is-invalid"));
-
       const username = DOM.registerUsernameInput.value.trim();
       const email = DOM.registerEmailInput.value.trim();
       const password = DOM.registerPasswordInput.value.trim();
@@ -261,7 +255,6 @@ document.addEventListener("DOMContentLoaded", () => {
         showUIMessage("As senhas não coincidem.");
         return;
       }
-
       const users = JSON.parse(localStorage.getItem("users")) || [];
       if (users.some(u => u.email === email)) {
         DOM.registerEmailInput.classList.add("is-invalid");
@@ -273,11 +266,9 @@ document.addEventListener("DOMContentLoaded", () => {
         showUIMessage("Nome de usuário já existe.");
         return;
       }
-
       const hashedPassword = await hashPassword(password);
       users.push({ username, email, password: hashedPassword });
       localStorage.setItem("users", JSON.stringify(users));
-
       showUIMessage("Cadastro realizado com sucesso!", false);
       showLoginPanel();
       DOM.registerForm.reset();
@@ -287,23 +278,18 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.loginForm && DOM.loginUsernameInput && DOM.loginPasswordInput && DOM.loginButton) {
     DOM.loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      // ... (código de login como antes, usando localStorage para "users" e "currentUser")
       const spinner = DOM.loginButton.querySelector(".spinner-border");
-
       DOM.loginUsernameInput.classList.remove("is-invalid");
       DOM.loginPasswordInput.classList.remove("is-invalid");
-
       if (spinner) spinner.classList.remove("d-none");
       DOM.loginButton.disabled = true;
-
       const username = DOM.loginUsernameInput.value.trim();
       const password = DOM.loginPasswordInput.value.trim();
       const hashedPassword = await hashPassword(password);
       const users = JSON.parse(localStorage.getItem("users")) || [];
       const user = users.find(u => u.username === username && u.password === hashedPassword);
-
       if (user) {
-        localStorage.setItem("currentUser", JSON.stringify({username: user.username, email: user.email})); // Salva apenas info não sensível
+        localStorage.setItem("currentUser", JSON.stringify({ username: user.username, email: user.email }));
         tasksCache = JSON.parse(localStorage.getItem(`tasks_${user.username}`)) || [];
         showMainAppPanel();
         renderTasks();
@@ -317,14 +303,12 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.loginButton.disabled = false;
     });
   }
-  
-  // Formulário Principal de Adicionar Tarefa
+
   if (DOM.taskForm) {
     const submitButton = DOM.taskForm.querySelector('button[type="submit"]');
     if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskStatusInput && DOM.taskCategoryInput && DOM.taskTagsInput && submitButton) {
       DOM.taskForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        // ... (lógica de adicionar tarefa como antes)
         const title = DOM.taskTitleInput.value.trim();
         const description = DOM.taskDescriptionInput.value.trim();
         const dueDate = DOM.taskDueDateInput.value;
@@ -333,7 +317,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const category = DOM.taskCategoryInput.value.trim();
         const tagsValue = DOM.taskTagsInput.value.trim();
         const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
-
         if (!title || !description || !dueDate) {
           showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");
           return;
@@ -344,12 +327,8 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
         }
-
-        const taskObj = { title, description, dueDate, priority, status, category, tags, id: Date.now()  };
-        // Não estamos mais usando editingTaskIndex para o formulário principal,
-        // pois a edição será feita no modal.
+        const taskObj = { title, description, dueDate, priority, status, category, tags, id: Date.now() };
         tasksCache.push(taskObj);
-        
         saveTasks();
         DOM.taskForm.reset();
         showUIMessage("Tarefa criada com sucesso!", false);
@@ -358,87 +337,71 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // **NOVO: Listener para o formulário de edição no modal**
   if (DOM.editTaskForm) {
     DOM.editTaskForm.addEventListener("submit", (e) => {
-        e.preventDefault(); // Previne o recarregamento da página
-        if (editingTaskIndex === null || !tasksCache[editingTaskIndex]) {
-            showUIMessage("Erro: Nenhuma tarefa selecionada para edição.", true);
-            return;
+      e.preventDefault();
+      if (editingTaskIndex === null || !tasksCache[editingTaskIndex]) {
+        showUIMessage("Erro: Nenhuma tarefa selecionada para edição.", true);
+        return;
+      }
+      const title = DOM.editTitleInput.value.trim();
+      const description = DOM.editDescriptionInput.value.trim();
+      const dueDate = DOM.editDueDateInput.value;
+      const priority = DOM.editPriorityInput.value;
+      const status = DOM.editStatusInput.value;
+      const category = DOM.editCategoryInput.value.trim();
+      const tagsValue = DOM.editTagsInput.value.trim();
+      const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
+      if (!title || !description || !dueDate) {
+        showUIMessage("Preencha os campos obrigatórios no formulário de edição: Título, Descrição e Prazo.", true);
+        return;
+      }
+      for (let tag of tags) {
+        if (tag && !tagRegex.test(tag)) {
+          showUIMessage(`Tag inválida na edição: "${sanitizeInput(tag)}". Use apenas letras, números ou traços.`, true);
+          return;
         }
-
-        const title = DOM.editTitleInput.value.trim();
-        const description = DOM.editDescriptionInput.value.trim();
-        const dueDate = DOM.editDueDateInput.value;
-        const priority = DOM.editPriorityInput.value;
-        const status = DOM.editStatusInput.value;
-        const category = DOM.editCategoryInput.value.trim();
-        const tagsValue = DOM.editTagsInput.value.trim();
-        const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
-
-        if (!title || !description || !dueDate) {
-            showUIMessage("Preencha os campos obrigatórios no formulário de edição: Título, Descrição e Prazo.", true);
-            return;
+      }
+      tasksCache[editingTaskIndex] = {
+        ...tasksCache[editingTaskIndex],
+        title,
+        description,
+        dueDate,
+        priority,
+        status,
+        category,
+        tags
+      };
+      saveTasks();
+      renderTasks();
+      showUIMessage("Tarefa atualizada com sucesso!", false);
+      if (DOM.editTaskModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modalInstance = bootstrap.Modal.getInstance(DOM.editTaskModalElement);
+        if (modalInstance) {
+          modalInstance.hide();
         }
-        for (let tag of tags) {
-            if (tag && !tagRegex.test(tag)) {
-            showUIMessage(`Tag inválida na edição: "${sanitizeInput(tag)}". Use apenas letras, números ou traços.`, true);
-            return;
-            }
-        }
-
-        // Atualiza a tarefa no tasksCache
-        tasksCache[editingTaskIndex] = {
-            ...tasksCache[editingTaskIndex], // Mantém o ID original e outras propriedades não editadas
-            title,
-            description,
-            dueDate,
-            priority,
-            status,
-            category,
-            tags
-        };
-
-        saveTasks();
-        renderTasks();
-        showUIMessage("Tarefa atualizada com sucesso!", false);
-
-        // Fecha o modal de edição
-        if (DOM.editTaskModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            const modalInstance = bootstrap.Modal.getInstance(DOM.editTaskModalElement);
-            if (modalInstance) {
-                modalInstance.hide();
-            }
-        }
-        editingTaskIndex = null; // Reseta o índice de edição
+      }
+      editingTaskIndex = null;
     });
   }
-
 
   function handleTaskActions(event) {
     const target = event.target.closest('button');
     if (!target) return;
-
     const taskCard = target.closest('.task-card');
     if (!taskCard) return;
-    
-    // Usar o índice original, pois a edição agora é via modal e não altera o formulário principal
     const originalIndexAttr = target.dataset.index || taskCard.querySelector('.edit-btn')?.dataset.index || taskCard.querySelector('.delete-btn')?.dataset.index;
-
     if (originalIndexAttr === undefined) {
-        console.error("Não foi possível encontrar o data-index no botão ou card.");
-        return;
+      console.error("Não foi possível encontrar o data-index no botão ou card.");
+      return;
     }
     const index = parseInt(originalIndexAttr, 10);
-
-
     if (isNaN(index) || index < 0 || index >= tasksCache.length) {
       console.error("Índice de tarefa inválido ou tarefa não encontrada:", index);
       return;
     }
-
     if (target.classList.contains("edit-btn")) {
-      editTask(index); // Chama a função para popular e mostrar o modal
+      editTask(index);
     } else if (target.classList.contains("delete-btn")) {
       confirmTaskDeletion(index);
     }
@@ -447,25 +410,19 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleCheckboxClick(e) {
     const checkbox = e.target.closest(".complete-checkbox");
     if (!checkbox) return;
-    
     const originalIndexAttr = checkbox.dataset.index;
     if (originalIndexAttr === undefined) {
-        console.error("Não foi possível encontrar o data-index no checkbox.");
-        return;
+      console.error("Não foi possível encontrar o data-index no checkbox.");
+      return;
     }
     const index = parseInt(originalIndexAttr, 10);
-
-
     if (isNaN(index) || index < 0 || index >= tasksCache.length) {
-        console.error("Índice de tarefa inválido no checkbox:", index);
-        return;
+      console.error("Índice de tarefa inválido no checkbox:", index);
+      return;
     }
-    
     const task = tasksCache[index];
     if (!task) return;
-
     task.status = checkbox.checked ? "concluída" : "pendente";
-
     saveTasks();
     renderTasks();
   }
@@ -473,30 +430,26 @@ document.addEventListener("DOMContentLoaded", () => {
   function normalizeStatus(status) {
     if (typeof status !== 'string') return "";
     return status
-    .trim()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s/g, "")
-    .toLowerCase();
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s/g, "")
+      .toLowerCase();
   }
 
   function renderTasks(tasksToDisplay = tasksCache) {
     if (!DOM.taskList) return;
-  
     const statusClass = {
       "pendente": "task-status-pendente",
       "emandamento": "task-status-em-andamento",
       "concluida": "task-status-concluida"
     };
-  
     DOM.taskList.innerHTML = "";
-  
     if (tasksToDisplay.length === 0) {
       DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir.</p>';
       updateProgress();
       return;
     }
-  
     const groupedByDate = {};
     tasksToDisplay.forEach(task => {
       const [year, month, day] = task.dueDate.split("-");
@@ -504,9 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!groupedByDate[date]) groupedByDate[date] = [];
       groupedByDate[date].push(task);
     });
-  
     const sortedDates = Object.keys(groupedByDate).sort((a, b) => new Date(a) - new Date(b));
-  
     sortedDates.forEach(date => {
       const [y, m, d] = date.split("-");
       const formattedDate = `${d}/${m}/${y}`;
@@ -514,28 +465,21 @@ document.addEventListener("DOMContentLoaded", () => {
       dateHeader.className = "mt-4 text-primary border-bottom pb-1";
       dateHeader.textContent = `📅 ${formattedDate}`;
       DOM.taskList.appendChild(dateHeader);
-  
       groupedByDate[date].forEach(task => {
-        // IMPORTANTE: Usar o índice real da tarefa no tasksCache original
         const originalIndex = tasksCache.findIndex(t => t.id === task.id);
         if (originalIndex === -1) {
-            console.warn("Tarefa do groupedByDate não encontrada no tasksCache original. ID:", task.id);
-            return; // Pula esta tarefa se não for encontrada (pode acontecer se tasksCache for modificado incorretamente)
+          console.warn("Tarefa do groupedByDate não encontrada no tasksCache original. ID:", task.id);
+          return;
         }
-  
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
-        // Não precisamos mais de data-taskId aqui se estamos usando data-index referenciando tasksCache
-  
         const normStatus = normalizeStatus(task.status);
         if (statusClass[normStatus]) {
           div.classList.add(statusClass[normStatus]);
         }
-  
         div.setAttribute("role", "listitem");
         div.setAttribute("data-priority", task.priority);
         div.setAttribute("data-status", task.status);
-  
         div.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center flex-grow-1">
@@ -559,24 +503,19 @@ document.addEventListener("DOMContentLoaded", () => {
           ${task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : ""}
           ${task.tags && task.tags.length > 0 ? `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : ""}
         `;
-  
         DOM.taskList.appendChild(div);
       });
     });
-  
     DOM.taskList.removeEventListener("click", handleTaskActions);
     DOM.taskList.addEventListener("click", handleTaskActions);
     DOM.taskList.removeEventListener("change", handleCheckboxClick);
     DOM.taskList.addEventListener("change", handleCheckboxClick);
-  
     updateProgress();
   }
-  
-  let currentDeleteHandler = null;
 
+  let currentDeleteHandler = null;
   function confirmTaskDeletion(index) {
     if (!DOM.deleteModalElement || !DOM.confirmDeleteButton || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
-
     const taskToDelete = tasksCache[index];
     const modalBody = DOM.deleteModalElement.querySelector('.modal-body');
     if (modalBody && taskToDelete) {
@@ -584,18 +523,14 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (modalBody) {
       modalBody.textContent = "Deseja realmente excluir esta tarefa?";
     }
-
     const modal = bootstrap.Modal.getOrCreateInstance(DOM.deleteModalElement);
-
     if (currentDeleteHandler) {
-        DOM.confirmDeleteButton.removeEventListener('click', currentDeleteHandler);
+      DOM.confirmDeleteButton.removeEventListener('click', currentDeleteHandler);
     }
-
     currentDeleteHandler = function onConfirm() {
       tasksCache.splice(index, 1);
       saveTasks();
       showUIMessage("Tarefa removida com sucesso!", false);
-
       const currentFilterStatus = DOM.filterStatusSelect ? DOM.filterStatusSelect.value : "todos";
       const currentSearchQuery = DOM.searchTasksInput ? DOM.searchTasksInput.value : "";
       let tasksToRenderAfterDelete = filterTasksByStatus(currentFilterStatus);
@@ -603,41 +538,32 @@ document.addEventListener("DOMContentLoaded", () => {
         tasksToRenderAfterDelete = filterTasksBySearchQuery(currentSearchQuery).filter(task => tasksToRenderAfterDelete.includes(task));
       }
       renderTasks(tasksToRenderAfterDelete);
-
       modal.hide();
     };
-
     DOM.confirmDeleteButton.addEventListener('click', currentDeleteHandler, { once: true });
     modal.show();
   }
 
-  // Função para preencher o modal de edição e exibi-lo
   function editTask(index) {
     const task = tasksCache[index];
     if (!task || !DOM.editTaskModalElement) {
-        console.error("Tarefa não encontrada ou modal de edição não existe.");
-        return;
+      console.error("Tarefa não encontrada ou modal de edição não existe.");
+      return;
     }
-  
-    // Preenche os campos do formulário do modal
-    if(DOM.editTitleInput) DOM.editTitleInput.value = task.title;
-    if(DOM.editDescriptionInput) DOM.editDescriptionInput.value = task.description;
-    if(DOM.editDueDateInput) DOM.editDueDateInput.value = task.dueDate;
-    if(DOM.editPriorityInput) DOM.editPriorityInput.value = task.priority;
-    if(DOM.editStatusInput) DOM.editStatusInput.value = task.status;
-    if(DOM.editCategoryInput) DOM.editCategoryInput.value = task.category || '';
-    if(DOM.editTagsInput) DOM.editTagsInput.value = task.tags ? task.tags.join(', ') : '';
-  
-    editingTaskIndex = index; // Armazena o índice da tarefa que está sendo editada
-  
-    // Mostra o modal
+    if (DOM.editTitleInput) DOM.editTitleInput.value = task.title;
+    if (DOM.editDescriptionInput) DOM.editDescriptionInput.value = task.description;
+    if (DOM.editDueDateInput) DOM.editDueDateInput.value = task.dueDate;
+    if (DOM.editPriorityInput) DOM.editPriorityInput.value = task.priority;
+    if (DOM.editStatusInput) DOM.editStatusInput.value = task.status;
+    if (DOM.editCategoryInput) DOM.editCategoryInput.value = task.category || '';
+    if (DOM.editTagsInput) DOM.editTagsInput.value = task.tags ? task.tags.join(', ') : '';
+    editingTaskIndex = index;
     if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modal = bootstrap.Modal.getOrCreateInstance(DOM.editTaskModalElement);
-        modal.show();
+      const modal = bootstrap.Modal.getOrCreateInstance(DOM.editTaskModalElement);
+      modal.show();
     }
   }
-  
-  // Listener para filtros, busca e exportação (como antes)
+
   if (DOM.filterStatusSelect) {
     DOM.filterStatusSelect.addEventListener("change", (e) => {
       const status = e.target.value;
@@ -669,7 +595,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       const escapeCsvField = (field) => `"${String(field == null ? '' : field).replace(/"/g, '""')}"`;
-
       const csvHeader = ["Título", "Descrição", "Prazo", "Prioridade", "Status", "Categoria", "Tags"].map(escapeCsvField);
       const csvRows = tasksCache.map(task => [
         escapeCsvField(task.title),
@@ -680,7 +605,6 @@ document.addEventListener("DOMContentLoaded", () => {
         escapeCsvField(task.category),
         escapeCsvField(task.tags ? task.tags.join(";") : "")
       ]);
-
       const csvContent = [csvHeader.join(","), ...csvRows.map(row => row.join(","))].join("\n");
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
@@ -695,29 +619,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Notificações e Inicialização (como antes)
   function checkDueDates() {
     if (!('Notification' in window) || Notification.permission !== "granted") return;
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     tasksCache.forEach(task => {
       if (normalizeStatus(task.status) !== "concluida" && task.dueDate) {
         const [year, month, day] = task.dueDate.split('-').map(Number);
         const dueDate = new Date(year, month - 1, day);
         dueDate.setHours(0, 0, 0, 0);
-
         const timeDiff = dueDate.getTime() - today.getTime();
         const daysUntilDue = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-
         let notificationTitle = "";
         if (daysUntilDue === 0) {
           notificationTitle = `Tarefa "${sanitizeInput(task.title)}" vence HOJE!`;
         } else if (daysUntilDue === 1) {
           notificationTitle = `Tarefa "${sanitizeInput(task.title)}" vence AMANHÃ!`;
         }
-
         if (notificationTitle) {
           new Notification(notificationTitle, { body: `Prazo: ${task.dueDate}` });
         }
@@ -740,10 +658,10 @@ document.addEventListener("DOMContentLoaded", () => {
       showMainAppPanel();
     } else {
       showLoginPanel();
-      tasksCache = []; // Garante que tasksCache seja um array vazio se não houver usuário
+      tasksCache = [];
     }
-    renderTasks(); // Renderiza com tasksCache (potencialmente vazio)
-    showWelcomeModal(); // Mostra o modal de boas-vindas se necessário
+    renderTasks();
+    showWelcomeModal();
   }
 
   document.querySelectorAll('[title]').forEach(el => {

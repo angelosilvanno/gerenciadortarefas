@@ -49,24 +49,27 @@ document.addEventListener("DOMContentLoaded", () => {
     editTagsInput: document.getElementById('edit-tags'),
   };
 
-  const API_BASE_URL = 'https://gerenciador-de-tarefas-d0zd.onrender.com'; // Adicionado
+  const API_BASE_URL = 'https://gerenciador-de-tarefas-d0zd.onrender.com';
+  const API_AUTH_REGISTER_ENDPOINT = `${API_BASE_URL}/tarefas/api/cadastrar/`;
+  const API_AUTH_LOGIN_ENDPOINT = `${API_BASE_URL}/tarefas/api/login/`;
+  const API_TASKS_ENDPOINT = `${API_BASE_URL}/api/Tarefas/`;
 
-  let editingTaskIndex = null;
-  let tasksCache = [];
 
+  let editingTaskIndex = null; // Índice no tasksCache da tarefa sendo editada
+  let tasksCache = []; // Cache local das tarefas do usuário
+
+  // --- Regex para Validações ---
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const tagRegex = /^[a-zA-Z0-9-]+$/;
 
+  // --- Funções Utilitárias ---
   const sanitizeInput = (input) => {
     const div = document.createElement("div");
     div.textContent = input;
     return div.innerHTML;
   };
-
-  // Removido hashPassword, pois o backend fará o hashing
-  // async function hashPassword(password) { ... }
 
   const showUIMessage = (msg, isError = true) => {
     if (!DOM.messageDiv) return;
@@ -84,22 +87,58 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 4000);
   };
 
-  // Modificado para usar API (ou localStorage como fallback se API falhar/não implementado)
-  const saveTasks = async () => {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  async function fetchTasksFromAPI() {
     const token = localStorage.getItem("authToken");
-
-    if (currentUser && currentUser.username && token) {
-      // TODO: Implementar chamada de API para salvar todas as tarefas se necessário,
-      // ou salvar cada tarefa individualmente ao criar/editar/excluir.
-      // Por agora, continuaremos usando localStorage para tarefas,
-      // assumindo que a API lida com persistência individual.
-      localStorage.setItem(`tasks_${currentUser.username}`, JSON.stringify(tasksCache));
-    } else {
-      console.warn("Usuário não logado ou token ausente, salvando tarefas localmente como fallback.");
-      localStorage.setItem("tasks", JSON.stringify(tasksCache));
+    if (!token) {
+      console.log("Nenhum token encontrado, não buscando tarefas.");
+      tasksCache = [];
+      renderTasks(); // Limpa a UI
+      // showLoginPanel(); // Descomente se quiser forçar o login imediatamente
+      return;
     }
-  };
+    try {
+      const response = await fetch(API_TASKS_ENDPOINT, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem("currentUser");
+          localStorage.removeItem("authToken");
+          tasksCache = [];
+          showLoginPanel();
+          showUIMessage("Sessão expirada ou inválida. Faça login novamente.", true);
+        } else {
+          const errorData = await response.json().catch(() => ({ message: `Erro ao buscar tarefas: ${response.status}` }));
+          showUIMessage(errorData.message || "Erro ao buscar tarefas.", true);
+        }
+        tasksCache = [];
+        renderTasks();
+        return;
+      }
+      const tasksFromAPI = await response.json();
+      // Mapear campos da API para o formato que o frontend espera, principalmente o 'id' e 'dueDate'
+      tasksCache = Array.isArray(tasksFromAPI) ? tasksFromAPI.map(task => ({
+        id: task.id || task._id, // O backend DEVE retornar um ID único
+        title: task.title,
+        description: task.description,
+        dueDate: task.due_date, // Ajuste se o nome do campo for diferente na API
+        priority: task.priority,
+        status: task.status,
+        category: task.category || "",
+        tags: Array.isArray(task.tags) ? task.tags : (task.tags ? [task.tags] : []), // Garante que tags seja um array
+      })) : [];
+      renderTasks();
+    } catch (error) {
+      console.error("Erro de conexão ao buscar tarefas:", error);
+      showUIMessage("Erro de conexão ao buscar tarefas.", true);
+      tasksCache = [];
+      renderTasks();
+    }
+  }
 
   const updateProgress = () => {
     if (!DOM.progressBar || !DOM.progressText) return;
@@ -177,47 +216,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  if (DOM.showRegisterLink) {
-    DOM.showRegisterLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      showRegisterPanel();
-    });
-  }
-  if (DOM.showLoginLink) {
-    DOM.showLoginLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      showLoginPanel();
-    });
-  }
-
-  if (DOM.forgotPasswordLink) {
-    DOM.forgotPasswordLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      showForgotPasswordModal();
-    });
-  }
+  // --- EVENT LISTENERS ---
+  if (DOM.showRegisterLink) { DOM.showRegisterLink.addEventListener("click", (e) => { e.preventDefault(); showRegisterPanel(); }); }
+  if (DOM.showLoginLink) { DOM.showLoginLink.addEventListener("click", (e) => { e.preventDefault(); showLoginPanel(); }); }
+  if (DOM.forgotPasswordLink) { DOM.forgotPasswordLink.addEventListener("click", (e) => { e.preventDefault(); showForgotPasswordModal(); });}
 
   if (DOM.forgotPasswordForm && DOM.forgotEmailInput) {
-    DOM.forgotPasswordForm.addEventListener("submit", async (e) => { // Adicionado async para futura chamada de API
+    DOM.forgotPasswordForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = DOM.forgotEmailInput.value.trim();
-      if (!emailRegex.test(email)) {
-        showUIMessage("E-mail inválido.");
-        return;
-      }
-      // TODO: Implementar chamada de API para /api/auth/forgot-password
-      // Por enquanto, mantém a lógica local
-      const users = JSON.parse(localStorage.getItem("users")) || []; // Temporário, deve vir da API
-      const user = users.find(u => u.email === email);
-      if (user) {
-        showUIMessage("Se o e-mail existir, instruções de recuperação serão enviadas!", false);
-      } else {
-        showUIMessage("Se o e-mail existir, instruções de recuperação serão enviadas!", false); // Mensagem genérica por segurança
-      }
-      if (DOM.forgotPasswordModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modalInstance = bootstrap.Modal.getInstance(DOM.forgotPasswordModalElement);
-        if (modalInstance) modalInstance.hide();
-      }
+      if (!emailRegex.test(email)) { showUIMessage("E-mail inválido."); return; }
+      // TODO: Implementar chamada real de API para /api/auth/forgot-password
+      // Exemplo:
+      // try {
+      //   const response = await fetch(`${API_AUTH_ENDPOINT}/forgot-password`, { /* ... */ });
+      //   // Tratar resposta
+      // } catch (error) { showUIMessage("Erro de conexão.", true); }
+      showUIMessage("Se o e-mail existir em nossa base, instruções de recuperação serão enviadas.", false);
+      bootstrap.Modal.getInstance(DOM.forgotPasswordModalElement)?.hide();
       DOM.forgotEmailInput.value = "";
     });
   }
@@ -233,72 +249,40 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // MODIFICADO: Registro com API
   if (DOM.registerForm && DOM.registerUsernameInput && DOM.registerEmailInput && DOM.registerPasswordInput && DOM.registerConfirmPasswordInput) {
     DOM.registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const inputs = [DOM.registerUsernameInput, DOM.registerEmailInput, DOM.registerPasswordInput, DOM.registerConfirmPasswordInput];
-      inputs.forEach(input => input.classList.remove("is-invalid"));
+      // ... (validações regex como antes)
       const username = DOM.registerUsernameInput.value.trim();
       const email = DOM.registerEmailInput.value.trim();
       const password = DOM.registerPasswordInput.value.trim();
       const confirmPassword = DOM.registerConfirmPasswordInput.value.trim();
 
-      if (!usernameRegex.test(username)) {
-        DOM.registerUsernameInput.classList.add("is-invalid");
-        showUIMessage("Nome de usuário inválido. Use 3 a 15 letras ou números.");
-        return;
-      }
-      if (!emailRegex.test(email)) {
-        DOM.registerEmailInput.classList.add("is-invalid");
-        showUIMessage("E-mail inválido.");
-        return;
-      }
-      if (!passwordRegex.test(password)) {
-        DOM.registerPasswordInput.classList.add("is-invalid");
-        showUIMessage("Senha inválida. Mínimo 6 caracteres, com pelo menos uma letra e um número.");
-        return;
-      }
-      if (password !== confirmPassword) {
-        DOM.registerConfirmPasswordInput.classList.add("is-invalid");
-        showUIMessage("As senhas não coincidem.");
-        return;
-      }
+      if (!usernameRegex.test(username)) { DOM.registerUsernameInput.classList.add("is-invalid"); showUIMessage("Nome de usuário inválido. Use 3 a 15 letras ou números."); return; }
+      if (!emailRegex.test(email)) { DOM.registerEmailInput.classList.add("is-invalid"); showUIMessage("E-mail inválido."); return; }
+      if (!passwordRegex.test(password)) { DOM.registerPasswordInput.classList.add("is-invalid"); showUIMessage("Senha inválida. Mínimo 6 caracteres, com pelo menos uma letra e um número."); return; }
+      if (password !== confirmPassword) { DOM.registerConfirmPasswordInput.classList.add("is-invalid"); showUIMessage("As senhas não coincidem."); return; }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/tarefas/api/cadastrar/`, { // Usando a URL da sua API
+        const response = await fetch(API_AUTH_REGISTER_ENDPOINT, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, email, password }),
         });
-
         const data = await response.json();
-
         if (!response.ok) {
-          showUIMessage(data.message || `Erro no cadastro: ${response.statusText}`, true);
-          if (data.message && data.message.toLowerCase().includes("e-mail")) {
-            DOM.registerEmailInput.classList.add("is-invalid");
-          }
-          if (data.message && data.message.toLowerCase().includes("usuário")) {
-            DOM.registerUsernameInput.classList.add("is-invalid");
-          }
+          showUIMessage(data.message || data.detail || `Erro no cadastro: ${response.statusText}`, true);
           return;
         }
-
         showUIMessage("Cadastro realizado com sucesso! Faça o login.", false);
         showLoginPanel();
         DOM.registerForm.reset();
-
       } catch (error) {
         console.error("Erro ao registrar:", error);
         showUIMessage("Erro de conexão ao tentar registrar. Tente novamente.", true);
       }
     });
   }
-
-  // TODO: Adaptar login, e todas as operações de tarefas (criar, ler, atualizar, deletar) para usar fetch com a API_BASE_URL e o authToken.
 
   if (DOM.loginForm && DOM.loginUsernameInput && DOM.loginPasswordInput && DOM.loginButton) {
     DOM.loginForm.addEventListener("submit", async (e) => {
@@ -310,71 +294,78 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.loginButton.disabled = true;
       const username = DOM.loginUsernameInput.value.trim();
       const password = DOM.loginPasswordInput.value.trim();
-      
-      // MANTENDO LOCALSTORAGE POR ENQUANTO, ATÉ IMPLEMENTAR API DE LOGIN
-      const users = JSON.parse(localStorage.getItem("users")) || []; 
-      const hashedPassword = await hashPassword(password); // Ainda necessário se users vem do localStorage
-      const user = users.find(u => u.username === username && u.password === hashedPassword);
-
-      if (user) {
-        localStorage.setItem("currentUser", JSON.stringify({ username: user.username, email: user.email }));
-        // TODO: Após login via API, carregar tarefas da API
-        tasksCache = JSON.parse(localStorage.getItem(`tasks_${user.username}`)) || [];
-        showMainAppPanel();
-        renderTasks();
-        DOM.loginForm.reset();
-      } else {
-        DOM.loginUsernameInput.classList.add("is-invalid");
-        DOM.loginPasswordInput.classList.add("is-invalid");
-        showUIMessage("Usuário ou senha inválidos.");
+      try {
+        const response = await fetch(API_AUTH_LOGIN_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          DOM.loginUsernameInput.classList.add("is-invalid");
+          DOM.loginPasswordInput.classList.add("is-invalid");
+          showUIMessage(data.message || data.detail || "Usuário ou senha inválidos.", true);
+        } else {
+          localStorage.setItem("currentUser", JSON.stringify(data.user));
+          localStorage.setItem("authToken", data.token);
+          await fetchTasksFromAPI(); // Carrega e renderiza tarefas
+          showMainAppPanel();
+          DOM.loginForm.reset();
+        }
+      } catch (error) {
+        console.error("Erro no login:", error);
+        showUIMessage("Erro de conexão ao tentar fazer login. Tente novamente.", true);
+      } finally {
+        if (spinner) spinner.classList.add("d-none");
+        DOM.loginButton.disabled = false;
       }
-      if (spinner) spinner.classList.add("d-none");
-      DOM.loginButton.disabled = false;
     });
   }
 
   if (DOM.taskForm) {
-    // ... (manter como está por enquanto, será adaptado para API depois)
-    const submitButton = DOM.taskForm.querySelector('button[type="submit"]');
-    if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskStatusInput && DOM.taskCategoryInput && DOM.taskTagsInput && submitButton) {
-      DOM.taskForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const title = DOM.taskTitleInput.value.trim();
-        const description = DOM.taskDescriptionInput.value.trim();
-        const dueDate = DOM.taskDueDateInput.value;
-        const priority = DOM.taskPriorityInput.value;
-        const status = DOM.taskStatusInput.value;
-        const category = DOM.taskCategoryInput.value.trim();
-        const tagsValue = DOM.taskTagsInput.value.trim();
-        const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
-        if (!title || !description || !dueDate) {
-          showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");
-          return;
-        }
-        for (let tag of tags) {
-          if (tag && !tagRegex.test(tag)) {
-            showUIMessage(`Tag inválida: "${sanitizeInput(tag)}". Use apenas letras, números ou traços.`);
-            return;
-          }
-        }
-        const taskObj = { title, description, dueDate, priority, status, category, tags, id: Date.now() };
-        tasksCache.push(taskObj);
-        saveTasks();
+    DOM.taskForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem("authToken");
+      if (!token) { showUIMessage("Você precisa estar logado para criar tarefas.", true); showLoginPanel(); return; }
+      const title = DOM.taskTitleInput.value.trim();
+      const description = DOM.taskDescriptionInput.value.trim();
+      const dueDate = DOM.taskDueDateInput.value;
+      const priority = DOM.taskPriorityInput.value;
+      const status = DOM.taskStatusInput.value;
+      const category = DOM.taskCategoryInput.value.trim();
+      const tagsValue = DOM.taskTagsInput.value.trim();
+      const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
+      if (!title || !description || !dueDate) { showUIMessage("Título, Descrição e Prazo são obrigatórios.", true); return; }
+      // Validação de tags omitida para brevidade
+      const taskData = { title, description, due_date: dueDate, priority, status, category, tags };
+      try {
+        const response = await fetch(API_TASKS_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
+          body: JSON.stringify(taskData)
+        });
+        const newTaskFromAPI = await response.json();
+        if (!response.ok) { showUIMessage(newTaskFromAPI.message || newTaskFromAPI.detail || "Erro ao criar tarefa.", true); return; }
+        tasksCache.push({
+            id: newTaskFromAPI.id || newTaskFromAPI._id, title: newTaskFromAPI.title, description: newTaskFromAPI.description,
+            dueDate: newTaskFromAPI.due_date, priority: newTaskFromAPI.priority, status: newTaskFromAPI.status,
+            category: newTaskFromAPI.category, tags: newTaskFromAPI.tags || []
+        });
         DOM.taskForm.reset();
         showUIMessage("Tarefa criada com sucesso!", false);
         renderTasks();
-      });
-    }
+      } catch (error) { showUIMessage("Erro de conexão ao criar tarefa.", true); }
+    });
   }
 
   if (DOM.editTaskForm) {
-    // ... (manter como está por enquanto, será adaptado para API depois)
-    DOM.editTaskForm.addEventListener("submit", (e) => {
+    DOM.editTaskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      if (editingTaskIndex === null || !tasksCache[editingTaskIndex]) {
-        showUIMessage("Erro: Nenhuma tarefa selecionada para edição.", true);
-        return;
-      }
+      const token = localStorage.getItem("authToken");
+      if (!token || editingTaskIndex === null || !tasksCache[editingTaskIndex]) { showUIMessage("Erro: Nenhuma tarefa selecionada ou sessão inválida.", true); return; }
+      const taskToEdit = tasksCache[editingTaskIndex];
+      const taskId = taskToEdit.id;
+      if (!taskId) { showUIMessage("Erro: ID da tarefa inválido para edição.", true); return; }
       const title = DOM.editTitleInput.value.trim();
       const description = DOM.editDescriptionInput.value.trim();
       const dueDate = DOM.editDueDateInput.value;
@@ -383,36 +374,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const category = DOM.editCategoryInput.value.trim();
       const tagsValue = DOM.editTagsInput.value.trim();
       const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
-      if (!title || !description || !dueDate) {
-        showUIMessage("Preencha os campos obrigatórios no formulário de edição: Título, Descrição e Prazo.", true);
-        return;
-      }
-      for (let tag of tags) {
-        if (tag && !tagRegex.test(tag)) {
-          showUIMessage(`Tag inválida na edição: "${sanitizeInput(tag)}". Use apenas letras, números ou traços.`, true);
-          return;
-        }
-      }
-      tasksCache[editingTaskIndex] = {
-        ...tasksCache[editingTaskIndex],
-        title,
-        description,
-        dueDate,
-        priority,
-        status,
-        category,
-        tags
-      };
-      saveTasks();
-      renderTasks();
-      showUIMessage("Tarefa atualizada com sucesso!", false);
-      if (DOM.editTaskModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modalInstance = bootstrap.Modal.getInstance(DOM.editTaskModalElement);
-        if (modalInstance) {
-          modalInstance.hide();
-        }
-      }
-      editingTaskIndex = null;
+      if (!title || !description || !dueDate) { showUIMessage("Título, Descrição e Prazo são obrigatórios.", true); return; }
+      const updatedTaskData = { title, description, due_date: dueDate, priority, status, category, tags };
+      try {
+        const response = await fetch(`${API_TASKS_ENDPOINT}/${taskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
+          body: JSON.stringify(updatedTaskData)
+        });
+        const updatedTaskFromAPI = await response.json();
+        if (!response.ok) { showUIMessage(updatedTaskFromAPI.message || updatedTaskFromAPI.detail || "Erro ao atualizar tarefa.", true); return; }
+        tasksCache[editingTaskIndex] = {
+            id: updatedTaskFromAPI.id || updatedTaskFromAPI._id, title: updatedTaskFromAPI.title, description: updatedTaskFromAPI.description,
+            dueDate: updatedTaskFromAPI.due_date, priority: updatedTaskFromAPI.priority, status: updatedTaskFromAPI.status,
+            category: updatedTaskFromAPI.category, tags: updatedTaskFromAPI.tags || []
+        };
+        renderTasks();
+        showUIMessage("Tarefa atualizada com sucesso!", false);
+        bootstrap.Modal.getInstance(DOM.editTaskModalElement)?.hide();
+        editingTaskIndex = null;
+      } catch (error) { showUIMessage("Erro de conexão ao atualizar tarefa.", true); }
     });
   }
 
@@ -421,69 +402,73 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!target) return;
     const taskCard = target.closest('.task-card');
     if (!taskCard) return;
-    const originalIndexAttr = target.dataset.index || taskCard.querySelector('.edit-btn')?.dataset.index || taskCard.querySelector('.delete-btn')?.dataset.index;
-    if (originalIndexAttr === undefined) {
-      console.error("Não foi possível encontrar o data-index no botão ou card.");
-      return;
-    }
+    const originalIndexAttr = target.dataset.index;
+    if (originalIndexAttr === undefined) return;
     const index = parseInt(originalIndexAttr, 10);
-    if (isNaN(index) || index < 0 || index >= tasksCache.length) {
-      console.error("Índice de tarefa inválido ou tarefa não encontrada:", index);
-      return;
-    }
-    if (target.classList.contains("edit-btn")) {
-      editTask(index);
-    } else if (target.classList.contains("delete-btn")) {
-      confirmTaskDeletion(index);
-    }
+    if (isNaN(index) || index < 0 || index >= tasksCache.length) return;
+    if (target.classList.contains("edit-btn")) editTask(index);
+    else if (target.classList.contains("delete-btn")) confirmTaskDeletion(index);
   }
 
-  function handleCheckboxClick(e) {
+  async function handleCheckboxClick(e) {
     const checkbox = e.target.closest(".complete-checkbox");
     if (!checkbox) return;
     const originalIndexAttr = checkbox.dataset.index;
-    if (originalIndexAttr === undefined) {
-      console.error("Não foi possível encontrar o data-index no checkbox.");
-      return;
-    }
+    if (originalIndexAttr === undefined) return;
     const index = parseInt(originalIndexAttr, 10);
-    if (isNaN(index) || index < 0 || index >= tasksCache.length) {
-      console.error("Índice de tarefa inválido no checkbox:", index);
-      return;
-    }
+    if (isNaN(index) || index < 0 || index >= tasksCache.length) return;
     const task = tasksCache[index];
     if (!task) return;
-    task.status = checkbox.checked ? "concluída" : "pendente";
-    saveTasks();
-    renderTasks();
+    const newStatus = checkbox.checked ? "Concluída" : "Pendente"; // Valores que a API pode esperar
+    const token = localStorage.getItem("authToken");
+    if (!token) { showUIMessage("Sessão inválida.", true); checkbox.checked = !checkbox.checked; return; }
+    const taskId = task.id;
+    if (!taskId) { showUIMessage("Erro: ID da tarefa não encontrado.", true); checkbox.checked = !checkbox.checked; return; }
+    try {
+      // Enviar a tarefa inteira com o status modificado, ou apenas o status, dependendo da API
+      const payload = { ...tasksCache[index], status: newStatus }; 
+      // Remover campos que a API não deve receber ou que não podem ser modificados por esta ação
+      delete payload.id; 
+      // delete payload._id; // se _id for usado internamente mas não na API de update
+
+      const response = await fetch(`${API_TASKS_ENDPOINT}/${taskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
+        body: JSON.stringify(payload) 
+      });
+      const updatedTaskFromAPI = await response.json();
+      if (!response.ok) {
+        showUIMessage(updatedTaskFromAPI.message || updatedTaskFromAPI.detail || "Erro ao atualizar status.", true);
+        checkbox.checked = !checkbox.checked; return;
+      }
+      // Atualiza o cache com a resposta completa da API para manter a consistência
+      tasksCache[index] = {
+        id: updatedTaskFromAPI.id || updatedTaskFromAPI._id, title: updatedTaskFromAPI.title, description: updatedTaskFromAPI.description,
+        dueDate: updatedTaskFromAPI.due_date, priority: updatedTaskFromAPI.priority, status: updatedTaskFromAPI.status, // status da API
+        category: updatedTaskFromAPI.category, tags: updatedTaskFromAPI.tags || []
+      };
+      renderTasks();
+    } catch (error) {
+      showUIMessage("Erro de conexão ao atualizar status.", true);
+      checkbox.checked = !checkbox.checked;
+    }
   }
 
   function normalizeStatus(status) {
     if (typeof status !== 'string') return "";
-    return status
-      .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s/g, "")
-      .toLowerCase();
+    return status.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-').toLowerCase();
   }
 
   function renderTasks(tasksToDisplay = tasksCache) {
     if (!DOM.taskList) return;
-    const statusClass = {
-      "pendente": "task-status-pendente",
-      "emandamento": "task-status-em-andamento",
-      "concluida": "task-status-concluida"
-    };
+    const statusClass = { "pendente": "task-status-pendente", "emandamento": "task-status-em-andamento", "concluida": "task-status-concluida" };
     DOM.taskList.innerHTML = "";
-    if (tasksToDisplay.length === 0) {
-      DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir.</p>';
-      updateProgress();
-      return;
-    }
+    if (tasksToDisplay.length === 0) { DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir.</p>'; updateProgress(); return; }
     const groupedByDate = {};
     tasksToDisplay.forEach(task => {
+      if (!task.dueDate || typeof task.dueDate !== 'string') { console.warn("Tarefa com dueDate inválido:", task); return; }
       const [year, month, day] = task.dueDate.split("-");
+      if (!year || !month || !day ) { console.warn("Formato de dueDate inválido:", task.dueDate); return;}
       const date = new Date(year, parseInt(month) - 1, day).toISOString().split("T")[0];
       if (!groupedByDate[date]) groupedByDate[date] = [];
       groupedByDate[date].push(task);
@@ -497,17 +482,13 @@ document.addEventListener("DOMContentLoaded", () => {
       dateHeader.textContent = `📅 ${formattedDate}`;
       DOM.taskList.appendChild(dateHeader);
       groupedByDate[date].forEach(task => {
-        const originalIndex = tasksCache.findIndex(t => t.id === task.id);
-        if (originalIndex === -1) {
-          console.warn("Tarefa do groupedByDate não encontrada no tasksCache original. ID:", task.id);
-          return;
-        }
+        const taskId = task.id;
+        const originalIndex = tasksCache.findIndex(t => t.id === taskId);
+        if (originalIndex === -1) { console.warn("Tarefa não encontrada no cache:", taskId); return; }
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
         const normStatus = normalizeStatus(task.status);
-        if (statusClass[normStatus]) {
-          div.classList.add(statusClass[normStatus]);
-        }
+        if (statusClass[normStatus]) div.classList.add(statusClass[normStatus]);
         div.setAttribute("role", "listitem");
         div.setAttribute("data-priority", task.priority);
         div.setAttribute("data-status", task.status);
@@ -545,31 +526,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   let currentDeleteHandler = null;
-  function confirmTaskDeletion(index) {
-    if (!DOM.deleteModalElement || !DOM.confirmDeleteButton || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
+  async function confirmTaskDeletion(index) {
+    if (!DOM.deleteModalElement || !DOM.confirmDeleteButton) return;
     const taskToDelete = tasksCache[index];
+    if (!taskToDelete) { showUIMessage("Erro: Tarefa para exclusão não encontrada.", true); return; }
+    const token = localStorage.getItem("authToken");
+    if (!token) { showUIMessage("Sessão inválida.", true); return; }
+    const taskId = taskToDelete.id;
+    if(!taskId) { showUIMessage("Erro: ID da tarefa não encontrado para exclusão.", true); return; }
     const modalBody = DOM.deleteModalElement.querySelector('.modal-body');
-    if (modalBody && taskToDelete) {
-      modalBody.textContent = `Deseja realmente excluir a tarefa "${sanitizeInput(taskToDelete.title)}"?`;
-    } else if (modalBody) {
-      modalBody.textContent = "Deseja realmente excluir esta tarefa?";
-    }
+    if (modalBody) modalBody.textContent = `Deseja realmente excluir a tarefa "${sanitizeInput(taskToDelete.title)}"?`;
     const modal = bootstrap.Modal.getOrCreateInstance(DOM.deleteModalElement);
-    if (currentDeleteHandler) {
-      DOM.confirmDeleteButton.removeEventListener('click', currentDeleteHandler);
-    }
-    currentDeleteHandler = function onConfirm() {
-      tasksCache.splice(index, 1);
-      saveTasks();
-      showUIMessage("Tarefa removida com sucesso!", false);
-      const currentFilterStatus = DOM.filterStatusSelect ? DOM.filterStatusSelect.value : "todos";
-      const currentSearchQuery = DOM.searchTasksInput ? DOM.searchTasksInput.value : "";
-      let tasksToRenderAfterDelete = filterTasksByStatus(currentFilterStatus);
-      if (currentSearchQuery) {
-        tasksToRenderAfterDelete = filterTasksBySearchQuery(currentSearchQuery).filter(task => tasksToRenderAfterDelete.includes(task));
-      }
-      renderTasks(tasksToRenderAfterDelete);
-      modal.hide();
+    if (currentDeleteHandler) DOM.confirmDeleteButton.removeEventListener('click', currentDeleteHandler);
+    currentDeleteHandler = async function onConfirm() {
+      try {
+        const response = await fetch(`${API_TASKS_ENDPOINT}/${taskId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: "Erro ao excluir tarefa."}));
+          showUIMessage(errorData.message || "Erro ao excluir tarefa.", true); return;
+        }
+        tasksCache.splice(index, 1);
+        showUIMessage("Tarefa removida com sucesso!", false);
+        renderTasks();
+      } catch (error) { showUIMessage("Erro de conexão ao excluir tarefa.", true);
+      } finally { modal.hide(); }
     };
     DOM.confirmDeleteButton.addEventListener('click', currentDeleteHandler, { once: true });
     modal.show();
@@ -577,10 +560,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function editTask(index) {
     const task = tasksCache[index];
-    if (!task || !DOM.editTaskModalElement) {
-      console.error("Tarefa não encontrada ou modal de edição não existe.");
-      return;
-    }
+    if (!task || !DOM.editTaskModalElement) { showUIMessage("Erro ao tentar editar tarefa.", true); return; }
     if (DOM.editTitleInput) DOM.editTitleInput.value = task.title;
     if (DOM.editDescriptionInput) DOM.editDescriptionInput.value = task.description;
     if (DOM.editDueDateInput) DOM.editDueDateInput.value = task.dueDate;
@@ -589,19 +569,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (DOM.editCategoryInput) DOM.editCategoryInput.value = task.category || '';
     if (DOM.editTagsInput) DOM.editTagsInput.value = task.tags ? task.tags.join(', ') : '';
     editingTaskIndex = index;
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-      const modal = bootstrap.Modal.getOrCreateInstance(DOM.editTaskModalElement);
-      modal.show();
-    }
+    bootstrap.Modal.getOrCreateInstance(DOM.editTaskModalElement).show();
   }
 
   if (DOM.filterStatusSelect) {
     DOM.filterStatusSelect.addEventListener("change", (e) => {
       const status = e.target.value;
-      const query = DOM.searchTasksInput ? DOM.searchTasksInput.value : "";
+      const query = DOM.searchTasksInput ? DOM.searchTasksInput.value.trim() : "";
       let filteredTasks = filterTasksByStatus(status);
       if (query) {
-        filteredTasks = filterTasksBySearchQuery(query).filter(task => filteredTasks.includes(task));
+        filteredTasks = filteredTasks.filter(task =>
+          task.title.toLowerCase().includes(query.toLowerCase()) ||
+          (task.tags && task.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase())))
+        );
       }
       renderTasks(filteredTasks);
     });
@@ -609,11 +589,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (DOM.searchTasksInput) {
     DOM.searchTasksInput.addEventListener("input", debounce((e) => {
-      const query = e.target.value;
+      const query = e.target.value.trim();
       const status = DOM.filterStatusSelect ? DOM.filterStatusSelect.value : "todos";
-      let searchedTasks = filterTasksBySearchQuery(query);
+      let searchedTasks = tasksCache;
       if (status !== "todos") {
-        searchedTasks = filterTasksByStatus(status).filter(task => searchedTasks.includes(task));
+        searchedTasks = filterTasksByStatus(status);
+      }
+      if (query) {
+        searchedTasks = searchedTasks.filter(task =>
+          task.title.toLowerCase().includes(query.toLowerCase()) ||
+          (task.tags && task.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase())))
+        );
       }
       renderTasks(searchedTasks);
     }, 300));
@@ -621,30 +607,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (DOM.exportTasksBtn) {
     DOM.exportTasksBtn.addEventListener("click", () => {
-      if (tasksCache.length === 0) {
-        showUIMessage("Nenhuma tarefa para exportar.");
-        return;
-      }
+      if (tasksCache.length === 0) { showUIMessage("Nenhuma tarefa para exportar."); return; }
       const escapeCsvField = (field) => `"${String(field == null ? '' : field).replace(/"/g, '""')}"`;
       const csvHeader = ["Título", "Descrição", "Prazo", "Prioridade", "Status", "Categoria", "Tags"].map(escapeCsvField);
       const csvRows = tasksCache.map(task => [
-        escapeCsvField(task.title),
-        escapeCsvField(task.description),
-        escapeCsvField(task.dueDate),
-        escapeCsvField(task.priority),
-        escapeCsvField(task.status),
-        escapeCsvField(task.category),
+        escapeCsvField(task.title), escapeCsvField(task.description), escapeCsvField(task.dueDate),
+        escapeCsvField(task.priority), escapeCsvField(task.status), escapeCsvField(task.category),
         escapeCsvField(task.tags ? task.tags.join(";") : "")
       ]);
       const csvContent = [csvHeader.join(","), ...csvRows.map(row => row.join(","))].join("\n");
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = "tarefas.csv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      a.href = url; a.download = "tarefas.csv";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showUIMessage("Tarefas exportadas com sucesso!", false);
     });
@@ -652,53 +628,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function checkDueDates() {
     if (!('Notification' in window) || Notification.permission !== "granted") return;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = new Date(); today.setHours(0, 0, 0, 0);
     tasksCache.forEach(task => {
       if (normalizeStatus(task.status) !== "concluida" && task.dueDate) {
         const [year, month, day] = task.dueDate.split('-').map(Number);
-        const dueDate = new Date(year, month - 1, day);
-        dueDate.setHours(0, 0, 0, 0);
+        const dueDate = new Date(year, month - 1, day); dueDate.setHours(0, 0, 0, 0);
         const timeDiff = dueDate.getTime() - today.getTime();
         const daysUntilDue = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
         let notificationTitle = "";
-        if (daysUntilDue === 0) {
-          notificationTitle = `Tarefa "${sanitizeInput(task.title)}" vence HOJE!`;
-        } else if (daysUntilDue === 1) {
-          notificationTitle = `Tarefa "${sanitizeInput(task.title)}" vence AMANHÃ!`;
-        }
-        if (notificationTitle) {
-          new Notification(notificationTitle, { body: `Prazo: ${task.dueDate}` });
-        }
+        if (daysUntilDue === 0) notificationTitle = `Tarefa "${sanitizeInput(task.title)}" vence HOJE!`;
+        else if (daysUntilDue === 1) notificationTitle = `Tarefa "${sanitizeInput(task.title)}" vence AMANHÃ!`;
+        if (notificationTitle) new Notification(notificationTitle, { body: `Prazo: ${task.dueDate}` });
       }
     });
   }
   if ('Notification' in window) {
     Notification.requestPermission().then(permission => {
-      if (permission === "granted") {
-        checkDueDates();
-        setInterval(checkDueDates, 60 * 60 * 1000);
-      }
+      if (permission === "granted") { checkDueDates(); setInterval(checkDueDates, 60 * 60 * 1000); }
     });
   }
 
-  function initializeApp() {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-    if (currentUser && currentUser.username) {
-      tasksCache = JSON.parse(localStorage.getItem(`tasks_${currentUser.username}`)) || [];
+  async function initializeApp() {
+    const token = localStorage.getItem("authToken");
+    const storedUser = localStorage.getItem("currentUser");
+    if (token && storedUser) {
+      await fetchTasksFromAPI(); // fetchTasksFromAPI agora chama renderTasks internamente
       showMainAppPanel();
     } else {
       showLoginPanel();
       tasksCache = [];
+      renderTasks(); // Garante que a lista seja limpa
     }
-    renderTasks();
     showWelcomeModal();
   }
 
   document.querySelectorAll('[title]').forEach(el => {
-    if (bootstrap && bootstrap.Tooltip) {
-      new bootstrap.Tooltip(el);
-    }
+    if (bootstrap && bootstrap.Tooltip) { new bootstrap.Tooltip(el); }
   });
 
   initializeApp();

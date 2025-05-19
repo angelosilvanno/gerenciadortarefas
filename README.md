@@ -1,14 +1,15 @@
-# NextTask
+<h1 align="center"> Projeto de Teste de Software </h1>
+<h1 align="center"> NextTask 📃 </h1>
 
-Um gerenciador de tarefas online projetado para ajudar os usuários a organizar suas atividades diárias de forma eficiente e intuitiva.
+<p align="justify"> Um gerenciador de tarefas online projetado para ajudar os usuários a organizar suas atividades diárias de forma eficiente e intuitiva. </p>
 
 ## ✍🏽 Introdução
 
-O NextTask é uma aplicação web que visa simplificar o gerenciamento de tarefas, permitindo que os usuários criem, editem, priorizem e acompanhem o progresso de suas atividades. O objetivo principal é fornecer uma ferramenta de produtividade que seja fácil de usar, acessível e que ajude os usuários a manterem o foco em suas metas.
+<p align="justify"> O NextTask é uma aplicação web que visa simplificar o gerenciamento de tarefas, permitindo que os usuários criem, editem, priorizem e acompanhem o progresso de suas atividades. O objetivo principal é fornecer uma ferramenta de produtividade que seja fácil de usar, acessível e que ajude os usuários a manterem o foco em suas metas.</p>
 
-Com o NextTask, você pode se livrar de listas de papel desorganizadas e centralizar todas as suas pendências em um único lugar, acessível de qualquer dispositivo com conexão à internet.
+ <p align="justify"> Com o NextTask, você pode se livrar de listas de papel desorganizadas e centralizar todas as suas pendências em um único lugar, acessível de qualquer dispositivo com conexão à internet.</p>
 
-### Funcionalidades Principais:
+## **:computer:** Funcionalidades Principais:
 
 *   **Autenticação de Usuário:**
     *   Cadastro de novos usuários com nome de usuário, e-mail e senha.
@@ -56,10 +57,6 @@ Com o NextTask, você pode se livrar de listas de papel desorganizadas e central
    ```bash  
    cd gerenciadortarefas  
    ```
-   
-## 📦 Tecnologias usadas:
-
-Coloque aqui as ferramentas que você usou para criar seu projeto.
 
 ## 👷 Autores
 
@@ -68,6 +65,19 @@ Coloque aqui as ferramentas que você usou para criar seu projeto.
 * **Mateus Gomes** - *Membro* - [GSmateus07](https://github.com/GSmateus07)
 * **Levítico Rimon** - *Membro* - [LEVEL303](https://github.com/LEVEL303)
 * **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
+
+## **:hammer_and_wrench:** Construído com
+ *  [Meet](https://meet.google.com/)
+    * Chamada via meet (Reuniões e compartilhamento de tela ao vivo);    
+ *  [PlantUML](https://plantuml.com/)
+    * Criação do diagrama de classe;
+    * Criação do diagrama de caso de uso;
+ *  [Git e Github](https://github.com/)
+    * Hospedagem do código;
+ *  [Visual Studio Code](https://code.visualstudio.com/)
+    * Criação do código;
+ * [PostgreSQL](https://www.postgresql.org/)
+   * Banco de Dados.
 
 ## 📄 Licença
 

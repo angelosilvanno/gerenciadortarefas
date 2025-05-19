@@ -1,5 +1,5 @@
 <h1 align="center"> Projeto de Teste de Software </h1>
-<h1 align="center"> NextTask 📃 </h1>
+<h1 align="center"> Gerenciamento de Tarefa: NextTask 📃 </h1>
 
 <p align="justify"> Um gerenciador de tarefas online projetado para ajudar os usuários a organizar suas atividades diárias de forma eficiente e intuitiva. </p>
 

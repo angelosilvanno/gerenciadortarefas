@@ -15,6 +15,63 @@
     <link rel="shortcut icon" href="image/icone.png" type="image/x-icon" />
   </head>
 
+  <!-- Modal de Edição de Tarefas -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form id="edit-task-form">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editTaskModalLabel">Editar Tarefa</h5>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="edit-title" class="form-label">Título</label>
+              <input type="text" class="form-control" id="edit-title" required />
+            </div>
+            <div class="mb-3">
+              <label for="edit-description" class="form-label">Descrição</label>
+              <textarea class="form-control" id="edit-description" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="edit-dueDate" class="form-label">Data de Vencimento</label>
+              <input type="date" class="form-control" id="edit-dueDate" required />
+            </div>
+            <div class="mb-3">
+              <label for="edit-priority" class="form-label">Prioridade</label>
+              <select class="form-select" id="edit-priority">
+                <option value="baixa">Baixa</option>
+                <option value="média">Média</option>
+                <option value="alta">Alta</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="edit-status" class="form-label">Status</label>
+              <select class="form-select" id="edit-status">
+                <option value="pendente">Pendente</option>
+                <option value="em andamento">Em andamento</option>
+                <option value="concluída">Concluída</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="edit-category" class="form-label">Categoria</label>
+              <input type="text" class="form-control" id="edit-category" />
+            </div>
+            <div class="mb-3">
+              <label for="edit-tags" class="form-label">Tags (separadas por vírgula)</label>
+              <input type="text" class="form-control" id="edit-tags" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success" id="save-edit-btn">
+              <i class="bi bi-save me-1"></i>Salvar Alterações
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+
   <body class="bg-light">
     <div id="message"
          class="alert alert-info text-center d-none shadow p-3"
@@ -156,6 +213,30 @@
                             <button id="export-tasks" class="btn btn-outline-secondary w-100" aria-label="Exportar tarefas como CSV">
                                 <i class="bi bi-download me-1"></i> Exportar
                             </button>
+<<<<<<< HEAD
+=======
+                        </header>
+
+                        <div class="row g-3 mb-3 align-items-end">
+                            <div class="col-lg-6 col-md-12 order-lg-1 order-md-1">
+                                <label for="search-tasks" class="form-label visually-hidden">Buscar tarefas por título ou tags</label>
+                                <input type="text"
+                                       id="search-tasks"
+                                       class="form-control"
+                                       placeholder="Buscar tarefas por título ou tags..."
+                                       aria-label="Buscar tarefas por título ou tags" />
+                            </div>
+                            <div class="col-lg-3 col-md-6 order-lg-2 order-md-2">
+                                <label for="filter-status" class="form-label">Filtrar por Status:</label>
+                                <select id="filter-status" class="form-select" aria-label="Filtrar por status da tarefa">
+                                    <option value="todos">Todos</option>
+                                    <option value="pendente">Pendente</option>
+                                    <option value="em andamento">Em andamento</option>
+                                    <option value="concluida">Concluída</option>
+                                </select>
+                            </div>
+    
+>>>>>>> 97f3743 (feat: adicionar modal de edição de tarefas com preenchimento automático dos campos)
                         </div>
                     </div>
 

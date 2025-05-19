@@ -22,6 +22,11 @@ document.addEventListener("DOMContentLoaded", () => {
     forgotPasswordModalElement: document.getElementById("forgotPasswordModal"),
     deleteModalElement: document.getElementById("deleteModal"),
     confirmDeleteButton: document.getElementById("confirmDelete"),
+<<<<<<< HEAD
+=======
+    editTaskModal: document.getElementById("editTaskModal"),
+    // Login form inputs
+>>>>>>> 97f3743 (feat: adicionar modal de edição de tarefas com preenchimento automático dos campos)
     loginUsernameInput: document.getElementById("login-username"),
     loginPasswordInput: document.getElementById("login-password"),
     loginButton: document.getElementById("login-btn"),
@@ -364,6 +369,58 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+<<<<<<< HEAD
+=======
+    if (tasksToDisplay.length === 0) {
+      DOM.taskList.appendChild(noTasksMessage);
+      noTasksMessage.classList.remove('d-none');
+    } else {
+      noTasksMessage.classList.add('d-none'); // Hide if there are tasks
+      tasksToDisplay.forEach((task) => {
+        const originalIndex = tasksCache.findIndex(t => t === task);
+        if (originalIndex === -1) return;
+
+        const div = document.createElement("div");
+        div.className = "border rounded p-3 mb-3 task-item";
+        div.setAttribute("role", "listitem");
+        div.setAttribute("data-priority", task.priority);
+        div.setAttribute("data-status", task.status);
+
+        div.innerHTML = `
+           <div class="d-flex justify-content-between align-items-start mb-2">
+               <h5 class="mb-0">${sanitizeInput(task.title)}</h5>
+               <div>
+                 <button 
+                    class="btn btn-warning btn-sm me-2 edit-btn" 
+                    data-index="${originalIndex}" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#editTaskModal"
+                    aria-label="Editar tarefa ${sanitizeInput(task.title)}"
+                  >
+                    <i class="bi bi-pencil-fill"></i>
+                 </button>
+                 <button 
+                    class="btn btn-danger btn-sm delete-btn" 
+                    data-index="${originalIndex}" 
+                    aria-label="Excluir tarefa ${sanitizeInput(task.title)}"
+                  >
+                    <i class="bi bi-trash-fill"></i>
+                  </button>
+               </div>
+             </div>
+             <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
+             <small class="text-muted d-block"><strong>Prazo:</strong> ${sanitizeInput(task.dueDate)}</small>
+             <small class="text-muted d-block"><strong>Prioridade:</strong> ${sanitizeInput(task.priority)} | <strong>Status:</strong> ${sanitizeInput(task.status)}</small>
+             ${task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : ''}
+             ${task.tags && task.tags.length > 0 ? `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : ''}
+      `;
+
+        DOM.taskList.appendChild(div);
+      });
+    }
+  
+  // Função para tratar ações de clique (checkbox)
+>>>>>>> 97f3743 (feat: adicionar modal de edição de tarefas com preenchimento automático dos campos)
   function handleCheckboxClick(e) {
     const checkbox = e.target.closest(".complete-checkbox");
     if (!checkbox) return;
@@ -524,35 +581,24 @@ document.addEventListener("DOMContentLoaded", () => {
   function editTask(index) {
     const task = tasksCache[index];
     if (!task) return;
-    const submitButton = DOM.taskForm ? DOM.taskForm.querySelector('button[type="submit"]') : null;
-
-    if (!DOM.taskTitleInput || !DOM.taskDescriptionInput || !DOM.taskDueDateInput || !DOM.taskPriorityInput || !DOM.taskStatusInput || !DOM.taskCategoryInput || !DOM.taskTagsInput || !submitButton) return;
-
-    DOM.taskTitleInput.value = task.title;
-    DOM.taskDescriptionInput.value = task.description;
-    DOM.taskDueDateInput.value = task.dueDate;
-    DOM.taskPriorityInput.value = task.priority;
-    DOM.taskStatusInput.value = task.status;
-    DOM.taskCategoryInput.value = task.category || "";
-    DOM.taskTagsInput.value = task.tags ? task.tags.join(", ") : "";
+  
+    document.getElementById('edit-title').value = task.title;
+    document.getElementById('edit-description').value = task.description;
+    document.getElementById('edit-dueDate').value = task.dueDate;
+    document.getElementById('edit-priority').value = task.priority;
+    document.getElementById('edit-status').value = task.status;
+    document.getElementById('edit-category').value = task.category || '';
+    document.getElementById('edit-tags').value = task.tags ? task.tags.join(', ') : '';
+  
+    
     editingTaskIndex = index;
-
-    submitButton.innerHTML = '<i class="bi bi-save me-1"></i> Salvar Alterações';
-    DOM.taskTitleInput.focus();
-    showUIMessage(`Editando tarefa: "${sanitizeInput(task.title)}" ...`, false);
+    document.getElementById('save-edit-btn').dataset.index = index;
+  
+    
+    const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+    modal.show();
   }
-
-  if (DOM.filterStatusSelect) {
-    DOM.filterStatusSelect.addEventListener("change", (e) => {
-      const status = e.target.value;
-      const query = DOM.searchTasksInput ? DOM.searchTasksInput.value : "";
-      let filteredTasks = filterTasksByStatus(status);
-      if (query) {
-        filteredTasks = filterTasksBySearchQuery(query).filter(task => filteredTasks.includes(task));
-      }
-      renderTasks(filteredTasks);
-    });
-  }
+  
 
   if (DOM.searchTasksInput) {
     DOM.searchTasksInput.addEventListener("input", debounce((e) => {

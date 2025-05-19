@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loginForm: document.getElementById("login-form"),
     registerForm: document.getElementById("register-form"),
     forgotPasswordForm: document.getElementById("forgot-password-form"),
-    taskForm: document.getElementById("task-form"),
+    taskForm: document.getElementById("task-form"), 
     taskList: document.getElementById("task-list"),
     searchTasksInput: document.getElementById("search-tasks"),
     filterStatusSelect: document.getElementById("filter-status"),
@@ -22,8 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
     forgotPasswordModalElement: document.getElementById("forgotPasswordModal"),
     deleteModalElement: document.getElementById("deleteModal"),
     confirmDeleteButton: document.getElementById("confirmDelete"),
-    editTaskModal: document.getElementById("editTaskModal"),
-    // Login f
+    editTaskModalElement: document.getElementById("editTaskModal"), 
+    editTaskForm: document.getElementById("edit-task-form"),       
+    saveEditButton: document.getElementById("save-edit-btn"),  
     loginUsernameInput: document.getElementById("login-username"),
     loginPasswordInput: document.getElementById("login-password"),
     loginButton: document.getElementById("login-btn"),
@@ -39,10 +40,17 @@ document.addEventListener("DOMContentLoaded", () => {
     taskStatusInput: document.getElementById("status"),
     taskCategoryInput: document.getElementById("category"),
     taskTagsInput: document.getElementById("tags"),
+    editTitleInput: document.getElementById('edit-title'),
+    editDescriptionInput: document.getElementById('edit-description'),
+    editDueDateInput: document.getElementById('edit-dueDate'),
+    editPriorityInput: document.getElementById('edit-priority'),
+    editStatusInput: document.getElementById('edit-status'),
+    editCategoryInput: document.getElementById('edit-category'),
+    editTagsInput: document.getElementById('edit-tags'),
   };
 
-  let editingTaskIndex = null;
-  let tasksCache = JSON.parse(localStorage.getItem("tasks")) || [];
+  let editingTaskIndex = null; // Mantém o índice da tarefa sendo editada no tasksCache
+  let tasksCache = []; // Será carregado em initializeApp
 
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
@@ -82,11 +90,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (currentUser && currentUser.username) {
       localStorage.setItem(`tasks_${currentUser.username}`, JSON.stringify(tasksCache));
     } else {
-      localStorage.setItem("tasks", JSON.stringify(tasksCache)); // Fallback for general or if no user
+      console.error("Tentativa de salvar tarefas sem usuário logado.");
+      localStorage.setItem("tasks", JSON.stringify(tasksCache)); 
     }
   };
   
-
   const updateProgress = () => {
     if (!DOM.progressBar || !DOM.progressText) return;
     const completed = tasksCache.filter(task => normalizeStatus(task.status) === "concluida").length;
@@ -103,7 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return tasksCache.filter(task => normalizeStatus(task.status) === normalizedFilterStatus);
   };
   
-
   const filterTasksBySearchQuery = (query) => {
     if (!query) return tasksCache;
     const lowerCaseQuery = query.toLowerCase();
@@ -141,16 +148,31 @@ document.addEventListener("DOMContentLoaded", () => {
     if (DOM.mainPanel) DOM.mainPanel.style.display = "block";
   }
 
-  if (!localStorage.getItem("welcomeShown")) {
-    if (DOM.welcomeModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-      try {
-        new bootstrap.Modal(DOM.welcomeModalElement).show();
-        localStorage.setItem("welcomeShown", "true");
-      } catch (e) {
-        console.error("Erro ao mostrar modal de boas-vindas:", e);
+  // --- MODAL HANDLERS ---
+  function showWelcomeModal() {
+    if (!localStorage.getItem("welcomeShown")) {
+      if (DOM.welcomeModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        try {
+          new bootstrap.Modal(DOM.welcomeModalElement).show();
+          localStorage.setItem("welcomeShown", "true");
+        } catch (e) {
+          console.error("Erro ao mostrar modal de boas-vindas:", e);
+        }
       }
     }
   }
+
+  function showForgotPasswordModal() {
+     if (DOM.forgotPasswordModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        try {
+          new bootstrap.Modal(DOM.forgotPasswordModalElement).show();
+        } catch (err) {
+          console.error("Erro ao mostrar modal de esquecer senha:", err);
+        }
+      }
+  }
+  
+  // --- EVENT LISTENERS ---
 
   if (DOM.showRegisterLink) {
     DOM.showRegisterLink.addEventListener("click", (e) => {
@@ -168,15 +190,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.forgotPasswordLink) {
     DOM.forgotPasswordLink.addEventListener("click", (e) => {
       e.preventDefault();
-      if (DOM.forgotPasswordModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        try {
-          new bootstrap.Modal(DOM.forgotPasswordModalElement).show();
-        } catch (err) {
-          console.error("Erro ao mostrar modal de esquecer senha:", err);
-        }
-      }
+      showForgotPasswordModal();
     });
   }
+
   if (DOM.forgotPasswordForm && DOM.forgotEmailInput) {
     DOM.forgotPasswordForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -204,17 +221,18 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.logoutBtn) {
     DOM.logoutBtn.addEventListener("click", () => {
       localStorage.removeItem("currentUser");
+      localStorage.removeItem("authToken"); // Se você estiver usando token para API
       tasksCache = []; 
       showLoginPanel();
-      renderTasks();
+      renderTasks(); // Para limpar a lista de tarefas da UI
       showUIMessage("Você saiu do sistema.", false);
     });
   }
   
-
   if (DOM.registerForm && DOM.registerUsernameInput && DOM.registerEmailInput && DOM.registerPasswordInput && DOM.registerConfirmPasswordInput) {
     DOM.registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      // ... (código de validação e registro como antes, usando localStorage para "users")
       const inputs = [DOM.registerUsernameInput, DOM.registerEmailInput, DOM.registerPasswordInput, DOM.registerConfirmPasswordInput];
       inputs.forEach(input => input.classList.remove("is-invalid"));
 
@@ -269,6 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.loginForm && DOM.loginUsernameInput && DOM.loginPasswordInput && DOM.loginButton) {
     DOM.loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      // ... (código de login como antes, usando localStorage para "users" e "currentUser")
       const spinner = DOM.loginButton.querySelector(".spinner-border");
 
       DOM.loginUsernameInput.classList.remove("is-invalid");
@@ -284,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const user = users.find(u => u.username === username && u.password === hashedPassword);
 
       if (user) {
-        localStorage.setItem("currentUser", JSON.stringify(user));
+        localStorage.setItem("currentUser", JSON.stringify({username: user.username, email: user.email})); // Salva apenas info não sensível
         tasksCache = JSON.parse(localStorage.getItem(`tasks_${user.username}`)) || [];
         showMainAppPanel();
         renderTasks();
@@ -299,13 +318,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   
-
+  // Formulário Principal de Adicionar Tarefa
   if (DOM.taskForm) {
     const submitButton = DOM.taskForm.querySelector('button[type="submit"]');
     if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskStatusInput && DOM.taskCategoryInput && DOM.taskTagsInput && submitButton) {
       DOM.taskForm.addEventListener("submit", (e) => {
         e.preventDefault();
-
+        // ... (lógica de adicionar tarefa como antes)
         const title = DOM.taskTitleInput.value.trim();
         const description = DOM.taskDescriptionInput.value.trim();
         const dueDate = DOM.taskDueDateInput.value;
@@ -326,22 +345,75 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        const taskObj = { title, description, dueDate, priority, status, category, tags, id: editingTaskIndex !== null ? tasksCache[editingTaskIndex].id : Date.now()  };
-        if (editingTaskIndex !== null) {
-          tasksCache[editingTaskIndex] = taskObj;
-          editingTaskIndex = null;
-          submitButton.innerHTML = '<i class="bi bi-plus-circle me-1"></i> Criar Tarefa';
-        } else {
-          tasksCache.push(taskObj);
-        }
-
+        const taskObj = { title, description, dueDate, priority, status, category, tags, id: Date.now()  };
+        // Não estamos mais usando editingTaskIndex para o formulário principal,
+        // pois a edição será feita no modal.
+        tasksCache.push(taskObj);
+        
         saveTasks();
         DOM.taskForm.reset();
-        showUIMessage("Tarefa salva com sucesso!", false);
+        showUIMessage("Tarefa criada com sucesso!", false);
         renderTasks();
       });
     }
   }
+
+  // **NOVO: Listener para o formulário de edição no modal**
+  if (DOM.editTaskForm) {
+    DOM.editTaskForm.addEventListener("submit", (e) => {
+        e.preventDefault(); // Previne o recarregamento da página
+        if (editingTaskIndex === null || !tasksCache[editingTaskIndex]) {
+            showUIMessage("Erro: Nenhuma tarefa selecionada para edição.", true);
+            return;
+        }
+
+        const title = DOM.editTitleInput.value.trim();
+        const description = DOM.editDescriptionInput.value.trim();
+        const dueDate = DOM.editDueDateInput.value;
+        const priority = DOM.editPriorityInput.value;
+        const status = DOM.editStatusInput.value;
+        const category = DOM.editCategoryInput.value.trim();
+        const tagsValue = DOM.editTagsInput.value.trim();
+        const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
+
+        if (!title || !description || !dueDate) {
+            showUIMessage("Preencha os campos obrigatórios no formulário de edição: Título, Descrição e Prazo.", true);
+            return;
+        }
+        for (let tag of tags) {
+            if (tag && !tagRegex.test(tag)) {
+            showUIMessage(`Tag inválida na edição: "${sanitizeInput(tag)}". Use apenas letras, números ou traços.`, true);
+            return;
+            }
+        }
+
+        // Atualiza a tarefa no tasksCache
+        tasksCache[editingTaskIndex] = {
+            ...tasksCache[editingTaskIndex], // Mantém o ID original e outras propriedades não editadas
+            title,
+            description,
+            dueDate,
+            priority,
+            status,
+            category,
+            tags
+        };
+
+        saveTasks();
+        renderTasks();
+        showUIMessage("Tarefa atualizada com sucesso!", false);
+
+        // Fecha o modal de edição
+        if (DOM.editTaskModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modalInstance = bootstrap.Modal.getInstance(DOM.editTaskModalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        }
+        editingTaskIndex = null; // Reseta o índice de edição
+    });
+  }
+
 
   function handleTaskActions(event) {
     const target = event.target.closest('button');
@@ -350,83 +422,42 @@ document.addEventListener("DOMContentLoaded", () => {
     const taskCard = target.closest('.task-card');
     if (!taskCard) return;
     
-    const taskId = parseInt(taskCard.dataset.taskId, 10);
-    const index = tasksCache.findIndex(task => task.id === taskId);
+    // Usar o índice original, pois a edição agora é via modal e não altera o formulário principal
+    const originalIndexAttr = target.dataset.index || taskCard.querySelector('.edit-btn')?.dataset.index || taskCard.querySelector('.delete-btn')?.dataset.index;
+
+    if (originalIndexAttr === undefined) {
+        console.error("Não foi possível encontrar o data-index no botão ou card.");
+        return;
+    }
+    const index = parseInt(originalIndexAttr, 10);
 
 
     if (isNaN(index) || index < 0 || index >= tasksCache.length) {
-      console.error("Índice de tarefa inválido ou tarefa não encontrada:", index, "para taskId:", taskId);
+      console.error("Índice de tarefa inválido ou tarefa não encontrada:", index);
       return;
     }
 
     if (target.classList.contains("edit-btn")) {
-      editTask(index);
+      editTask(index); // Chama a função para popular e mostrar o modal
     } else if (target.classList.contains("delete-btn")) {
       confirmTaskDeletion(index);
     }
   }
 
-    if (tasksToDisplay.length === 0) {
-      DOM.taskList.appendChild(noTasksMessage);
-      noTasksMessage.classList.remove('d-none');
-    } else {
-      noTasksMessage.classList.add('d-none'); // Hide if there are tasks
-      tasksToDisplay.forEach((task) => {
-        const originalIndex = tasksCache.findIndex(t => t === task);
-        if (originalIndex === -1) return;
-
-        const div = document.createElement("div");
-        div.className = "border rounded p-3 mb-3 task-item";
-        div.setAttribute("role", "listitem");
-        div.setAttribute("data-priority", task.priority);
-        div.setAttribute("data-status", task.status);
-
-        div.innerHTML = `
-           <div class="d-flex justify-content-between align-items-start mb-2">
-               <h5 class="mb-0">${sanitizeInput(task.title)}</h5>
-               <div>
-                 <button 
-                    class="btn btn-warning btn-sm me-2 edit-btn" 
-                    data-index="${originalIndex}" 
-                    data-bs-toggle="modal" 
-                    data-bs-target="#editTaskModal"
-                    aria-label="Editar tarefa ${sanitizeInput(task.title)}"
-                  >
-                    <i class="bi bi-pencil-fill"></i>
-                 </button>
-                 <button 
-                    class="btn btn-danger btn-sm delete-btn" 
-                    data-index="${originalIndex}" 
-                    aria-label="Excluir tarefa ${sanitizeInput(task.title)}"
-                  >
-                    <i class="bi bi-trash-fill"></i>
-                  </button>
-               </div>
-             </div>
-             <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
-             <small class="text-muted d-block"><strong>Prazo:</strong> ${sanitizeInput(task.dueDate)}</small>
-             <small class="text-muted d-block"><strong>Prioridade:</strong> ${sanitizeInput(task.priority)} | <strong>Status:</strong> ${sanitizeInput(task.status)}</small>
-             ${task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : ''}
-             ${task.tags && task.tags.length > 0 ? `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : ''}
-      `;
-
-        DOM.taskList.appendChild(div);
-      });
-    }
-  
-  // Função para tratar ações de clique (checkbox)
   function handleCheckboxClick(e) {
     const checkbox = e.target.closest(".complete-checkbox");
     if (!checkbox) return;
+    
+    const originalIndexAttr = checkbox.dataset.index;
+    if (originalIndexAttr === undefined) {
+        console.error("Não foi possível encontrar o data-index no checkbox.");
+        return;
+    }
+    const index = parseInt(originalIndexAttr, 10);
 
-    const taskCard = checkbox.closest('.task-card');
-    if (!taskCard) return;
-
-    const taskId = parseInt(taskCard.dataset.taskId, 10);
-    const index = tasksCache.findIndex(task => task.id === taskId);
 
     if (isNaN(index) || index < 0 || index >= tasksCache.length) {
-        console.error("Índice de tarefa inválido no checkbox:", index, "para taskId:", taskId);
+        console.error("Índice de tarefa inválido no checkbox:", index);
         return;
     }
     
@@ -485,12 +516,16 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.taskList.appendChild(dateHeader);
   
       groupedByDate[date].forEach(task => {
-        const originalIndex = tasksCache.findIndex(t => t === task); // ← ESSENCIAL
-        if (originalIndex === -1) return;
+        // IMPORTANTE: Usar o índice real da tarefa no tasksCache original
+        const originalIndex = tasksCache.findIndex(t => t.id === task.id);
+        if (originalIndex === -1) {
+            console.warn("Tarefa do groupedByDate não encontrada no tasksCache original. ID:", task.id);
+            return; // Pula esta tarefa se não for encontrada (pode acontecer se tasksCache for modificado incorretamente)
+        }
   
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
-        div.dataset.taskId = task.id;
+        // Não precisamos mais de data-taskId aqui se estamos usando data-index referenciando tasksCache
   
         const normStatus = normalizeStatus(task.status);
         if (statusClass[normStatus]) {
@@ -529,7 +564,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   
-    // Listeners
     DOM.taskList.removeEventListener("click", handleTaskActions);
     DOM.taskList.addEventListener("click", handleTaskActions);
     DOM.taskList.removeEventListener("change", handleCheckboxClick);
@@ -538,7 +572,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateProgress();
   }
   
-
   let currentDeleteHandler = null;
 
   function confirmTaskDeletion(index) {
@@ -578,27 +611,44 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.show();
   }
 
+  // Função para preencher o modal de edição e exibi-lo
   function editTask(index) {
     const task = tasksCache[index];
-    if (!task) return;
+    if (!task || !DOM.editTaskModalElement) {
+        console.error("Tarefa não encontrada ou modal de edição não existe.");
+        return;
+    }
   
-    document.getElementById('edit-title').value = task.title;
-    document.getElementById('edit-description').value = task.description;
-    document.getElementById('edit-dueDate').value = task.dueDate;
-    document.getElementById('edit-priority').value = task.priority;
-    document.getElementById('edit-status').value = task.status;
-    document.getElementById('edit-category').value = task.category || '';
-    document.getElementById('edit-tags').value = task.tags ? task.tags.join(', ') : '';
+    // Preenche os campos do formulário do modal
+    if(DOM.editTitleInput) DOM.editTitleInput.value = task.title;
+    if(DOM.editDescriptionInput) DOM.editDescriptionInput.value = task.description;
+    if(DOM.editDueDateInput) DOM.editDueDateInput.value = task.dueDate;
+    if(DOM.editPriorityInput) DOM.editPriorityInput.value = task.priority;
+    if(DOM.editStatusInput) DOM.editStatusInput.value = task.status;
+    if(DOM.editCategoryInput) DOM.editCategoryInput.value = task.category || '';
+    if(DOM.editTagsInput) DOM.editTagsInput.value = task.tags ? task.tags.join(', ') : '';
   
-    
-    editingTaskIndex = index;
-    document.getElementById('save-edit-btn').dataset.index = index;
+    editingTaskIndex = index; // Armazena o índice da tarefa que está sendo editada
   
-    
-    const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
-    modal.show();
+    // Mostra o modal
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modal = bootstrap.Modal.getOrCreateInstance(DOM.editTaskModalElement);
+        modal.show();
+    }
   }
   
+  // Listener para filtros, busca e exportação (como antes)
+  if (DOM.filterStatusSelect) {
+    DOM.filterStatusSelect.addEventListener("change", (e) => {
+      const status = e.target.value;
+      const query = DOM.searchTasksInput ? DOM.searchTasksInput.value : "";
+      let filteredTasks = filterTasksByStatus(status);
+      if (query) {
+        filteredTasks = filterTasksBySearchQuery(query).filter(task => filteredTasks.includes(task));
+      }
+      renderTasks(filteredTasks);
+    });
+  }
 
   if (DOM.searchTasksInput) {
     DOM.searchTasksInput.addEventListener("input", debounce((e) => {
@@ -645,6 +695,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Notificações e Inicialização (como antes)
   function checkDueDates() {
     if (!('Notification' in window) || Notification.permission !== "granted") return;
 
@@ -689,9 +740,10 @@ document.addEventListener("DOMContentLoaded", () => {
       showMainAppPanel();
     } else {
       showLoginPanel();
-      tasksCache = [];
+      tasksCache = []; // Garante que tasksCache seja um array vazio se não houver usuário
     }
-    renderTasks();
+    renderTasks(); // Renderiza com tasksCache (potencialmente vazio)
+    showWelcomeModal(); // Mostra o modal de boas-vindas se necessário
   }
 
   document.querySelectorAll('[title]').forEach(el => {

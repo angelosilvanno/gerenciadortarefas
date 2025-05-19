@@ -22,11 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
     forgotPasswordModalElement: document.getElementById("forgotPasswordModal"),
     deleteModalElement: document.getElementById("deleteModal"),
     confirmDeleteButton: document.getElementById("confirmDelete"),
-<<<<<<< HEAD
-=======
     editTaskModal: document.getElementById("editTaskModal"),
-    // Login form inputs
->>>>>>> 97f3743 (feat: adicionar modal de edição de tarefas com preenchimento automático dos campos)
+    // Login f
     loginUsernameInput: document.getElementById("login-username"),
     loginPasswordInput: document.getElementById("login-password"),
     loginButton: document.getElementById("login-btn"),
@@ -369,8 +366,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-<<<<<<< HEAD
-=======
     if (tasksToDisplay.length === 0) {
       DOM.taskList.appendChild(noTasksMessage);
       noTasksMessage.classList.remove('d-none');
@@ -420,7 +415,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
   // Função para tratar ações de clique (checkbox)
->>>>>>> 97f3743 (feat: adicionar modal de edição de tarefas com preenchimento automático dos campos)
   function handleCheckboxClick(e) {
     const checkbox = e.target.closest(".complete-checkbox");
     if (!checkbox) return;
@@ -457,30 +451,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderTasks(tasksToDisplay = tasksCache) {
     if (!DOM.taskList) return;
-
+  
     const statusClass = {
       "pendente": "task-status-pendente",
       "emandamento": "task-status-em-andamento",
       "concluida": "task-status-concluida"
     };
-
+  
     DOM.taskList.innerHTML = "";
-
+  
     if (tasksToDisplay.length === 0) {
       DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir.</p>';
       updateProgress();
       return;
     }
-
+  
     const groupedByDate = {};
     tasksToDisplay.forEach(task => {
-       const [year, month, day] = task.dueDate.split("-");
-       const date = new Date(year, parseInt(month) - 1, day).toISOString().split("T")[0];
-       if (!groupedByDate[date]) groupedByDate[date] = [];
-       groupedByDate[date].push(task);
+      const [year, month, day] = task.dueDate.split("-");
+      const date = new Date(year, parseInt(month) - 1, day).toISOString().split("T")[0];
+      if (!groupedByDate[date]) groupedByDate[date] = [];
+      groupedByDate[date].push(task);
     });
+  
     const sortedDates = Object.keys(groupedByDate).sort((a, b) => new Date(a) - new Date(b));
-
+  
     sortedDates.forEach(date => {
       const [y, m, d] = date.split("-");
       const formattedDate = `${d}/${m}/${y}`;
@@ -488,34 +483,37 @@ document.addEventListener("DOMContentLoaded", () => {
       dateHeader.className = "mt-4 text-primary border-bottom pb-1";
       dateHeader.textContent = `📅 ${formattedDate}`;
       DOM.taskList.appendChild(dateHeader);
-
+  
       groupedByDate[date].forEach(task => {
+        const originalIndex = tasksCache.findIndex(t => t === task); // ← ESSENCIAL
+        if (originalIndex === -1) return;
+  
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
-        div.dataset.taskId = task.id; 
-
+        div.dataset.taskId = task.id;
+  
         const normStatus = normalizeStatus(task.status);
         if (statusClass[normStatus]) {
           div.classList.add(statusClass[normStatus]);
         }
-
+  
         div.setAttribute("role", "listitem");
         div.setAttribute("data-priority", task.priority);
         div.setAttribute("data-status", task.status);
-
+  
         div.innerHTML = `
-          <div class="d-flex justify-content-between align-items-start mb-2">
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input complete-checkbox" ${normStatus === "concluida" ? "checked" : ""}>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex align-items-center flex-grow-1">
+              <input type="checkbox" class="form-check-input me-2 complete-checkbox" data-index="${originalIndex}" ${normStatus === "concluida" ? "checked" : ""}>
+              <h5 class="mb-0 ${normStatus === "concluida" ? "text-decoration-line-through text-muted" : ""}" style="font-weight: bold;">
+                ${sanitizeInput(task.title)}
+              </h5>
             </div>
-            <h5 class="mb-0 flex-grow-1 ms-2 ${normStatus === "concluida" ? "text-decoration-line-through text-muted" : ""}">
-              ${sanitizeInput(task.title)}
-            </h5>
             <div>
-              <button class="btn btn-warning btn-sm me-2 edit-btn" title="Editar tarefa">
+              <button class="btn btn-warning btn-sm me-2 edit-btn" data-index="${originalIndex}" title="Editar tarefa">
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button class="btn btn-danger btn-sm delete-btn" title="Excluir tarefa">
+              <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" title="Excluir tarefa">
                 <i class="bi bi-trash-fill"></i>
               </button>
             </div>
@@ -526,18 +524,20 @@ document.addEventListener("DOMContentLoaded", () => {
           ${task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : ""}
           ${task.tags && task.tags.length > 0 ? `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : ""}
         `;
+  
         DOM.taskList.appendChild(div);
       });
     });
-
+  
+    // Listeners
     DOM.taskList.removeEventListener("click", handleTaskActions);
     DOM.taskList.addEventListener("click", handleTaskActions);
-    DOM.taskList.removeEventListener("change", handleCheckboxClick); // Use change for checkboxes
+    DOM.taskList.removeEventListener("change", handleCheckboxClick);
     DOM.taskList.addEventListener("change", handleCheckboxClick);
-
-
+  
     updateProgress();
   }
+  
 
   let currentDeleteHandler = null;
 

@@ -64,7 +64,7 @@
 * **Ludmila Monteiro** - *Membro* - [ludmilamonteiro](https://github.com/LudmilaMonteiro)
 * **Mateus Gomes** - *Membro* - [GSmateus07](https://github.com/GSmateus07)
 * **Levítico Rimon** - *Membro* - [LEVEL303](https://github.com/LEVEL303)
-* **Nome do dev** - *Função realizada* - [nome_do_dev](https://github.com/link_do_Perfil)
+* **Aluizio** - *Membro* - [Aluizio](https://github.com/aluiziairesjr007)
 
 ## **:hammer_and_wrench:** Construído com
  *  [Meet](https://meet.google.com/)

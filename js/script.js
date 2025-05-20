@@ -497,7 +497,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     DOM.taskList.innerHTML = "";
     if (!Array.isArray(tasksToDisplay) || tasksToDisplay.length === 0) {
-      DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir. Use a busca ou filtros para encontrar tarefas.</p>';
+      DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir.</p>';
       updateProgress();
       return;
     }

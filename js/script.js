@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     confirmDeleteButton: document.getElementById("confirmDelete"),
     editTaskModalElement: document.getElementById("editTaskModal"),
     editTaskForm: document.getElementById("edit-task-form"),
-    saveEditButton: document.getElementById("save-edit-btn"), // Although ID exists, not directly used for JS event listener on button itself
+    saveEditButton: document.getElementById("save-edit-btn"),
     loginUsernameInput: document.getElementById("login-username"),
     loginPasswordInput: document.getElementById("login-password"),
     loginButton: document.getElementById("login-btn"),
@@ -120,13 +120,13 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const filterTasksByStatus = (status = "todos") => {
-    if (status === "todos") return tasksCache;
+    if (status === "todos") return tasksCache; // Returns a reference, be careful if modifying
     const normalizedFilterStatus = normalizeStatus(status);
     return tasksCache.filter(task => normalizeStatus(task.status) === normalizedFilterStatus);
   };
 
   const filterTasksBySearchQuery = (query) => {
-    if (!query) return tasksCache;
+    if (!query) return tasksCache; // Returns a reference
     const lowerCaseQuery = query.toLowerCase();
     return tasksCache.filter(task =>
       task.title.toLowerCase().includes(lowerCaseQuery) ||
@@ -240,8 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.removeItem("authToken");
       tasksCache = [];
       showLoginPanel();
-      if (DOM.taskList) DOM.taskList.innerHTML = ""; // Clear task list visually
-      if (DOM.progressBar && DOM.progressText) updateProgress(); // Reset progress
+      if (DOM.taskList) DOM.taskList.innerHTML = "";
+      if (DOM.progressBar && DOM.progressText) updateProgress();
       showUIMessage("Você saiu do sistema.", false);
     });
   }
@@ -254,8 +254,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const username = DOM.registerUsernameInput.value.trim();
       const email = DOM.registerEmailInput.value.trim();
-      const password = DOM.registerPasswordInput.value; // No trim for password
-      const confirmPassword = DOM.registerConfirmPasswordInput.value; // No trim
+      const password = DOM.registerPasswordInput.value;
+      const confirmPassword = DOM.registerConfirmPasswordInput.value;
 
       if (!usernameRegex.test(username)) {
         DOM.registerUsernameInput.classList.add("is-invalid");
@@ -310,7 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.loginButton.disabled = true;
 
       const username = DOM.loginUsernameInput.value.trim();
-      const password = DOM.loginPasswordInput.value; // No trim for password
+      const password = DOM.loginPasswordInput.value;
 
       try {
         const hashedPassword = await hashPassword(password);
@@ -323,7 +323,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const userTasksRaw = localStorage.getItem(`tasks_${user.username}`);
           tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
           showMainAppPanel();
-          renderTasks();
+          renderTasks([]); // Display no tasks initially after login
+          updateProgress(); // Update progress based on all tasks in cache
           DOM.loginForm.reset();
         } else {
           DOM.loginUsernameInput.classList.add("is-invalid");
@@ -372,7 +373,7 @@ document.addEventListener("DOMContentLoaded", () => {
         saveTasks();
         DOM.taskForm.reset();
         showUIMessage("Tarefa criada com sucesso!", false);
-        renderTasks();
+        renderTasks(tasksCache); // Display all tasks after adding a new one
       });
     } else {
         console.warn("Formulário de criação de tarefa não pôde ser inicializado completamente: campos ou botão de submit ausentes.");
@@ -416,7 +417,6 @@ document.addEventListener("DOMContentLoaded", () => {
         tags
       };
       saveTasks();
-      renderTasks();
       showUIMessage("Tarefa atualizada com sucesso!", false);
       if (DOM.editTaskModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
         const modalInstance = bootstrap.Modal.getInstance(DOM.editTaskModalElement);
@@ -425,6 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       editingTaskIndex = null;
+      renderTasks(tasksCache); // Display all tasks after editing
     });
   } else if (DOM.editTaskForm) {
     console.warn("Formulário de edição de tarefa não pôde ser inicializado completamente: campos ausentes.");
@@ -471,7 +472,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     task.status = checkbox.checked ? "concluída" : "pendente";
     saveTasks();
-    renderTasks();
+    renderTasks(tasksCache); // Display all tasks after status change
   }
 
   function normalizeStatus(status) {
@@ -480,11 +481,11 @@ document.addEventListener("DOMContentLoaded", () => {
       .trim()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, "") // Collapses multiple spaces too
+      .replace(/\s+/g, "")
       .toLowerCase();
   }
 
-  function renderTasks(tasksToDisplay = tasksCache) {
+  function renderTasks(tasksToDisplay) { // Removed default parameter
     if (!DOM.taskList) {
         console.error("Elemento taskList não encontrado no DOM. Não é possível renderizar tarefas.");
         return;
@@ -496,7 +497,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     DOM.taskList.innerHTML = "";
     if (!Array.isArray(tasksToDisplay) || tasksToDisplay.length === 0) {
-      DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir.</p>';
+      DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir. Use a busca ou filtros para encontrar tarefas.</p>';
       updateProgress();
       return;
     }
@@ -508,10 +509,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       const [year, month, day] = task.dueDate.split("-");
-      // Basic validation for date parts
       if (!year || !month || !day || isNaN(parseInt(year)) || isNaN(parseInt(month)) || isNaN(parseInt(day))) {
         console.warn("Formato de data inválido para a tarefa:", task.title, task.dueDate);
-        // Assign to a generic 'invalid-date' group or handle as preferred
         const dateKey = 'Data Inválida';
         if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
         groupedByDate[dateKey].push(task);
@@ -523,7 +522,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
-        if (a === 'Data Inválida') return 1; // Push invalid dates to the end
+        if (a === 'Data Inválida') return 1;
         if (b === 'Data Inválida') return -1;
         return new Date(a) - new Date(b);
     });
@@ -616,7 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.confirmDeleteButton.removeEventListener('click', currentDeleteHandler);
     }
     currentDeleteHandler = function onConfirm() {
-      if (index < 0 || index >= tasksCache.length) { // Double check index validity
+      if (index < 0 || index >= tasksCache.length) {
         showUIMessage("Erro ao excluir tarefa: tarefa não encontrada.", true);
         modal.hide();
         return;
@@ -629,7 +628,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const currentSearchQuery = DOM.searchTasksInput ? DOM.searchTasksInput.value : "";
       let tasksToRenderAfterDelete = filterTasksByStatus(currentFilterStatus);
       if (currentSearchQuery) {
-        tasksToRenderAfterDelete = filterTasksBySearchQuery(currentSearchQuery).filter(task => tasksToRenderAfterDelete.includes(task));
+        const searchedOverall = filterTasksBySearchQuery(currentSearchQuery);
+        tasksToRenderAfterDelete = tasksToRenderAfterDelete.filter(task => searchedOverall.includes(task));
       }
       renderTasks(tasksToRenderAfterDelete);
       modal.hide();
@@ -667,10 +667,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.filterStatusSelect) {
     DOM.filterStatusSelect.addEventListener("change", (e) => {
       const status = e.target.value;
-      const query = DOM.searchTasksInput ? DOM.searchTasksInput.value : "";
-      let filteredTasks = filterTasksByStatus(status);
+      const query = DOM.searchTasksInput ? DOM.searchTasksInput.value.trim() : "";
+      let filteredTasks = filterTasksByStatus(status); // Uses tasksCache
       if (query) {
-        filteredTasks = filterTasksBySearchQuery(query).filter(task => filteredTasks.includes(task));
+        const searchedOverall = filterTasksBySearchQuery(query); // Uses tasksCache
+        filteredTasks = filteredTasks.filter(task => searchedOverall.includes(task));
       }
       renderTasks(filteredTasks);
     });
@@ -678,13 +679,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (DOM.searchTasksInput) {
     DOM.searchTasksInput.addEventListener("input", debounce((e) => {
-      const query = e.target.value;
+      const query = e.target.value.trim();
       const status = DOM.filterStatusSelect ? DOM.filterStatusSelect.value : "todos";
-      let searchedTasks = filterTasksBySearchQuery(query);
+      let searchedTasksResult = filterTasksBySearchQuery(query); // Uses tasksCache
       if (status !== "todos") {
-        searchedTasks = filterTasksByStatus(status).filter(task => searchedTasks.includes(task));
+        const statusFiltered = filterTasksByStatus(status); // Uses tasksCache
+        searchedTasksResult = searchedTasksResult.filter(task => statusFiltered.includes(task));
       }
-      renderTasks(searchedTasks);
+      renderTasks(searchedTasksResult);
     }, 300));
   }
 
@@ -764,6 +766,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initializeApp() {
     const currentUserItem = localStorage.getItem("currentUser");
+    let initialTasksToRender = []; // Always render an empty list initially after login or if no user
+
     if (currentUserItem) {
         try {
             const currentUser = JSON.parse(currentUserItem);
@@ -771,13 +775,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const userTasksRaw = localStorage.getItem(`tasks_${currentUser.username}`);
                 tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
                 showMainAppPanel();
+                // initialTasksToRender remains [] as per new requirement
             } else {
                 showLoginPanel();
                 tasksCache = [];
             }
         } catch (error) {
             console.error("Erro ao parsear currentUser ou tasks do localStorage na inicialização:", error);
-            localStorage.removeItem("currentUser"); 
+            localStorage.removeItem("currentUser");
             showLoginPanel();
             tasksCache = [];
         }
@@ -785,7 +790,8 @@ document.addEventListener("DOMContentLoaded", () => {
         showLoginPanel();
         tasksCache = [];
     }
-    renderTasks();
+    renderTasks(initialTasksToRender);
+    updateProgress(); // updateProgress uses tasksCache, which is correctly populated
     showWelcomeModal();
   }
 

@@ -47,10 +47,24 @@ document.addEventListener("DOMContentLoaded", () => {
     editStatusInput: document.getElementById('edit-status'),
     editCategoryInput: document.getElementById('edit-category'),
     editTagsInput: document.getElementById('edit-tags'),
+    toggleLoginPasswordBtn: document.querySelector(".toggle-password"),
   };
 
   let editingTaskIndex = null;
   let tasksCache = [];
+
+  const togglePasswordBtn = document.getElementById("toggle-password-btn");
+  const togglePasswordIcon = document.getElementById("toggle-login-password-icon");
+  const passwordInput = DOM.loginPasswordInput;
+
+  if (togglePasswordBtn && togglePasswordIcon && passwordInput) {
+    togglePasswordBtn.addEventListener("click", () => {
+      const isPasswordVisible = passwordInput.type === "text";
+      passwordInput.type = isPasswordVisible ? "password" : "text";
+      togglePasswordIcon.classList.toggle("bi-eye", !isPasswordVisible);
+      togglePasswordIcon.classList.toggle("bi-eye-slash", isPasswordDisible);
+    });
+  }
 
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
@@ -191,6 +205,16 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.showRegisterLink.addEventListener("click", (e) => {
       e.preventDefault();
       showRegisterPanel();
+    });
+  }
+  if (DOM.toggleLoginPasswordBtn && DOM.loginPasswordInput) {
+    DOM.toggleLoginPasswordBtn.addEventListener("click", () => {
+      const input = DOM.loginPasswordInput;
+      const icon = document.getElementById("toggle-login-password-icon");
+      const isPassword = input.type === "password";
+      input.type = isPassword ? "text" : "password";
+      icon.classList.toggle("bi-eye");
+      icon.classList.toggle("bi-eye-slash");
     });
   }
   if (DOM.showLoginLink) {

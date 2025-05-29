@@ -319,25 +319,43 @@ document.addEventListener("DOMContentLoaded", () => {
         const user = users.find(u => u.username === username && u.password === hashedPassword);
 
         if (user) {
-          localStorage.setItem("currentUser", JSON.stringify({ username: user.username, email: user.email }));
-          const userTasksRaw = localStorage.getItem(`tasks_${user.username}`);
-          tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
-          showMainAppPanel();
-          renderTasks([]); // Display no tasks initially after login
-          updateProgress(); // Update progress based on all tasks in cache
-          DOM.loginForm.reset();
+          try {
+            localStorage.setItem("currentUser", JSON.stringify({ username: user.username, email: user.email }));
+        
+            const userTasksRaw = localStorage.getItem(`tasks_${user.username}`);
+            try {
+              tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
+            } catch (parseErr) {
+              console.warn("Erro ao fazer parse das tarefas do usuário:", parseErr);
+              tasksCache = [];
+            }
+        
+            showMainAppPanel();
+        
+            setTimeout(() => {
+              renderTasks(tasksCache);
+              updateProgress();
+            }, 50);
+        
+            DOM.loginForm.reset();
+          } catch (internalErr) {
+            console.error("Erro ao configurar usuário logado:", internalErr);
+            showUIMessage("Erro ao carregar dados do usuário.");
+          }
         } else {
           DOM.loginUsernameInput.classList.add("is-invalid");
           DOM.loginPasswordInput.classList.add("is-invalid");
           showUIMessage("Usuário ou senha inválidos.");
         }
-      } catch (error) {
-        console.error("Erro durante o login:", error);
-        showUIMessage("Ocorreu um erro inesperado durante o login. Tente novamente.");
-      } finally {
-        if (spinner) spinner.classList.add("d-none");
-        DOM.loginButton.disabled = false;
-      }
+        
+        } catch (error) {
+          console.error("Erro durante o login:", error);
+          showUIMessage("Ocorreu um erro inesperado durante o login. Tente novamente.");
+        } finally {
+          if (spinner) spinner.classList.add("d-none");
+          DOM.loginButton.disabled = false;
+        }
+        
     });
   } else if (DOM.loginForm) {
       console.warn("Formulário de login não pôde ser inicializado completamente: campos ausentes.");
@@ -766,34 +784,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initializeApp() {
     const currentUserItem = localStorage.getItem("currentUser");
-    let initialTasksToRender = []; // Always render an empty list initially after login or if no user
-
+  
     if (currentUserItem) {
-        try {
-            const currentUser = JSON.parse(currentUserItem);
-            if (currentUser && currentUser.username) {
-                const userTasksRaw = localStorage.getItem(`tasks_${currentUser.username}`);
-                tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
-                showMainAppPanel();
-                // initialTasksToRender remains [] as per new requirement
-            } else {
-                showLoginPanel();
-                tasksCache = [];
-            }
-        } catch (error) {
-            console.error("Erro ao parsear currentUser ou tasks do localStorage na inicialização:", error);
-            localStorage.removeItem("currentUser");
-            showLoginPanel();
-            tasksCache = [];
+      try {
+        const currentUser = JSON.parse(currentUserItem);
+        if (currentUser && currentUser.username) {
+          const userTasksRaw = localStorage.getItem(`tasks_${currentUser.username}`);
+          tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
+          showMainAppPanel();
+  
+          renderTasks(tasksCache);
+        } else {
+          showLoginPanel();
+          tasksCache = [];
         }
-    } else {
+      } catch (error) {
+        console.error("Erro ao parsear currentUser ou tasks do localStorage na inicialização:", error);
+        localStorage.removeItem("currentUser");
         showLoginPanel();
         tasksCache = [];
+      }
+    } else {
+      showLoginPanel();
+      tasksCache = [];
     }
-    renderTasks(initialTasksToRender);
-    updateProgress(); // updateProgress uses tasksCache, which is correctly populated
+  
+    updateProgress();
     showWelcomeModal();
   }
+  
+
 
   document.querySelectorAll('[title]').forEach(el => {
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {

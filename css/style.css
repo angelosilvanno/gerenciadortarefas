@@ -177,10 +177,16 @@ main.container {
 /* Cores por status */
 .task-card {
     border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: 1rem;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.2rem;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.task-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .task-card.task-status-pendente {
@@ -206,4 +212,26 @@ main.container {
 
 .task-card.tarefa-atrasada h5{
     color: #dc3545;
+}
+
+.task-card .btn-warning,
+.task-card .btn-danger {
+    border: none;
+    border-radius: 1rem;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.85rem;
+    box-shadow: none;
+    background-color: transparent;
+    color: #495057;
+    transition: all 0.2s ease-in-out;
+}
+
+.task-card .btn-warning:hover {
+    color: #ffc107;
+    background-color: rgba(225, 193, 7, 0.1);
+}
+
+.task-card .btn-danger:hover {
+    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
 }

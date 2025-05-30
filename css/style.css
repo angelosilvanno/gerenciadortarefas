@@ -305,3 +305,17 @@ input#category::placeholder,
 input#tags::placeholder {
   color: #adb5bd; 
 }
+
+#export-tasks {
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    color: #0d6efd;
+    border-color: #b6d4fe;
+}
+
+#export-tasks:hover {
+    background-color: #b6d4fe;
+    color: #0d6efd;
+    border-color: #b6d4fe;
+}

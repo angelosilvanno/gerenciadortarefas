@@ -151,13 +151,15 @@
       
         <section id="main-panel" style="display: none;">
           <div class="container mt-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h4 class="mt-2 mb-0">Tarefas</h4>
-              <button id="logout-btn" class="btn btn-danger">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <h4 class="mb-0 d-flex align-items-center">
+                <i class="bi bi-list-task me-2"></i> Tarefas
+              </h4>
+              <button id="logout-btn" class="btn btn-outline-danger d-flex align-items-center">
                 <i class="bi bi-box-arrow-left me-1"></i> Sair
               </button>
             </div>
-      
+            
             <div class="row g-3 mb-3 align-items-end">
               <div class="col-lg-6">
                 <input type="text" id="search-tasks" class="form-control" placeholder="Buscar tarefas por título ou tags..." />
@@ -171,7 +173,7 @@
                 </select>
               </div>
               <div class="col-lg-3">
-                <button id="export-tasks" class="btn btn-outline-secondary w-100">
+                <button id="export-tasks" class="btn btn-outline-secondary d-flex align-items-center">
                   <i class="bi bi-download me-1"></i> Exportar
                 </button>
               </div>
@@ -186,7 +188,7 @@
               <!-- Formulário -->
               <div class="col-lg-5 mb-4">
                 <div class="border rounded shadow-sm p-3 bg-white h-100">
-                  <h5>Nova Tarefa</h5>
+                  <h5><i class="bi bi-journal-plus me-2"></i>Nova Tarefa</h5>
                   <form id="task-form">
                     <div class="mb-2 input-group">
                       <span class="input-group-text"><i class="bi bi-card-text"></i></span>

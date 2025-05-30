@@ -238,3 +238,14 @@ main.container {
     color: #dc3545;
     background-color: rgba(220, 53, 69, 0.1);
 }
+
+.task-title {
+    font-weight: 500;
+    font-size: 1.05rem;
+    color: #343a40;
+    letter-spacing: 0.2px;
+}
+
+.task-card i.bi-check-circle-fill {
+    vertical-align:middle
+}

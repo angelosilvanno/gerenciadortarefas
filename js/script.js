@@ -617,8 +617,11 @@ document.addEventListener("DOMContentLoaded", () => {
         div.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center flex-grow-1">
-              <input type="checkbox" class="form-check-input me-2 complete-checkbox" data-index="${originalIndex}" ${normStatus === "concluida" ? "checked" : ""} aria-label="Marcar tarefa ${sanitizeInput(task.title)} como concluída">
-              <h5 class="mb-0 ${normStatus === "concluida" ? "text-decoration-line-through text-muted" : (dataTarefa < hoje ? 'text-danger' : '')}" style="font-weight: bold;">
+            ${normStatus === "concluida" ? `
+              <i class="bi bi-check-circle-fill text-success me-2 fs-5" title="Tarefa concluída"></i>
+            ` : `
+              <input type="checkbox" class="form-check-input me-2 complete-checkbox" data-index="${originalIndex}" aria-label="Marcar tarefa ${sanitizeInput(task.title)} como concluída">
+            `}            
                 ${sanitizeInput(task.title)}
               </h5>
             </div>

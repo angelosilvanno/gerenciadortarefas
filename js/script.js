@@ -575,10 +575,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const [y, m, d] = date.split("-");
         formattedDate = `${d}/${m}/${y}`;
       }
-      const dateHeader = document.createElement("h6");
-      dateHeader.className = "mt-4 text-primary border-bottom pb-1";
-      dateHeader.textContent = `📅 ${formattedDate}`;
-      DOM.taskList.appendChild(dateHeader);
+      const dateHeaderWrapper = document.createElement("div");
+      dateHeaderWrapper.className = "mt-4 mb-2 d-flex align-items-center justify-content-start";
+
+      const datePill = document.createElement("span");
+      datePill.className= "date-pill";
+      datePill.textContent = formattedDate;
+
+      dateHeaderWrapper.appendChild(datePill);
+      DOM.taskList.appendChild(dateHeaderWrapper);
 
       groupedByDate[date].forEach(task => {
         const originalIndex = tasksCache.findIndex(t => t.id === task.id);

@@ -270,3 +270,38 @@ main.container {
     transform: scale(1.03);
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
+
+.form-control,
+.form-select {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: #86b7fe;
+}
+
+.border.rounded.shadow-sm.p-3.bg-white {
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.border.rounded.shadow-sm.p-3.bg-white:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+}
+
+input#category,
+input#tags {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-style: italic;
+}
+
+input#category::placeholder,
+input#tags::placeholder {
+  color: #adb5bd; 
+}

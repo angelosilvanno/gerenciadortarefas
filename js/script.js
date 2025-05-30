@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,80}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const tagRegex = /^[a-zA-Z0-9-]+$/;
 
@@ -293,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (!passwordRegex.test(password)) {
         DOM.registerPasswordInput.classList.add("is-invalid");
-        showUIMessage("Senha inválida. Mínimo 6 caracteres, com pelo menos uma letra e um número.");
+        showUIMessage("Senha inválida. Sua senha deve ter entre 6 a 80 caracteres, com pelo menos uma letra e um número.");
         return;
       }
       if (password !== confirmPassword) {
@@ -369,7 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           DOM.loginUsernameInput.classList.add("is-invalid");
           DOM.loginPasswordInput.classList.add("is-invalid");
-          showUIMessage("Usuário ou senha inválidos.");
+          showUIMessage("Usuário e/ou senha inválidos.");
         }
         
         } catch (error) {
@@ -388,14 +388,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (DOM.taskForm) {
     const submitButton = DOM.taskForm.querySelector('button[type="submit"]');
-    if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskStatusInput && DOM.taskCategoryInput && DOM.taskTagsInput && submitButton) {
+    if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskCategoryInput && DOM.taskTagsInput && submitButton) {
       DOM.taskForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const title = DOM.taskTitleInput.value.trim();
         const description = DOM.taskDescriptionInput.value.trim();
         const dueDate = DOM.taskDueDateInput.value;
         const priority = DOM.taskPriorityInput.value;
-        const status = DOM.taskStatusInput.value;
+        const status = "pendente";
         const category = DOM.taskCategoryInput.value.trim();
         const tagsValue = DOM.taskTagsInput.value.trim();
         const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];

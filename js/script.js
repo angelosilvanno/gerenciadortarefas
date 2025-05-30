@@ -527,7 +527,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .toLowerCase();
   }
 
-  function renderTasks(tasksToDisplay) { // Removed default parameter
+  function renderTasks(tasksToDisplay) { 
     if (!DOM.taskList) {
         console.error("Elemento taskList não encontrado no DOM. Não é possível renderizar tarefas.");
         return;
@@ -588,6 +588,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        const [ano, mes, dia] = task.dueDate.split("-").map(Number);
+        const dataTarefa = new Date(ano, mes -1, dia);
+
+        if (dataTarefa < hoje && normalizeStatus(task.status) !== "concluida") {
+          div.classList.add("tarefa-atrasada");
+        }
         const normStatus = normalizeStatus(task.status);
         if (statusClassMap[normStatus]) {
           div.classList.add(statusClassMap[normStatus]);
@@ -605,7 +613,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center flex-grow-1">
               <input type="checkbox" class="form-check-input me-2 complete-checkbox" data-index="${originalIndex}" ${normStatus === "concluida" ? "checked" : ""} aria-label="Marcar tarefa ${sanitizeInput(task.title)} como concluída">
-              <h5 class="mb-0 ${normStatus === "concluida" ? "text-decoration-line-through text-muted" : ""}" style="font-weight: bold;">
+              <h5 class="mb-0 ${normStatus === "concluida" ? "text-decoration-line-through text-muted" : (dataTarefa < hoje ? 'text-danger' : '')}" style="font-weight: bold;">
                 ${sanitizeInput(task.title)}
               </h5>
             </div>

@@ -198,3 +198,12 @@ main.container {
     background-color: #d4edda;
     opacity: 0.95;
 }
+
+.task-card.tarefa-atrasada {
+    border: 2px solid #dc3545;
+    background-color: #f8d7da;
+}
+
+.task-card.tarefa-atrasada h5{
+    color: #dc3545;
+}

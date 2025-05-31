@@ -852,8 +852,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateProgress();
     showWelcomeModal();
   }
-  
-
 
   document.querySelectorAll('[title]').forEach(el => {
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
@@ -867,3 +865,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initializeApp();
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const themeToggleBtn = document.getElementById("toggle-theme-btn");
+  const body = document.body;
+  const loginImage = document.getElementById("login-image");
+  const mainLogo = document.getElementById("main-logo");
+
+  function updateLogoImages(darkModeEnabled) {
+    if (loginImage) {
+      loginImage.src = darkModeEnabled ? "image/logo-dark.png" : "image/logo.png";
+    }
+    if (mainLogo) {
+      mainLogo.src = darkModeEnabled ? "image/img-dark.png" : "image/img.png";
+    }
+  }
+
+  const darkMode = localStorage.getItem("darkMode") === "true";
+  if (darkMode) {
+    body.classList.add("dark-mode");
+    themeToggleBtn.innerHTML = '<i class="bi bi-sun-fill"></i> Tema Claro';
+  } else {
+    themeToggleBtn.innerHTML = '<i class="bi bi-moon-stars"></i> Tema Escuro';
+  }
+  updateLogoImages(darkMode);
+
+  themeToggleBtn?.addEventListener("click", () => {
+    body.classList.toggle("dark-mode");
+    const darkModeEnabled = body.classList.contains("dark-mode");
+    localStorage.setItem("darkMode", darkModeEnabled);
+
+    themeToggleBtn.innerHTML = darkModeEnabled
+      ? '<i class="bi bi-sun-fill"></i> Tema Claro'
+      : '<i class="bi bi-moon-stars"></i> Tema Escuro';
+
+    updateLogoImages(darkModeEnabled);
+  });
+});
+

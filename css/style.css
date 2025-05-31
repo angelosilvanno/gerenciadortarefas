@@ -319,3 +319,156 @@ input#tags::placeholder {
     color: #0d6efd;
     border-color: #b6d4fe;
 }
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+  
+  body.dark-mode,
+  body.dark-mode .bg-light,
+  body.dark-mode .bg-white {
+    background-color: #121212 !important;
+    color: #e0e0e0;
+  }
+  
+  body.dark-mode .card,
+  body.dark-mode .task-card,
+  body.dark-mode .form-wrapper,
+  body.dark-mode #task-list,
+  body.dark-mode .modal-content,
+  body.dark-mode .shadow-sm {
+    background-color: #1e1e1e !important;
+    color: #e0e0e0;
+    border-color: #2c2c2c;
+    box-shadow: none !important;
+  }
+  
+  body.dark-mode .border,
+  body.dark-mode .border-start {
+    border-color: #444 !important;
+  }
+  
+  body.dark-mode h2,
+  body.dark-mode h4,
+  body.dark-mode h5,
+  body.dark-mode label,
+  body.dark-mode p,
+  body.dark-mode .form-label {
+    color: #f0f0f0;
+  }
+  
+  body.dark-mode .card h5 {
+    color: #ffffff;
+  }
+  
+  body.dark-mode .text-muted {
+    color: #bbb !important;
+  }
+  
+  body.dark-mode .form-control,
+  body.dark-mode .form-select {
+    background-color: #2a2a2a;
+    color: #fff;
+    border: 1px solid #444;
+  }
+  
+  body.dark-mode .form-control::placeholder,
+  body.dark-mode input::placeholder {
+    color: #ccc !important;
+    font-style: italic;
+  }
+  
+  body.dark-mode .input-group-text {
+    background-color: #333;
+    color: #ccc;
+  }
+  
+  body.dark-mode .btn-primary {
+    background: linear-gradient(90deg, #0d6efd, #0a58ca);
+    border: none;
+  }
+  
+  body.dark-mode .btn-outline-danger {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+  }
+  
+  body.dark-mode .btn-outline-danger:hover {
+    background-color: #ff6b6b;
+    color: #fff;
+  }
+  
+  body.dark-mode .btn-outline-secondary {
+    color: #ccc;
+    border-color: #666;
+  }
+  
+  body.dark-mode .btn-outline-secondary:hover {
+    background-color: #666;
+    color: #fff;
+  }
+  
+  
+  body.dark-mode .task-card.task-status-pendente {
+    background-color: rgba(255, 193, 7, 0.12) !important;
+    border-left: 5px solid #ffc107 !important;
+  }
+  
+  body.dark-mode .task-card.task-status-em-andamento {
+    background-color: rgba(102, 178, 255, 0.12) !important;
+    border-left: 5px solid #66b2ff !important;
+  }
+  
+  body.dark-mode .task-card.task-status-concluida {
+    background-color: rgba(40, 167, 69, 0.12) !important;
+    border-left: 5px solid #28a745 !important;
+  }
+  
+  body.dark-mode .task-card.tarefa-atrasada {
+    background-color: rgba(220, 53, 69, 0.12) !important;
+    border-left: 5px solid #dc3545 !important;
+  }
+  
+  body.dark-mode .task-card span {
+    color: #ddd;
+  }
+  
+  body.dark-mode .task-card:hover {
+    background-color: #2a2a2a;
+    transition: background-color 0.3s ease;
+  }
+  
+  
+  body.dark-mode ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  body.dark-mode ::-webkit-scrollbar-track {
+    background: #1e1e1e;
+  }
+  
+  body.dark-mode ::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+  }
+
+body.dark-mode .progress {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  body.dark-mode .progress-bar {
+    background-color: #0d6efd !important;
+  }
+  
+  body.dark-mode input::placeholder {
+    color: #ccc !important;
+    font-style: italic;
+  }
+  
+  body.dark-mode input[type="text"]:not(:focus):placeholder-shown,
+  body.dark-mode input[type="email"]:not(:focus):placeholder-shown {
+    background-color: #1f1f1f !important;
+    color: #e0e0e0;
+  }
+  

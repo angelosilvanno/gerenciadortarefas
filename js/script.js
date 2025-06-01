@@ -632,6 +632,9 @@ document.addEventListener("DOMContentLoaded", () => {
               <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" title="Excluir tarefa ${sanitizeInput(task.title)}" aria-label="Excluir tarefa ${sanitizeInput(task.title)}">
                 <i class="bi bi-trash-fill"></i>
               </button>
+              <button class="btn btn-info btn-sm view-comments-btn" data-index="${originalIndex}" title="Comentários">
+                <i class="bi bi-chat-dots-fill"></i>
+              </button>
             </div>
           </div>
           <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
@@ -647,6 +650,12 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.taskList.addEventListener("click", handleTaskActions);
     DOM.taskList.removeEventListener("change", handleCheckboxClick);
     DOM.taskList.addEventListener("change", handleCheckboxClick);
+    DOM.taskList.querySelectorAll(".view-comments-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.index);
+        openCommentsModal(index);
+      });
+    });
     updateProgress();
   }
 
@@ -861,6 +870,62 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn("Erro ao inicializar tooltip para o elemento:", el, e);
       }
     }
+  });
+
+  let currentCommentTaskIndex = null;
+
+  function openCommentsModal(taskIndex) {
+    currentCommentTaskIndex = taskIndex;
+    const task = tasksCache[taskIndex];
+    if (!task.comments) task.comments = [];
+
+    const commentsList = document.getElementById("comments-list");
+    commentsList.innerHTML = "";
+
+    if (task.comments.length === 0) {
+      commentsList.innerHTML = `<p class="text-muted">Nenhum comentário ainda.</p>`;
+    } else {
+      task.comments.forEach((c, i) => {
+        const div = document.createElement("div");
+        div.className = "d-flex justify-content-between align-items-center border rounded p-2 mb-2";
+        div.innerHTML = `
+          <div class="me-2 flex-grow-1">
+            ${sanitizeInput(c.text)}<br>
+            <small class="text-muted">${sanitizeInput(c.timestamp)}</small>
+          </div>
+          <button class="btn btn-sm btn-danger delete-comment-btn" data-index="${i}">
+            <i class="bi bi-trash"></i>
+          </button>
+        `;
+        commentsList.appendChild(div);
+      });
+
+      commentsList.querySelectorAll(".delete-comment-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = parseInt(btn.dataset.index);
+          task.comments.splice(i, 1);
+          saveTasks();
+          openCommentsModal(taskIndex);
+        });
+      });
+    }
+
+    document.getElementById("new-comment-text").value = "";
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("commentsModal"));
+    modal.show();
+  }
+
+  document.getElementById("add-comment-btn").addEventListener("click", () => {
+    const textarea = document.getElementById("new-comment-text");
+    const text = textarea.value.trim();
+    if (!text) return;
+
+    const task = tasksCache[currentCommentTaskIndex];
+    const timestamp = new Date().toLocaleString("pt-BR");
+    task.comments.push({ text, timestamp });
+    saveTasks();
+    textarea.value = "";
+    openCommentsModal(currentCommentTaskIndex);
   });
 
   initializeApp();

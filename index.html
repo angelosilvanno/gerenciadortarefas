@@ -327,5 +327,23 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/script.js"></script>
+
+    <!-- Modal de Comentários -->
+    <div class="modal fade" id="commentsModal" tabindex="-1" aria-labelledby="commentsModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Comentários</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="comments-list" class="mb-3 text-break"></div>
+            <textarea id="new-comment-text" class="form-control" placeholder="Digite um comentário..."></textarea>
+            <button id="add-comment-btn" class="btn btn-primary mt-2 w-100">Adicionar Comentário</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </body>
 </html>

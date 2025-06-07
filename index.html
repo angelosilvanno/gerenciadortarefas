@@ -16,7 +16,7 @@
   </head>
 
   <!-- Modal de Edição de Tarefas -->
-<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+  <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <form id="edit-task-form">
@@ -340,6 +340,21 @@
             <div id="comments-list" class="mb-3 text-break"></div>
             <textarea id="new-comment-text" class="form-control" placeholder="Digite um comentário..."></textarea>
             <button id="add-comment-btn" class="btn btn-primary mt-2 w-100">Adicionar Comentário</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Histórico -->
+    <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Histórico de Alterações</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="history-list" class="text-break"></div>
           </div>
         </div>
       </div>

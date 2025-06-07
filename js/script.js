@@ -448,16 +448,43 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
       }
-      tasksCache[editingTaskIndex] = {
-        ...tasksCache[editingTaskIndex],
-        title,
-        description,
-        dueDate,
-        priority,
-        status,
-        category,
-        tags
-      };
+
+      const task = tasksCache[editingTaskIndex];
+      const now = new Date().toLocaleString("pt-BR");
+      const userId = "usuario-teste";
+
+      task.history = task.history || [];
+
+      if (task.title !== title) {
+        task.history.push({ field: "Título", date: now, taskId: task.id, userId });
+      }
+      if (task.description !== description) {
+        task.history.push({ field: "Descrição", date: now, taskId: task.id, userId });
+      }
+      if (task.dueDate !== dueDate) {
+        task.history.push({ field: "Data de vencimento", date: now, taskId: task.id, userId });
+      }
+      if (task.priority !== priority) {
+        task.history.push({ field: "Prioridade", date: now, taskId: task.id, userId });
+      }
+      if (task.status !== status) {
+        task.history.push({ field: "Status", date: now, taskId: task.id, userId });
+      }
+      if (task.category !== category) {
+        task.history.push({ field: "Categoria", date: now, taskId: task.id, userId });
+      }
+      if (JSON.stringify(task.tags) !== JSON.stringify(tags)) {
+        task.history.push({ field: "Tags", date: now, taskId: task.id, userId });
+      }
+
+      task.title = title;
+      task.description = description;
+      task.dueDate = dueDate;
+      task.priority = priority;
+      task.status = status;
+      task.category = category;
+      task.tags = tags;
+
       saveTasks();
       showUIMessage("Tarefa atualizada com sucesso!", false);
       if (DOM.editTaskModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
@@ -635,6 +662,9 @@ document.addEventListener("DOMContentLoaded", () => {
               <button class="btn btn-info btn-sm view-comments-btn" data-index="${originalIndex}" title="Comentários">
                 <i class="bi bi-chat-dots-fill"></i>
               </button>
+              <button class="btn btn-secondary btn-sm view-history-btn" data-index="${originalIndex}" title="Ver histórico">
+                <i class="bi bi-clock-history"></i>
+              </button>
             </div>
           </div>
           <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
@@ -654,6 +684,12 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", () => {
         const index = parseInt(btn.dataset.index);
         openCommentsModal(index);
+      });
+    });
+    DOM.taskList.querySelectorAll(".view-history-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.index);
+        openHistoryModal(index);
       });
     });
     updateProgress();
@@ -927,6 +963,31 @@ document.addEventListener("DOMContentLoaded", () => {
     textarea.value = "";
     openCommentsModal(currentCommentTaskIndex);
   });
+
+  function openHistoryModal(taskIndex) {
+    const task = tasksCache[taskIndex];
+    const history = task.history || [];
+
+    const historyList = document.getElementById("history-list");
+    historyList.innerHTML = "";
+
+    if (history.length === 0) {
+      historyList.innerHTML = `<p class="text-muted">Nenhuma alteração registrada.</p>`;
+    } else {
+      history.forEach(item => {
+        const entry = document.createElement("div");
+        entry.className = "border rounded p-2 mb-2";
+        entry.innerHTML = `
+          <div><strong>Campo:</strong> ${sanitizeInput(item.field)}</div>
+          <div><strong>Data:</strong> ${sanitizeInput(item.date)}</div>
+        `;
+        historyList.appendChild(entry);
+      });
+    }
+
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("historyModal"));
+    modal.show();
+  }
 
   initializeApp();
 });

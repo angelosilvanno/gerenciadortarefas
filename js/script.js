@@ -47,24 +47,10 @@ document.addEventListener("DOMContentLoaded", () => {
     editStatusInput: document.getElementById('edit-status'),
     editCategoryInput: document.getElementById('edit-category'),
     editTagsInput: document.getElementById('edit-tags'),
-    toggleLoginPasswordBtn: document.querySelector(".toggle-password"),
   };
 
   let editingTaskIndex = null;
   let tasksCache = [];
-
-  const togglePasswordBtn = document.getElementById("toggle-password-btn");
-  const togglePasswordIcon = document.getElementById("toggle-login-password-icon");
-  const passwordInput = DOM.loginPasswordInput;
-
-  if (togglePasswordBtn && togglePasswordIcon && passwordInput) {
-    togglePasswordBtn.addEventListener("click", () => {
-      const isPasswordVisible = passwordInput.type === "text";
-      passwordInput.type = isPasswordVisible ? "password" : "text";
-      togglePasswordIcon.classList.toggle("bi-eye", !isPasswordVisible);
-      togglePasswordIcon.classList.toggle("bi-eye-slash", isPasswordDisible);
-    });
-  }
 
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,80}$/;
@@ -73,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const sanitizeInput = (input) => {
     if (typeof input !== 'string' && typeof input !== 'number') {
-        return '';
+      return '';
     }
     const div = document.createElement("div");
     div.textContent = String(input);
@@ -87,10 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const showUIMessage = (msg, isError = true) => {
-    if (!DOM.messageDiv) {
-      console.warn("Message div not found in DOM.");
-      return;
-    }
+    if (!DOM.messageDiv) return;
     DOM.messageDiv.textContent = msg;
     DOM.messageDiv.className = `alert ${isError ? "alert-danger" : "alert-success"} text-center shadow p-3`;
     DOM.messageDiv.classList.remove("d-none");
@@ -107,19 +90,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const saveTasks = () => {
     const currentUserItem = localStorage.getItem("currentUser");
-    if (!currentUserItem) {
-        console.error("Tentativa de salvar tarefas sem usuário logado (currentUser não encontrado).");
-        return;
-    }
+    if (!currentUserItem) return;
     try {
-        const currentUser = JSON.parse(currentUserItem);
-        if (currentUser && currentUser.username) {
-            localStorage.setItem(`tasks_${currentUser.username}`, JSON.stringify(tasksCache));
-        } else {
-            console.error("Tentativa de salvar tarefas sem usuário logado válido ou username ausente.");
-        }
+      const currentUser = JSON.parse(currentUserItem);
+      if (currentUser && currentUser.username) {
+        localStorage.setItem(`tasks_${currentUser.username}`, JSON.stringify(tasksCache));
+      }
     } catch (error) {
-        console.error("Erro ao parsear currentUser de localStorage:", error);
+      console.error("Erro ao parsear currentUser de localStorage:", error);
     }
   };
 
@@ -134,13 +112,13 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const filterTasksByStatus = (status = "todos") => {
-    if (status === "todos") return tasksCache; // Returns a reference, be careful if modifying
+    if (status === "todos") return tasksCache;
     const normalizedFilterStatus = normalizeStatus(status);
     return tasksCache.filter(task => normalizeStatus(task.status) === normalizedFilterStatus);
   };
 
   const filterTasksBySearchQuery = (query) => {
-    if (!query) return tasksCache; // Returns a reference
+    if (!query) return tasksCache;
     const lowerCaseQuery = query.toLowerCase();
     return tasksCache.filter(task =>
       task.title.toLowerCase().includes(lowerCaseQuery) ||
@@ -165,11 +143,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (DOM.registerContainer) DOM.registerContainer.style.display = "none";
     if (DOM.mainPanel) DOM.mainPanel.style.display = "none";
   }
+
   function showRegisterPanel() {
     if (DOM.loginContainer) DOM.loginContainer.style.display = "none";
     if (DOM.registerContainer) DOM.registerContainer.style.display = "block";
     if (DOM.mainPanel) DOM.mainPanel.style.display = "none";
   }
+
   function showMainAppPanel() {
     if (DOM.loginContainer) DOM.loginContainer.style.display = "none";
     if (DOM.registerContainer) DOM.registerContainer.style.display = "none";
@@ -207,16 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showRegisterPanel();
     });
   }
-  if (DOM.toggleLoginPasswordBtn && DOM.loginPasswordInput) {
-    DOM.toggleLoginPasswordBtn.addEventListener("click", () => {
-      const input = DOM.loginPasswordInput;
-      const icon = document.getElementById("toggle-login-password-icon");
-      const isPassword = input.type === "password";
-      input.type = isPassword ? "text" : "password";
-      icon.classList.toggle("bi-eye");
-      icon.classList.toggle("bi-eye-slash");
-    });
-  }
+
   if (DOM.showLoginLink) {
     DOM.showLoginLink.addEventListener("click", (e) => {
       e.preventDefault();
@@ -253,15 +224,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       DOM.forgotEmailInput.value = "";
     });
-  } else if (DOM.forgotPasswordForm) {
-    console.warn("Formulário de esqueci a senha não pôde ser inicializado completamente: campo de email ausente.");
   }
-
 
   if (DOM.logoutBtn) {
     DOM.logoutBtn.addEventListener("click", () => {
       localStorage.removeItem("currentUser");
-      localStorage.removeItem("authToken");
       tasksCache = [];
       showLoginPanel();
       if (DOM.taskList) DOM.taskList.innerHTML = "";
@@ -314,23 +281,23 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       const hashedPassword = await hashPassword(password);
-      users.push({ username, email, password: hashedPassword });
+      users.push({
+        username,
+        email,
+        password: hashedPassword
+      });
       localStorage.setItem("users", JSON.stringify(users));
       showUIMessage("Cadastro realizado com sucesso!", false);
       showLoginPanel();
       DOM.registerForm.reset();
     });
-  } else if (DOM.registerForm) {
-     console.warn("Formulário de registro não pôde ser inicializado completamente: campos ausentes.");
   }
 
   if (DOM.loginForm && DOM.loginUsernameInput && DOM.loginPasswordInput && DOM.loginButton) {
     DOM.loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const spinner = DOM.loginButton.querySelector(".spinner-border");
       DOM.loginUsernameInput.classList.remove("is-invalid");
       DOM.loginPasswordInput.classList.remove("is-invalid");
-      if (spinner) spinner.classList.remove("d-none");
       DOM.loginButton.disabled = true;
 
       const username = DOM.loginUsernameInput.value.trim();
@@ -343,52 +310,32 @@ document.addEventListener("DOMContentLoaded", () => {
         const user = users.find(u => u.username === username && u.password === hashedPassword);
 
         if (user) {
-          try {
-            localStorage.setItem("currentUser", JSON.stringify({ username: user.username, email: user.email }));
-        
-            const userTasksRaw = localStorage.getItem(`tasks_${user.username}`);
-            try {
-              tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
-            } catch (parseErr) {
-              console.warn("Erro ao fazer parse das tarefas do usuário:", parseErr);
-              tasksCache = [];
-            }
-        
-            showMainAppPanel();
-        
-            setTimeout(() => {
-              renderTasks(tasksCache);
-              updateProgress();
-            }, 50);
-        
-            DOM.loginForm.reset();
-          } catch (internalErr) {
-            console.error("Erro ao configurar usuário logado:", internalErr);
-            showUIMessage("Erro ao carregar dados do usuário.");
-          }
+          localStorage.setItem("currentUser", JSON.stringify({
+            username: user.username,
+            email: user.email
+          }));
+          const userTasksRaw = localStorage.getItem(`tasks_${user.username}`);
+          tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
+          showMainAppPanel();
+          renderTasks(tasksCache);
+          updateProgress();
+          DOM.loginForm.reset();
         } else {
           DOM.loginUsernameInput.classList.add("is-invalid");
           DOM.loginPasswordInput.classList.add("is-invalid");
           showUIMessage("Usuário e/ou senha inválidos.");
         }
-        
-        } catch (error) {
-          console.error("Erro durante o login:", error);
-          showUIMessage("Ocorreu um erro inesperado durante o login. Tente novamente.");
-        } finally {
-          if (spinner) spinner.classList.add("d-none");
-          DOM.loginButton.disabled = false;
-        }
-        
+      } catch (error) {
+        console.error("Erro durante o login:", error);
+        showUIMessage("Ocorreu um erro inesperado durante o login. Tente novamente.");
+      } finally {
+        DOM.loginButton.disabled = false;
+      }
     });
-  } else if (DOM.loginForm) {
-      console.warn("Formulário de login não pôde ser inicializado completamente: campos ausentes.");
   }
 
-
   if (DOM.taskForm) {
-    const submitButton = DOM.taskForm.querySelector('button[type="submit"]');
-    if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskCategoryInput && DOM.taskTagsInput && submitButton) {
+    if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskCategoryInput && DOM.taskTagsInput) {
       DOM.taskForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const title = DOM.taskTitleInput.value.trim();
@@ -410,15 +357,22 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
         }
-        const taskObj = { title, description, dueDate, priority, status, category, tags, id: Date.now() };
+        const taskObj = {
+          title,
+          description,
+          dueDate,
+          priority,
+          status,
+          category,
+          tags,
+          id: Date.now()
+        };
         tasksCache.push(taskObj);
         saveTasks();
         DOM.taskForm.reset();
         showUIMessage("Tarefa criada com sucesso!", false);
-        renderTasks(tasksCache); // Display all tasks after adding a new one
+        renderTasks(tasksCache);
       });
-    } else {
-        console.warn("Formulário de criação de tarefa não pôde ser inicializado completamente: campos ou botão de submit ausentes.");
     }
   }
 
@@ -450,33 +404,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const task = tasksCache[editingTaskIndex];
-      const now = new Date().toLocaleString("pt-BR");
-      const userId = "usuario-teste";
-
-      task.history = task.history || [];
-
-      if (task.title !== title) {
-        task.history.push({ field: "Título", date: now, taskId: task.id, userId });
-      }
-      if (task.description !== description) {
-        task.history.push({ field: "Descrição", date: now, taskId: task.id, userId });
-      }
-      if (task.dueDate !== dueDate) {
-        task.history.push({ field: "Data de vencimento", date: now, taskId: task.id, userId });
-      }
-      if (task.priority !== priority) {
-        task.history.push({ field: "Prioridade", date: now, taskId: task.id, userId });
-      }
-      if (task.status !== status) {
-        task.history.push({ field: "Status", date: now, taskId: task.id, userId });
-      }
-      if (task.category !== category) {
-        task.history.push({ field: "Categoria", date: now, taskId: task.id, userId });
-      }
-      if (JSON.stringify(task.tags) !== JSON.stringify(tags)) {
-        task.history.push({ field: "Tags", date: now, taskId: task.id, userId });
-      }
-
       task.title = title;
       task.description = description;
       task.dueDate = dueDate;
@@ -494,12 +421,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       editingTaskIndex = null;
-      renderTasks(tasksCache); // Display all tasks after editing
+      renderTasks(tasksCache);
     });
-  } else if (DOM.editTaskForm) {
-    console.warn("Formulário de edição de tarefa não pôde ser inicializado completamente: campos ausentes.");
   }
-
 
   function handleTaskActions(event) {
     const button = event.target.closest('button[data-index]');
@@ -509,7 +433,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const index = parseInt(originalIndexAttr, 10);
 
     if (isNaN(index) || index < 0 || index >= tasksCache.length) {
-      console.error("Índice de tarefa inválido ou tarefa não encontrada:", index);
       showUIMessage("Erro ao processar ação da tarefa: tarefa não encontrada.", true);
       return;
     }
@@ -529,19 +452,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const index = parseInt(originalIndexAttr, 10);
 
     if (isNaN(index) || index < 0 || index >= tasksCache.length) {
-      console.error("Índice de tarefa inválido no checkbox:", index);
       showUIMessage("Erro ao atualizar status da tarefa: tarefa não encontrada.", true);
       return;
     }
     const task = tasksCache[index];
     if (!task) {
-        console.error("Tarefa não encontrada no cache para o índice (checkbox):", index);
-        showUIMessage("Erro ao atualizar status da tarefa: dados da tarefa inconsistentes.", true);
-        return;
+      showUIMessage("Erro ao atualizar status da tarefa: dados da tarefa inconsistentes.", true);
+      return;
     }
     task.status = checkbox.checked ? "concluída" : "pendente";
     saveTasks();
-    renderTasks(tasksCache); // Display all tasks after status change
+    renderTasks(tasksCache);
   }
 
   function normalizeStatus(status) {
@@ -554,11 +475,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .toLowerCase();
   }
 
-  function renderTasks(tasksToDisplay) { 
-    if (!DOM.taskList) {
-        console.error("Elemento taskList não encontrado no DOM. Não é possível renderizar tarefas.");
-        return;
-    }
+  function renderTasks(tasksToDisplay) {
+    if (!DOM.taskList) return;
+
     const statusClassMap = {
       "pendente": "task-status-pendente",
       "emandamento": "task-status-em-andamento",
@@ -573,13 +492,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const groupedByDate = {};
     tasksToDisplay.forEach(task => {
-      if (!task || typeof task.dueDate !== 'string') {
-        console.warn("Tarefa inválida ou sem data de vencimento encontrada:", task);
-        return;
-      }
+      if (!task || typeof task.dueDate !== 'string') return;
       const [year, month, day] = task.dueDate.split("-");
       if (!year || !month || !day || isNaN(parseInt(year)) || isNaN(parseInt(month)) || isNaN(parseInt(day))) {
-        console.warn("Formato de data inválido para a tarefa:", task.title, task.dueDate);
         const dateKey = 'Data Inválida';
         if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
         groupedByDate[dateKey].push(task);
@@ -591,9 +506,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
-        if (a === 'Data Inválida') return 1;
-        if (b === 'Data Inválida') return -1;
-        return new Date(a) - new Date(b);
+      if (a === 'Data Inválida') return 1;
+      if (b === 'Data Inválida') return -1;
+      return new Date(a) - new Date(b);
     });
 
     sortedDates.forEach(date => {
@@ -606,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
       dateHeaderWrapper.className = "mt-4 mb-2 d-flex align-items-center justify-content-start";
 
       const datePill = document.createElement("span");
-      datePill.className= "date-pill";
+      datePill.className = "date-pill";
       datePill.textContent = formattedDate;
 
       dateHeaderWrapper.appendChild(datePill);
@@ -614,16 +529,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       groupedByDate[date].forEach(task => {
         const originalIndex = tasksCache.findIndex(t => t.id === task.id);
-        if (originalIndex === -1) {
-          console.warn("Tarefa do groupedByDate não encontrada no tasksCache original. ID:", task.id);
-          return;
-        }
+        if (originalIndex === -1) return;
+
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
         const [ano, mes, dia] = task.dueDate.split("-").map(Number);
-        const dataTarefa = new Date(ano, mes -1, dia);
+        const dataTarefa = new Date(ano, mes - 1, dia);
 
         if (dataTarefa < hoje && normalizeStatus(task.status) !== "concluida") {
           div.classList.add("tarefa-atrasada");
@@ -636,19 +549,18 @@ document.addEventListener("DOMContentLoaded", () => {
         div.setAttribute("data-priority", task.priority);
         div.setAttribute("data-status", task.status);
 
-        const tagsHtml = (task.tags && Array.isArray(task.tags) && task.tags.length > 0)
-            ? `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>`
-            : "";
+        const tagsHtml = (task.tags && Array.isArray(task.tags) && task.tags.length > 0) ?
+          `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : "";
         const categoryHtml = task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : "";
 
         div.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center flex-grow-1">
-            ${normStatus === "concluida" ? `
-              <i class="bi bi-check-circle-fill text-success me-2 fs-5" title="Tarefa concluída"></i>
-            ` : `
-              <input type="checkbox" class="form-check-input me-2 complete-checkbox" data-index="${originalIndex}" aria-label="Marcar tarefa ${sanitizeInput(task.title)} como concluída">
-            `}            
+              ${normStatus === "concluida" ?
+              `<i class="bi bi-check-circle-fill text-success me-2 fs-5" title="Tarefa concluída"></i>` :
+              `<input type="checkbox" class="form-check-input me-2 complete-checkbox" data-index="${originalIndex}" aria-label="Marcar tarefa ${sanitizeInput(task.title)} como concluída">`
+              }
+              <h5 class="mb-0 flex-grow-1 task-title" style="word-break: break-word;">
                 ${sanitizeInput(task.title)}
               </h5>
             </div>
@@ -658,12 +570,6 @@ document.addEventListener("DOMContentLoaded", () => {
               </button>
               <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" title="Excluir tarefa ${sanitizeInput(task.title)}" aria-label="Excluir tarefa ${sanitizeInput(task.title)}">
                 <i class="bi bi-trash-fill"></i>
-              </button>
-              <button class="btn btn-info btn-sm view-comments-btn" data-index="${originalIndex}" title="Comentários">
-                <i class="bi bi-chat-dots-fill"></i>
-              </button>
-              <button class="btn btn-secondary btn-sm view-history-btn" data-index="${originalIndex}" title="Ver histórico">
-                <i class="bi bi-clock-history"></i>
               </button>
             </div>
           </div>
@@ -680,27 +586,15 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.taskList.addEventListener("click", handleTaskActions);
     DOM.taskList.removeEventListener("change", handleCheckboxClick);
     DOM.taskList.addEventListener("change", handleCheckboxClick);
-    DOM.taskList.querySelectorAll(".view-comments-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const index = parseInt(btn.dataset.index);
-        openCommentsModal(index);
-      });
-    });
-    DOM.taskList.querySelectorAll(".view-history-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const index = parseInt(btn.dataset.index);
-        openHistoryModal(index);
-      });
-    });
     updateProgress();
   }
 
   let currentDeleteHandler = null;
+
   function confirmTaskDeletion(index) {
     if (!DOM.deleteModalElement || !DOM.confirmDeleteButton || typeof bootstrap === 'undefined' || !bootstrap.Modal) {
-        console.error("Componentes do modal de exclusão não encontrados.");
-        showUIMessage("Não foi possível abrir a confirmação de exclusão.", true);
-        return;
+      showUIMessage("Não foi possível abrir a confirmação de exclusão.", true);
+      return;
     }
     const taskToDelete = tasksCache[index];
     const modalBody = DOM.deleteModalElement.querySelector('.modal-body');
@@ -709,8 +603,6 @@ document.addEventListener("DOMContentLoaded", () => {
       modalBody.textContent = `Deseja realmente excluir a tarefa "${sanitizeInput(taskToDelete.title)}"?`;
     } else if (modalBody) {
       modalBody.textContent = "Deseja realmente excluir esta tarefa?";
-    } else {
-      console.error("Corpo do modal de exclusão não encontrado.");
     }
 
     const modal = bootstrap.Modal.getOrCreateInstance(DOM.deleteModalElement);
@@ -737,18 +629,19 @@ document.addEventListener("DOMContentLoaded", () => {
       renderTasks(tasksToRenderAfterDelete);
       modal.hide();
     };
-    DOM.confirmDeleteButton.addEventListener('click', currentDeleteHandler, { once: true });
+    DOM.confirmDeleteButton.addEventListener('click', currentDeleteHandler, {
+      once: true
+    });
     modal.show();
   }
 
   function editTask(index) {
     if (index < 0 || index >= tasksCache.length) {
-        showUIMessage("Tarefa inválida para edição.", true);
-        return;
+      showUIMessage("Tarefa inválida para edição.", true);
+      return;
     }
     const task = tasksCache[index];
     if (!task || !DOM.editTaskModalElement || !DOM.editTitleInput || !DOM.editDescriptionInput || !DOM.editDueDateInput || !DOM.editPriorityInput || !DOM.editStatusInput || !DOM.editCategoryInput || !DOM.editTagsInput) {
-      console.error("Tarefa não encontrada ou modal/campos de edição não existem.");
       showUIMessage("Não é possível editar a tarefa: formulário incompleto.", true);
       return;
     }
@@ -771,9 +664,9 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.filterStatusSelect.addEventListener("change", (e) => {
       const status = e.target.value;
       const query = DOM.searchTasksInput ? DOM.searchTasksInput.value.trim() : "";
-      let filteredTasks = filterTasksByStatus(status); // Uses tasksCache
+      let filteredTasks = filterTasksByStatus(status);
       if (query) {
-        const searchedOverall = filterTasksBySearchQuery(query); // Uses tasksCache
+        const searchedOverall = filterTasksBySearchQuery(query);
         filteredTasks = filteredTasks.filter(task => searchedOverall.includes(task));
       }
       renderTasks(filteredTasks);
@@ -784,9 +677,9 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.searchTasksInput.addEventListener("input", debounce((e) => {
       const query = e.target.value.trim();
       const status = DOM.filterStatusSelect ? DOM.filterStatusSelect.value : "todos";
-      let searchedTasksResult = filterTasksBySearchQuery(query); // Uses tasksCache
+      let searchedTasksResult = filterTasksBySearchQuery(query);
       if (status !== "todos") {
-        const statusFiltered = filterTasksByStatus(status); // Uses tasksCache
+        const statusFiltered = filterTasksByStatus(status);
         searchedTasksResult = searchedTasksResult.filter(task => statusFiltered.includes(task));
       }
       renderTasks(searchedTasksResult);
@@ -811,7 +704,9 @@ document.addEventListener("DOMContentLoaded", () => {
         escapeCsvField(task.tags && Array.isArray(task.tags) ? task.tags.join(";") : "")
       ]);
       const csvContent = [csvHeader.join(","), ...csvRows.map(row => row.join(","))].join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const blob = new Blob([csvContent], {
+        type: "text/csv;charset=utf-8;"
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -826,7 +721,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function checkDueDates() {
     if (!('Notification' in window) || Notification.permission !== "granted") return;
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -850,10 +744,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (notificationTitle) {
-          new Notification(notificationTitle, { body: `Prazo: ${sanitizeInput(task.dueDate)}` });
+          new Notification(notificationTitle, {
+            body: `Prazo: ${sanitizeInput(task.dueDate)}`
+          });
         }
       } catch (error) {
-          console.warn("Erro ao processar data de vencimento para notificação:", task.title, error);
+        console.warn("Erro ao processar data de vencimento para notificação:", task.title, error);
       }
     });
   }
@@ -869,7 +765,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initializeApp() {
     const currentUserItem = localStorage.getItem("currentUser");
-  
     if (currentUserItem) {
       try {
         const currentUser = JSON.parse(currentUserItem);
@@ -877,14 +772,12 @@ document.addEventListener("DOMContentLoaded", () => {
           const userTasksRaw = localStorage.getItem(`tasks_${currentUser.username}`);
           tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
           showMainAppPanel();
-  
           renderTasks(tasksCache);
         } else {
           showLoginPanel();
           tasksCache = [];
         }
       } catch (error) {
-        console.error("Erro ao parsear currentUser ou tasks do localStorage na inicialização:", error);
         localStorage.removeItem("currentUser");
         showLoginPanel();
         tasksCache = [];
@@ -893,139 +786,15 @@ document.addEventListener("DOMContentLoaded", () => {
       showLoginPanel();
       tasksCache = [];
     }
-  
     updateProgress();
     showWelcomeModal();
   }
 
   document.querySelectorAll('[title]').forEach(el => {
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-      try {
-        new bootstrap.Tooltip(el);
-      } catch (e) {
-        console.warn("Erro ao inicializar tooltip para o elemento:", el, e);
-      }
+      new bootstrap.Tooltip(el);
     }
   });
-
-  let currentCommentTaskIndex = null;
-
-  function openCommentsModal(taskIndex) {
-    currentCommentTaskIndex = taskIndex;
-    const task = tasksCache[taskIndex];
-    if (!task.comments) task.comments = [];
-
-    const commentsList = document.getElementById("comments-list");
-    commentsList.innerHTML = "";
-
-    if (task.comments.length === 0) {
-      commentsList.innerHTML = `<p class="text-muted">Nenhum comentário ainda.</p>`;
-    } else {
-      task.comments.forEach((c, i) => {
-        const div = document.createElement("div");
-        div.className = "d-flex justify-content-between align-items-center border rounded p-2 mb-2";
-        div.innerHTML = `
-          <div class="me-2 flex-grow-1">
-            ${sanitizeInput(c.text)}<br>
-            <small class="text-muted">${sanitizeInput(c.timestamp)}</small>
-          </div>
-          <button class="btn btn-sm btn-danger delete-comment-btn" data-index="${i}">
-            <i class="bi bi-trash"></i>
-          </button>
-        `;
-        commentsList.appendChild(div);
-      });
-
-      commentsList.querySelectorAll(".delete-comment-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const i = parseInt(btn.dataset.index);
-          task.comments.splice(i, 1);
-          saveTasks();
-          openCommentsModal(taskIndex);
-        });
-      });
-    }
-
-    document.getElementById("new-comment-text").value = "";
-    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("commentsModal"));
-    modal.show();
-  }
-
-  document.getElementById("add-comment-btn").addEventListener("click", () => {
-    const textarea = document.getElementById("new-comment-text");
-    const text = textarea.value.trim();
-    if (!text) return;
-
-    const task = tasksCache[currentCommentTaskIndex];
-    const timestamp = new Date().toLocaleString("pt-BR");
-    task.comments.push({ text, timestamp });
-    saveTasks();
-    textarea.value = "";
-    openCommentsModal(currentCommentTaskIndex);
-  });
-
-  function openHistoryModal(taskIndex) {
-    const task = tasksCache[taskIndex];
-    const history = task.history || [];
-
-    const historyList = document.getElementById("history-list");
-    historyList.innerHTML = "";
-
-    if (history.length === 0) {
-      historyList.innerHTML = `<p class="text-muted">Nenhuma alteração registrada.</p>`;
-    } else {
-      history.forEach(item => {
-        const entry = document.createElement("div");
-        entry.className = "border rounded p-2 mb-2";
-        entry.innerHTML = `
-          <div><strong>Campo:</strong> ${sanitizeInput(item.field)}</div>
-          <div><strong>Data:</strong> ${sanitizeInput(item.date)}</div>
-        `;
-        historyList.appendChild(entry);
-      });
-    }
-
-    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("historyModal"));
-    modal.show();
-  }
 
   initializeApp();
 });
-
-document.addEventListener("DOMContentLoaded", () => {
-  const themeToggleBtn = document.getElementById("toggle-theme-btn");
-  const body = document.body;
-  const loginImage = document.getElementById("login-image");
-  const mainLogo = document.getElementById("main-logo");
-
-  function updateLogoImages(darkModeEnabled) {
-    if (loginImage) {
-      loginImage.src = darkModeEnabled ? "image/logo-dark.png" : "image/logo.png";
-    }
-    if (mainLogo) {
-      mainLogo.src = darkModeEnabled ? "image/img-dark.png" : "image/img.png";
-    }
-  }
-
-  const darkMode = localStorage.getItem("darkMode") === "true";
-  if (darkMode) {
-    body.classList.add("dark-mode");
-    themeToggleBtn.innerHTML = '<i class="bi bi-sun-fill"></i> Tema Claro';
-  } else {
-    themeToggleBtn.innerHTML = '<i class="bi bi-moon-stars"></i> Tema Escuro';
-  }
-  updateLogoImages(darkMode);
-
-  themeToggleBtn?.addEventListener("click", () => {
-    body.classList.toggle("dark-mode");
-    const darkModeEnabled = body.classList.contains("dark-mode");
-    localStorage.setItem("darkMode", darkModeEnabled);
-
-    themeToggleBtn.innerHTML = darkModeEnabled
-      ? '<i class="bi bi-sun-fill"></i> Tema Claro'
-      : '<i class="bi bi-moon-stars"></i> Tema Escuro';
-
-    updateLogoImages(darkModeEnabled);
-  });
-});
-

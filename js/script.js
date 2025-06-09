@@ -47,13 +47,27 @@ document.addEventListener("DOMContentLoaded", () => {
     editStatusInput: document.getElementById('edit-status'),
     editCategoryInput: document.getElementById('edit-category'),
     editTagsInput: document.getElementById('edit-tags'),
+    toggleLoginPasswordBtn: document.querySelector(".toggle-password"),
   };
 
   let editingTaskIndex = null;
   let tasksCache = [];
 
+  const togglePasswordBtn = document.getElementById("toggle-password-btn");
+  const togglePasswordIcon = document.getElementById("toggle-login-password-icon");
+  const passwordInput = DOM.loginPasswordInput;
+
+  if (togglePasswordBtn && togglePasswordIcon && passwordInput) {
+    togglePasswordBtn.addEventListener("click", () => {
+      const isPasswordVisible = passwordInput.type === "text";
+      passwordInput.type = isPasswordVisible ? "password" : "text";
+      togglePasswordIcon.classList.toggle("bi-eye", !isPasswordVisible);
+      togglePasswordIcon.classList.toggle("bi-eye-slash", isPasswordDisible);
+    });
+  }
+
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
-  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,80}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const tagRegex = /^[a-zA-Z0-9-]+$/;
 
@@ -193,6 +207,16 @@ document.addEventListener("DOMContentLoaded", () => {
       showRegisterPanel();
     });
   }
+  if (DOM.toggleLoginPasswordBtn && DOM.loginPasswordInput) {
+    DOM.toggleLoginPasswordBtn.addEventListener("click", () => {
+      const input = DOM.loginPasswordInput;
+      const icon = document.getElementById("toggle-login-password-icon");
+      const isPassword = input.type === "password";
+      input.type = isPassword ? "text" : "password";
+      icon.classList.toggle("bi-eye");
+      icon.classList.toggle("bi-eye-slash");
+    });
+  }
   if (DOM.showLoginLink) {
     DOM.showLoginLink.addEventListener("click", (e) => {
       e.preventDefault();
@@ -269,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (!passwordRegex.test(password)) {
         DOM.registerPasswordInput.classList.add("is-invalid");
-        showUIMessage("Senha inválida. Mínimo 6 caracteres, com pelo menos uma letra e um número.");
+        showUIMessage("Senha inválida. Sua senha deve ter entre 6 a 80 caracteres, com pelo menos uma letra e um número.");
         return;
       }
       if (password !== confirmPassword) {
@@ -319,25 +343,43 @@ document.addEventListener("DOMContentLoaded", () => {
         const user = users.find(u => u.username === username && u.password === hashedPassword);
 
         if (user) {
-          localStorage.setItem("currentUser", JSON.stringify({ username: user.username, email: user.email }));
-          const userTasksRaw = localStorage.getItem(`tasks_${user.username}`);
-          tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
-          showMainAppPanel();
-          renderTasks([]); // Display no tasks initially after login
-          updateProgress(); // Update progress based on all tasks in cache
-          DOM.loginForm.reset();
+          try {
+            localStorage.setItem("currentUser", JSON.stringify({ username: user.username, email: user.email }));
+        
+            const userTasksRaw = localStorage.getItem(`tasks_${user.username}`);
+            try {
+              tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
+            } catch (parseErr) {
+              console.warn("Erro ao fazer parse das tarefas do usuário:", parseErr);
+              tasksCache = [];
+            }
+        
+            showMainAppPanel();
+        
+            setTimeout(() => {
+              renderTasks(tasksCache);
+              updateProgress();
+            }, 50);
+        
+            DOM.loginForm.reset();
+          } catch (internalErr) {
+            console.error("Erro ao configurar usuário logado:", internalErr);
+            showUIMessage("Erro ao carregar dados do usuário.");
+          }
         } else {
           DOM.loginUsernameInput.classList.add("is-invalid");
           DOM.loginPasswordInput.classList.add("is-invalid");
-          showUIMessage("Usuário ou senha inválidos.");
+          showUIMessage("Usuário e/ou senha inválidos.");
         }
-      } catch (error) {
-        console.error("Erro durante o login:", error);
-        showUIMessage("Ocorreu um erro inesperado durante o login. Tente novamente.");
-      } finally {
-        if (spinner) spinner.classList.add("d-none");
-        DOM.loginButton.disabled = false;
-      }
+        
+        } catch (error) {
+          console.error("Erro durante o login:", error);
+          showUIMessage("Ocorreu um erro inesperado durante o login. Tente novamente.");
+        } finally {
+          if (spinner) spinner.classList.add("d-none");
+          DOM.loginButton.disabled = false;
+        }
+        
     });
   } else if (DOM.loginForm) {
       console.warn("Formulário de login não pôde ser inicializado completamente: campos ausentes.");
@@ -346,14 +388,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (DOM.taskForm) {
     const submitButton = DOM.taskForm.querySelector('button[type="submit"]');
-    if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskStatusInput && DOM.taskCategoryInput && DOM.taskTagsInput && submitButton) {
+    if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskCategoryInput && DOM.taskTagsInput && submitButton) {
       DOM.taskForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const title = DOM.taskTitleInput.value.trim();
         const description = DOM.taskDescriptionInput.value.trim();
         const dueDate = DOM.taskDueDateInput.value;
         const priority = DOM.taskPriorityInput.value;
-        const status = DOM.taskStatusInput.value;
+        const status = "pendente";
         const category = DOM.taskCategoryInput.value.trim();
         const tagsValue = DOM.taskTagsInput.value.trim();
         const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
@@ -406,16 +448,43 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
       }
-      tasksCache[editingTaskIndex] = {
-        ...tasksCache[editingTaskIndex],
-        title,
-        description,
-        dueDate,
-        priority,
-        status,
-        category,
-        tags
-      };
+
+      const task = tasksCache[editingTaskIndex];
+      const now = new Date().toLocaleString("pt-BR");
+      const userId = "usuario-teste";
+
+      task.history = task.history || [];
+
+      if (task.title !== title) {
+        task.history.push({ field: "Título", date: now, taskId: task.id, userId });
+      }
+      if (task.description !== description) {
+        task.history.push({ field: "Descrição", date: now, taskId: task.id, userId });
+      }
+      if (task.dueDate !== dueDate) {
+        task.history.push({ field: "Data de vencimento", date: now, taskId: task.id, userId });
+      }
+      if (task.priority !== priority) {
+        task.history.push({ field: "Prioridade", date: now, taskId: task.id, userId });
+      }
+      if (task.status !== status) {
+        task.history.push({ field: "Status", date: now, taskId: task.id, userId });
+      }
+      if (task.category !== category) {
+        task.history.push({ field: "Categoria", date: now, taskId: task.id, userId });
+      }
+      if (JSON.stringify(task.tags) !== JSON.stringify(tags)) {
+        task.history.push({ field: "Tags", date: now, taskId: task.id, userId });
+      }
+
+      task.title = title;
+      task.description = description;
+      task.dueDate = dueDate;
+      task.priority = priority;
+      task.status = status;
+      task.category = category;
+      task.tags = tags;
+
       saveTasks();
       showUIMessage("Tarefa atualizada com sucesso!", false);
       if (DOM.editTaskModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
@@ -485,7 +554,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .toLowerCase();
   }
 
-  function renderTasks(tasksToDisplay) { // Removed default parameter
+  function renderTasks(tasksToDisplay) { 
     if (!DOM.taskList) {
         console.error("Elemento taskList não encontrado no DOM. Não é possível renderizar tarefas.");
         return;
@@ -533,10 +602,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const [y, m, d] = date.split("-");
         formattedDate = `${d}/${m}/${y}`;
       }
-      const dateHeader = document.createElement("h6");
-      dateHeader.className = "mt-4 text-primary border-bottom pb-1";
-      dateHeader.textContent = `📅 ${formattedDate}`;
-      DOM.taskList.appendChild(dateHeader);
+      const dateHeaderWrapper = document.createElement("div");
+      dateHeaderWrapper.className = "mt-4 mb-2 d-flex align-items-center justify-content-start";
+
+      const datePill = document.createElement("span");
+      datePill.className= "date-pill";
+      datePill.textContent = formattedDate;
+
+      dateHeaderWrapper.appendChild(datePill);
+      DOM.taskList.appendChild(dateHeaderWrapper);
 
       groupedByDate[date].forEach(task => {
         const originalIndex = tasksCache.findIndex(t => t.id === task.id);
@@ -546,6 +620,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        const [ano, mes, dia] = task.dueDate.split("-").map(Number);
+        const dataTarefa = new Date(ano, mes -1, dia);
+
+        if (dataTarefa < hoje && normalizeStatus(task.status) !== "concluida") {
+          div.classList.add("tarefa-atrasada");
+        }
         const normStatus = normalizeStatus(task.status);
         if (statusClassMap[normStatus]) {
           div.classList.add(statusClassMap[normStatus]);
@@ -562,8 +644,11 @@ document.addEventListener("DOMContentLoaded", () => {
         div.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center flex-grow-1">
-              <input type="checkbox" class="form-check-input me-2 complete-checkbox" data-index="${originalIndex}" ${normStatus === "concluida" ? "checked" : ""} aria-label="Marcar tarefa ${sanitizeInput(task.title)} como concluída">
-              <h5 class="mb-0 ${normStatus === "concluida" ? "text-decoration-line-through text-muted" : ""}" style="font-weight: bold;">
+            ${normStatus === "concluida" ? `
+              <i class="bi bi-check-circle-fill text-success me-2 fs-5" title="Tarefa concluída"></i>
+            ` : `
+              <input type="checkbox" class="form-check-input me-2 complete-checkbox" data-index="${originalIndex}" aria-label="Marcar tarefa ${sanitizeInput(task.title)} como concluída">
+            `}            
                 ${sanitizeInput(task.title)}
               </h5>
             </div>
@@ -573,6 +658,12 @@ document.addEventListener("DOMContentLoaded", () => {
               </button>
               <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" title="Excluir tarefa ${sanitizeInput(task.title)}" aria-label="Excluir tarefa ${sanitizeInput(task.title)}">
                 <i class="bi bi-trash-fill"></i>
+              </button>
+              <button class="btn btn-info btn-sm view-comments-btn" data-index="${originalIndex}" title="Comentários">
+                <i class="bi bi-chat-dots-fill"></i>
+              </button>
+              <button class="btn btn-secondary btn-sm view-history-btn" data-index="${originalIndex}" title="Ver histórico">
+                <i class="bi bi-clock-history"></i>
               </button>
             </div>
           </div>
@@ -589,6 +680,18 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.taskList.addEventListener("click", handleTaskActions);
     DOM.taskList.removeEventListener("change", handleCheckboxClick);
     DOM.taskList.addEventListener("change", handleCheckboxClick);
+    DOM.taskList.querySelectorAll(".view-comments-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.index);
+        openCommentsModal(index);
+      });
+    });
+    DOM.taskList.querySelectorAll(".view-history-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const index = parseInt(btn.dataset.index);
+        openHistoryModal(index);
+      });
+    });
     updateProgress();
   }
 
@@ -766,32 +869,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initializeApp() {
     const currentUserItem = localStorage.getItem("currentUser");
-    let initialTasksToRender = []; // Always render an empty list initially after login or if no user
-
+  
     if (currentUserItem) {
-        try {
-            const currentUser = JSON.parse(currentUserItem);
-            if (currentUser && currentUser.username) {
-                const userTasksRaw = localStorage.getItem(`tasks_${currentUser.username}`);
-                tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
-                showMainAppPanel();
-                // initialTasksToRender remains [] as per new requirement
-            } else {
-                showLoginPanel();
-                tasksCache = [];
-            }
-        } catch (error) {
-            console.error("Erro ao parsear currentUser ou tasks do localStorage na inicialização:", error);
-            localStorage.removeItem("currentUser");
-            showLoginPanel();
-            tasksCache = [];
+      try {
+        const currentUser = JSON.parse(currentUserItem);
+        if (currentUser && currentUser.username) {
+          const userTasksRaw = localStorage.getItem(`tasks_${currentUser.username}`);
+          tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
+          showMainAppPanel();
+  
+          renderTasks(tasksCache);
+        } else {
+          showLoginPanel();
+          tasksCache = [];
         }
-    } else {
+      } catch (error) {
+        console.error("Erro ao parsear currentUser ou tasks do localStorage na inicialização:", error);
+        localStorage.removeItem("currentUser");
         showLoginPanel();
         tasksCache = [];
+      }
+    } else {
+      showLoginPanel();
+      tasksCache = [];
     }
-    renderTasks(initialTasksToRender);
-    updateProgress(); // updateProgress uses tasksCache, which is correctly populated
+  
+    updateProgress();
     showWelcomeModal();
   }
 
@@ -805,5 +908,124 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  let currentCommentTaskIndex = null;
+
+  function openCommentsModal(taskIndex) {
+    currentCommentTaskIndex = taskIndex;
+    const task = tasksCache[taskIndex];
+    if (!task.comments) task.comments = [];
+
+    const commentsList = document.getElementById("comments-list");
+    commentsList.innerHTML = "";
+
+    if (task.comments.length === 0) {
+      commentsList.innerHTML = `<p class="text-muted">Nenhum comentário ainda.</p>`;
+    } else {
+      task.comments.forEach((c, i) => {
+        const div = document.createElement("div");
+        div.className = "d-flex justify-content-between align-items-center border rounded p-2 mb-2";
+        div.innerHTML = `
+          <div class="me-2 flex-grow-1">
+            ${sanitizeInput(c.text)}<br>
+            <small class="text-muted">${sanitizeInput(c.timestamp)}</small>
+          </div>
+          <button class="btn btn-sm btn-danger delete-comment-btn" data-index="${i}">
+            <i class="bi bi-trash"></i>
+          </button>
+        `;
+        commentsList.appendChild(div);
+      });
+
+      commentsList.querySelectorAll(".delete-comment-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = parseInt(btn.dataset.index);
+          task.comments.splice(i, 1);
+          saveTasks();
+          openCommentsModal(taskIndex);
+        });
+      });
+    }
+
+    document.getElementById("new-comment-text").value = "";
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("commentsModal"));
+    modal.show();
+  }
+
+  document.getElementById("add-comment-btn").addEventListener("click", () => {
+    const textarea = document.getElementById("new-comment-text");
+    const text = textarea.value.trim();
+    if (!text) return;
+
+    const task = tasksCache[currentCommentTaskIndex];
+    const timestamp = new Date().toLocaleString("pt-BR");
+    task.comments.push({ text, timestamp });
+    saveTasks();
+    textarea.value = "";
+    openCommentsModal(currentCommentTaskIndex);
+  });
+
+  function openHistoryModal(taskIndex) {
+    const task = tasksCache[taskIndex];
+    const history = task.history || [];
+
+    const historyList = document.getElementById("history-list");
+    historyList.innerHTML = "";
+
+    if (history.length === 0) {
+      historyList.innerHTML = `<p class="text-muted">Nenhuma alteração registrada.</p>`;
+    } else {
+      history.forEach(item => {
+        const entry = document.createElement("div");
+        entry.className = "border rounded p-2 mb-2";
+        entry.innerHTML = `
+          <div><strong>Campo:</strong> ${sanitizeInput(item.field)}</div>
+          <div><strong>Data:</strong> ${sanitizeInput(item.date)}</div>
+        `;
+        historyList.appendChild(entry);
+      });
+    }
+
+    const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById("historyModal"));
+    modal.show();
+  }
+
   initializeApp();
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const themeToggleBtn = document.getElementById("toggle-theme-btn");
+  const body = document.body;
+  const loginImage = document.getElementById("login-image");
+  const mainLogo = document.getElementById("main-logo");
+
+  function updateLogoImages(darkModeEnabled) {
+    if (loginImage) {
+      loginImage.src = darkModeEnabled ? "image/logo-dark.png" : "image/logo.png";
+    }
+    if (mainLogo) {
+      mainLogo.src = darkModeEnabled ? "image/img-dark.png" : "image/img.png";
+    }
+  }
+
+  const darkMode = localStorage.getItem("darkMode") === "true";
+  if (darkMode) {
+    body.classList.add("dark-mode");
+    themeToggleBtn.innerHTML = '<i class="bi bi-sun-fill"></i> Tema Claro';
+  } else {
+    themeToggleBtn.innerHTML = '<i class="bi bi-moon-stars"></i> Tema Escuro';
+  }
+  updateLogoImages(darkMode);
+
+  themeToggleBtn?.addEventListener("click", () => {
+    body.classList.toggle("dark-mode");
+    const darkModeEnabled = body.classList.contains("dark-mode");
+    localStorage.setItem("darkMode", darkModeEnabled);
+
+    themeToggleBtn.innerHTML = darkModeEnabled
+      ? '<i class="bi bi-sun-fill"></i> Tema Claro'
+      : '<i class="bi bi-moon-stars"></i> Tema Escuro';
+
+    updateLogoImages(darkModeEnabled);
+  });
+});
+

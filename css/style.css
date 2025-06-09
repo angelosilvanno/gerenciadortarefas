@@ -165,22 +165,31 @@ main.container {
     border-top-right-radius: 0;
 }
 
-/* Cars mais compactos */
 
-.task-card {
-    padding: 0.5rem 1rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    border-radius:0.5rem;
-}
-
-/* Cores por status */
 .task-card {
     border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: 1rem;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.2rem;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.date-pill {
+    display: inline-block;
+    background-color: #cce5ff;
+    color: #004085;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 20px;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.task-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .task-card.task-status-pendente {
@@ -198,3 +207,268 @@ main.container {
     background-color: #d4edda;
     opacity: 0.95;
 }
+
+.task-card.tarefa-atrasada {
+    border: 2px solid #dc3545;
+    background-color: #f8d7da;
+}
+
+.task-card.tarefa-atrasada h5{
+    color: #dc3545;
+}
+
+.task-card .btn-warning,
+.task-card .btn-danger {
+    border: none;
+    border-radius: 1rem;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.85rem;
+    box-shadow: none;
+    background-color: transparent;
+    color: #495057;
+    transition: all 0.2s ease-in-out;
+}
+
+.task-card .btn-warning:hover {
+    color: #ffc107;
+    background-color: rgba(225, 193, 7, 0.1);
+}
+
+.task-card .btn-danger:hover {
+    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.task-title {
+    font-weight: 500;
+    font-size: 1.05rem;
+    color: #343a40;
+    letter-spacing: 0.2px;
+}
+
+.task-card i.bi-check-circle-fill {
+    vertical-align:middle
+}
+
+.task-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+    transition: all 0.2s ease-in-out;
+}
+
+#create-task-btn {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#create-task-btn:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.form-control,
+.form-select {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: #86b7fe;
+}
+
+.border.rounded.shadow-sm.p-3.bg-white {
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.border.rounded.shadow-sm.p-3.bg-white:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+}
+
+input#category,
+input#tags {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-style: italic;
+}
+
+input#category::placeholder,
+input#tags::placeholder {
+  color: #adb5bd; 
+}
+
+#export-tasks {
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    color: #0d6efd;
+    border-color: #b6d4fe;
+}
+
+#export-tasks:hover {
+    background-color: #b6d4fe;
+    color: #0d6efd;
+    border-color: #b6d4fe;
+}
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+  
+  body.dark-mode,
+  body.dark-mode .bg-light,
+  body.dark-mode .bg-white {
+    background-color: #121212 !important;
+    color: #e0e0e0;
+  }
+  
+  body.dark-mode .card,
+  body.dark-mode .task-card,
+  body.dark-mode .form-wrapper,
+  body.dark-mode #task-list,
+  body.dark-mode .modal-content,
+  body.dark-mode .shadow-sm {
+    background-color: #1e1e1e !important;
+    color: #e0e0e0;
+    border-color: #2c2c2c;
+    box-shadow: none !important;
+  }
+  
+  body.dark-mode .border,
+  body.dark-mode .border-start {
+    border-color: #444 !important;
+  }
+  
+  body.dark-mode h2,
+  body.dark-mode h4,
+  body.dark-mode h5,
+  body.dark-mode label,
+  body.dark-mode p,
+  body.dark-mode .form-label {
+    color: #f0f0f0;
+  }
+  
+  body.dark-mode .card h5 {
+    color: #ffffff;
+  }
+  
+  body.dark-mode .text-muted {
+    color: #bbb !important;
+  }
+  
+  body.dark-mode .form-control,
+  body.dark-mode .form-select {
+    background-color: #2a2a2a;
+    color: #fff;
+    border: 1px solid #444;
+  }
+  
+  body.dark-mode .form-control::placeholder,
+  body.dark-mode input::placeholder {
+    color: #ccc !important;
+    font-style: italic;
+  }
+  
+  body.dark-mode .input-group-text {
+    background-color: #333;
+    color: #ccc;
+  }
+  
+  body.dark-mode .btn-primary {
+    background: linear-gradient(90deg, #0d6efd, #0a58ca);
+    border: none;
+  }
+  
+  body.dark-mode .btn-outline-danger {
+    color: #ff6b6b;
+    border-color: #ff6b6b;
+  }
+  
+  body.dark-mode .btn-outline-danger:hover {
+    background-color: #ff6b6b;
+    color: #fff;
+  }
+  
+  body.dark-mode .btn-outline-secondary {
+    color: #ccc;
+    border-color: #666;
+  }
+  
+  body.dark-mode .btn-outline-secondary:hover {
+    background-color: #666;
+    color: #fff;
+  }
+  
+  
+  body.dark-mode .task-card.task-status-pendente {
+    background-color: rgba(255, 193, 7, 0.12) !important;
+    border-left: 5px solid #ffc107 !important;
+  }
+  
+  body.dark-mode .task-card.task-status-em-andamento {
+    background-color: rgba(102, 178, 255, 0.12) !important;
+    border-left: 5px solid #66b2ff !important;
+  }
+  
+  body.dark-mode .task-card.task-status-concluida {
+    background-color: rgba(40, 167, 69, 0.12) !important;
+    border-left: 5px solid #28a745 !important;
+  }
+  
+  body.dark-mode .task-card.tarefa-atrasada {
+    background-color: rgba(220, 53, 69, 0.12) !important;
+    border-left: 5px solid #dc3545 !important;
+  }
+  
+  body.dark-mode .task-card span {
+    color: #ddd;
+  }
+  
+  body.dark-mode .task-card:hover {
+    background-color: #2a2a2a;
+    transition: background-color 0.3s ease;
+  }
+  
+  
+  body.dark-mode ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  body.dark-mode ::-webkit-scrollbar-track {
+    background: #1e1e1e;
+  }
+  
+  body.dark-mode ::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+  }
+
+body.dark-mode .progress {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  body.dark-mode .progress-bar {
+    background-color: #0d6efd !important;
+  }
+  
+  body.dark-mode input::placeholder {
+    color: #ccc !important;
+    font-style: italic;
+  }
+  
+  body.dark-mode input[type="text"]:not(:focus):placeholder-shown,
+  body.dark-mode input[type="email"]:not(:focus):placeholder-shown {
+    background-color: #1f1f1f !important;
+    color: #e0e0e0;
+  }
+  

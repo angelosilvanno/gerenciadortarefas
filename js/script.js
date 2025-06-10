@@ -50,15 +50,21 @@ document.addEventListener("DOMContentLoaded", () => {
     themeToggleButton: document.getElementById("theme-toggle-btn"),
     tagsContainer: document.getElementById("tags-container"),
     editTagsContainer: document.getElementById("edit-tags-container"),
+    clearCompletedBtn: document.getElementById("clear-completed-btn"),
+    loginEyeBtn: document.getElementById('login-eye-btn'),
+    registerEyeBtn: document.getElementById('register-eye-btn'),
+    confirmRegisterEyeBtn: document.getElementById('confirm-register-eye-btn'),
+    taskListTitle: document.querySelector("#task-list").parentElement.querySelector("h5"),
   };
 
   let editingTaskIndex = null;
   let tasksCache = [];
+  let currentFilter = { type: 'status', value: 'todos' };
 
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,80}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const tagRegex = /^[a-zA-Z0-9-]+$/;
+  const tagRegex = /^[a-zA-Z0-9\u00C0-\u017F-]+$/;
 
   const sanitizeInput = (input) => {
     if (typeof input !== 'string' && typeof input !== 'number') {
@@ -120,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     inputElement.addEventListener("keyup", (e) => {
       if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
-        const tagValue = inputElement.value.trim().replace(/,$/, '');
+        const tagValue = inputElement.value.trim().replace(/,$/, '').toLowerCase();
         if (tagValue && tagRegex.test(tagValue)) {
           createTagPill(tagValue, containerElement);
           inputElement.value = "";
@@ -176,19 +182,31 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.progressText.textContent = `${completed} de ${total} tarefas concluídas`;
   };
 
-  const filterTasksByStatus = (status = "todos") => {
-    if (status === "todos") return tasksCache;
-    const normalizedFilterStatus = normalizeStatus(status);
-    return tasksCache.filter(task => normalizeStatus(task.status) === normalizedFilterStatus);
-  };
+  const filterAndRender = () => {
+    let filteredTasks = [...tasksCache];
+    const query = DOM.searchTasksInput.value.toLowerCase().trim();
 
-  const filterTasksBySearchQuery = (query) => {
-    if (!query) return tasksCache;
-    const lowerCaseQuery = query.toLowerCase();
-    return tasksCache.filter(task =>
-      task.title.toLowerCase().includes(lowerCaseQuery) ||
-      (task.tags && Array.isArray(task.tags) && task.tags.some(tag => typeof tag === 'string' && tag.toLowerCase().includes(lowerCaseQuery)))
-    );
+    if (currentFilter.type === 'status') {
+      if (currentFilter.value !== 'todos') {
+        filteredTasks = filteredTasks.filter(task => normalizeStatus(task.status) === normalizeStatus(currentFilter.value));
+      }
+      DOM.taskListTitle.textContent = "Lista de Tarefas";
+    } else if (currentFilter.type === 'category') {
+      filteredTasks = filteredTasks.filter(task => task.category && task.category.toLowerCase() === currentFilter.value.toLowerCase());
+      DOM.taskListTitle.innerHTML = `Lista de Tarefas <small class="text-muted fs-6">(Categoria: ${sanitizeInput(currentFilter.value)})</small>`;
+    } else if (currentFilter.type === 'tag') {
+      filteredTasks = filteredTasks.filter(task => task.tags && task.tags.includes(currentFilter.value));
+      DOM.taskListTitle.innerHTML = `Lista de Tarefas <small class="text-muted fs-6">(Tag: ${sanitizeInput(currentFilter.value)})</small>`;
+    }
+    
+    if (query) {
+      filteredTasks = filteredTasks.filter(task =>
+        task.title.toLowerCase().includes(query) ||
+        (task.tags && task.tags.some(tag => tag.toLowerCase().includes(query)))
+      );
+    }
+
+    renderTasks(filteredTasks);
   };
 
   const debounce = (func, wait) => {
@@ -201,6 +219,22 @@ document.addEventListener("DOMContentLoaded", () => {
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
     };
+  };
+
+  const setupPasswordToggle = (inputEl, buttonEl) => {
+    if (!inputEl || !buttonEl) return;
+    buttonEl.addEventListener('click', () => {
+        const icon = buttonEl.querySelector('i');
+        if (inputEl.type === 'password') {
+            inputEl.type = 'text';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        } else {
+            inputEl.type = 'password';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        }
+    });
   };
 
   function showLoginPanel() {
@@ -391,7 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const userTasksRaw = localStorage.getItem(`tasks_${user.username}`);
           tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
           showMainAppPanel();
-          renderTasks(tasksCache);
+          filterAndRender();
           updateProgress();
           DOM.loginForm.reset();
         } else {
@@ -440,7 +474,7 @@ document.addEventListener("DOMContentLoaded", () => {
         DOM.taskForm.reset();
         DOM.tagsContainer.innerHTML = '';
         showUIMessage("Tarefa criada com sucesso!", false);
-        renderTasks(tasksCache);
+        filterAndRender();
       });
     }
   }
@@ -483,26 +517,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       editingTaskIndex = null;
-      renderTasks(tasksCache);
+      filterAndRender();
     });
   }
 
   function handleTaskActions(event) {
     const button = event.target.closest('button[data-index]');
-    if (!button) return;
+    const badge = event.target.closest('[data-category], [data-tag]');
 
-    const originalIndexAttr = button.dataset.index;
-    const index = parseInt(originalIndexAttr, 10);
+    if (button) {
+      const originalIndexAttr = button.dataset.index;
+      const index = parseInt(originalIndexAttr, 10);
 
-    if (isNaN(index) || index < 0 || index >= tasksCache.length) {
-      showUIMessage("Erro ao processar ação da tarefa: tarefa não encontrada.", true);
-      return;
-    }
+      if (isNaN(index) || index < 0 || index >= tasksCache.length) {
+        showUIMessage("Erro ao processar ação da tarefa: tarefa não encontrada.", true);
+        return;
+      }
 
-    if (button.classList.contains("edit-btn")) {
-      editTask(index);
-    } else if (button.classList.contains("delete-btn")) {
-      confirmTaskDeletion(index);
+      if (button.classList.contains("edit-btn")) {
+        editTask(index);
+      } else if (button.classList.contains("delete-btn")) {
+        confirmTaskDeletion(index);
+      }
+    } else if (badge) {
+        if (badge.dataset.category) {
+            currentFilter = { type: 'category', value: badge.dataset.category };
+            DOM.filterStatusSelect.value = 'todos';
+        } else if (badge.dataset.tag) {
+            currentFilter = { type: 'tag', value: badge.dataset.tag };
+            DOM.filterStatusSelect.value = 'todos';
+        }
+        filterAndRender();
     }
   }
 
@@ -524,7 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     task.status = checkbox.checked ? "concluída" : "pendente";
     saveTasks();
-    renderTasks(tasksCache);
+    filterAndRender();
   }
 
   function normalizeStatus(status) {
@@ -584,7 +629,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const datePill = document.createElement("span");
       datePill.className = "date-pill";
-      datePill.textContent = formattedDate;
+      datePill.innerHTML = `🗓️ ${formattedDate}`;
 
       dateHeaderWrapper.appendChild(datePill);
       DOM.taskList.appendChild(dateHeaderWrapper);
@@ -612,11 +657,11 @@ document.addEventListener("DOMContentLoaded", () => {
         div.setAttribute("data-status", task.status);
 
         const categoryHtml = task.category 
-            ? `<span class="task-category-badge">${sanitizeInput(task.category)}</span>` 
+            ? `<span class="task-category-badge" data-category="${sanitizeInput(task.category)}">${sanitizeInput(task.category)}</span>` 
             : "";
 
         const tagsHtml = (task.tags && Array.isArray(task.tags) && task.tags.length > 0) 
-            ? task.tags.map(tag => `<span class="task-tag-badge">${sanitizeInput(tag)}</span>`).join('') 
+            ? task.tags.map(tag => `<span class="task-tag-badge" data-tag="${sanitizeInput(tag)}">${sanitizeInput(tag)}</span>`).join('') 
             : "";
         
         const metaHtml = (categoryHtml || tagsHtml)
@@ -651,10 +696,7 @@ document.addEventListener("DOMContentLoaded", () => {
         DOM.taskList.appendChild(div);
       });
     });
-    DOM.taskList.removeEventListener("click", handleTaskActions);
-    DOM.taskList.addEventListener("click", handleTaskActions);
-    DOM.taskList.removeEventListener("change", handleCheckboxClick);
-    DOM.taskList.addEventListener("change", handleCheckboxClick);
+    
     updateProgress();
   }
 
@@ -687,15 +729,7 @@ document.addEventListener("DOMContentLoaded", () => {
       tasksCache.splice(index, 1);
       saveTasks();
       showUIMessage("Tarefa removida com sucesso!", false);
-
-      const currentFilterStatus = DOM.filterStatusSelect ? DOM.filterStatusSelect.value : "todos";
-      const currentSearchQuery = DOM.searchTasksInput ? DOM.searchTasksInput.value : "";
-      let tasksToRenderAfterDelete = filterTasksByStatus(currentFilterStatus);
-      if (currentSearchQuery) {
-        const searchedOverall = filterTasksBySearchQuery(currentSearchQuery);
-        tasksToRenderAfterDelete = tasksToRenderAfterDelete.filter(task => searchedOverall.includes(task));
-      }
-      renderTasks(tasksToRenderAfterDelete);
+      filterAndRender();
       modal.hide();
     };
     DOM.confirmDeleteButton.addEventListener('click', currentDeleteHandler, {
@@ -737,28 +771,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (DOM.filterStatusSelect) {
     DOM.filterStatusSelect.addEventListener("change", (e) => {
-      const status = e.target.value;
-      const query = DOM.searchTasksInput ? DOM.searchTasksInput.value.trim() : "";
-      let filteredTasks = filterTasksByStatus(status);
-      if (query) {
-        const searchedOverall = filterTasksBySearchQuery(query);
-        filteredTasks = filteredTasks.filter(task => searchedOverall.includes(task));
-      }
-      renderTasks(filteredTasks);
+      currentFilter = { type: 'status', value: e.target.value };
+      filterAndRender();
     });
   }
 
   if (DOM.searchTasksInput) {
-    DOM.searchTasksInput.addEventListener("input", debounce((e) => {
-      const query = e.target.value.trim();
-      const status = DOM.filterStatusSelect ? DOM.filterStatusSelect.value : "todos";
-      let searchedTasksResult = filterTasksBySearchQuery(query);
-      if (status !== "todos") {
-        const statusFiltered = filterTasksByStatus(status);
-        searchedTasksResult = searchedTasksResult.filter(task => statusFiltered.includes(task));
-      }
-      renderTasks(searchedTasksResult);
+    DOM.searchTasksInput.addEventListener("input", debounce(() => {
+        filterAndRender();
     }, 300));
+  }
+  
+  if (DOM.clearCompletedBtn) {
+      DOM.clearCompletedBtn.addEventListener("click", () => {
+          const completedTasks = tasksCache.some(task => normalizeStatus(task.status) === 'concluida');
+          if (!completedTasks) {
+              showUIMessage("Nenhuma tarefa concluída para limpar.", false);
+              return;
+          }
+          tasksCache = tasksCache.filter(task => normalizeStatus(task.status) !== 'concluida');
+          saveTasks();
+          showUIMessage("Tarefas concluídas foram limpas.", false);
+          filterAndRender();
+      });
   }
 
   if (DOM.exportTasksBtn) {
@@ -842,12 +877,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
 
+    setupPasswordToggle(DOM.loginPasswordInput, DOM.loginEyeBtn);
+    setupPasswordToggle(DOM.registerPasswordInput, DOM.registerEyeBtn);
+    setupPasswordToggle(DOM.registerConfirmPasswordInput, DOM.confirmRegisterEyeBtn);
+
     if(DOM.taskTagsInput && DOM.tagsContainer) {
         setupTagInput(DOM.taskTagsInput, DOM.tagsContainer);
     }
     if(DOM.editTagsInput && DOM.editTagsContainer) {
         setupTagInput(DOM.editTagsInput, DOM.editTagsContainer);
     }
+
+    DOM.taskList.addEventListener("click", handleTaskActions);
+    DOM.taskList.addEventListener("change", handleCheckboxClick);
 
     const currentUserItem = localStorage.getItem("currentUser");
     if (currentUserItem) {
@@ -857,7 +899,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const userTasksRaw = localStorage.getItem(`tasks_${currentUser.username}`);
           tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
           showMainAppPanel();
-          renderTasks(tasksCache);
+          filterAndRender();
         } else {
           showLoginPanel();
           tasksCache = [];

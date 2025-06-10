@@ -29,6 +29,7 @@ main.container {
 #login-image {
     width: 100%;
     object-fit: cover; 
+    transition: filter 0.3s ease-in-out;
 }
 
 #login-container .card-body,
@@ -260,10 +261,6 @@ input#tags::placeholder {
     color: #fff;
 }
 
-/* --------------------------------- */
-/* --- MODO ESCURO (DARK MODE) --- */
-/* --------------------------------- */
-
 body.dark-mode {
     background-color: #121212;
     color: #e0e0e0;
@@ -441,10 +438,6 @@ body.dark-mode .task-tag-badge {
     background-color: #5a6268;
 }
 
-/* --- RESPONSIVIDADE COMPLETA --- */
-
-
-/* Telas de Celular (pequenas) */
 @media (max-width: 767.98px) {
     main.container {
         margin-top: 1rem !important;
@@ -509,7 +502,6 @@ body.dark-mode .task-tag-badge {
     }
 }
 
-/* Telas de Tablet (médias) */
 @media (min-width: 768px) and (max-width: 991.98px) {
     #login-container {
         max-width: 720px; 
@@ -523,7 +515,6 @@ body.dark-mode .task-tag-badge {
     }
 }
 
-/* Telas de Desktop (grandes) */
 @media (min-width: 992px) {
     #login-image {
         height: 100%; 
@@ -543,4 +534,8 @@ body.dark-mode .task-tag-badge {
         border-top-right-radius: var(--bs-card-border-radius);
         border-bottom-right-radius: var(--bs-card-border-radius);
     }
+}
+
+body.dark-mode #login-image {
+    filter: invert(1) hue-rotate(180deg) brightness(1.2) contrast(0.9);
 }

@@ -413,7 +413,6 @@ body.dark-mode input[type="email"]:not(:focus):placeholder-shown {
     color: #e0e0e0;
 }
 
-/* --- ESTILOS PARA ETIQUETAS (TAGS) INTERATIVAS NO INPUT --- */
 .tags-container {
     display: flex;
     flex-wrap: wrap;
@@ -476,7 +475,6 @@ body.dark-mode .tag-pill .tag-remove-btn:hover {
     color: #ff6b6b;
 }
 
-/* --- ESTILOS ADICIONADOS: Badges de Categoria e Tags no Card --- */
 .task-meta-wrapper {
     display: flex;
     flex-wrap: wrap;

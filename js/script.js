@@ -48,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
     editCategoryInput: document.getElementById('edit-category'),
     editTagsInput: document.getElementById('edit-tags'),
     themeToggleButton: document.getElementById("theme-toggle-btn"),
-    // --- REFERÊNCIAS ADICIONADAS ---
     tagsContainer: document.getElementById("tags-container"),
     editTagsContainer: document.getElementById("edit-tags-container"),
   };
@@ -117,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // --- FUNÇÕES ADICIONADAS PARA GERENCIAR ETIQUETAS ---
   const setupTagInput = (inputElement, containerElement) => {
     inputElement.addEventListener("keyup", (e) => {
       if (e.key === 'Enter' || e.key === ',') {
@@ -154,7 +152,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const getTagsFromContainer = (containerElement) => {
     return Array.from(containerElement.querySelectorAll('.tag-pill span')).map(span => span.textContent);
   };
-  // --- FIM DAS FUNÇÕES ADICIONADAS ---
   
   const saveTasks = () => {
     const currentUserItem = localStorage.getItem("currentUser");
@@ -411,7 +408,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- LÓGICA DE CRIAÇÃO DE TAREFA ATUALIZADA ---
   if (DOM.taskForm) {
     if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskCategoryInput && DOM.taskTagsInput) {
       DOM.taskForm.addEventListener("submit", (e) => {
@@ -422,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const priority = DOM.taskPriorityInput.value;
         const status = "pendente";
         const category = DOM.taskCategoryInput.value.trim();
-        const tags = getTagsFromContainer(DOM.tagsContainer); // MODIFICADO
+        const tags = getTagsFromContainer(DOM.tagsContainer);
 
         if (!title || !description || !dueDate) {
           showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");
@@ -442,14 +438,13 @@ document.addEventListener("DOMContentLoaded", () => {
         tasksCache.push(taskObj);
         saveTasks();
         DOM.taskForm.reset();
-        DOM.tagsContainer.innerHTML = ''; // ADICIONADO para limpar as pílulas
+        DOM.tagsContainer.innerHTML = '';
         showUIMessage("Tarefa criada com sucesso!", false);
         renderTasks(tasksCache);
       });
     }
   }
 
-  // --- LÓGICA DE EDIÇÃO DE TAREFA ATUALIZADA ---
   if (DOM.editTaskForm && DOM.editTitleInput && DOM.editDescriptionInput && DOM.editDueDateInput && DOM.editPriorityInput && DOM.editStatusInput && DOM.editCategoryInput && DOM.editTagsInput) {
     DOM.editTaskForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -463,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const priority = DOM.editPriorityInput.value;
       const status = DOM.editStatusInput.value;
       const category = DOM.editCategoryInput.value.trim();
-      const tags = getTagsFromContainer(DOM.editTagsContainer); // MODIFICADO
+      const tags = getTagsFromContainer(DOM.editTagsContainer);
 
       if (!title || !description || !dueDate) {
         showUIMessage("Preencha os campos obrigatórios no formulário de edição: Título, Descrição e Prazo.", true);
@@ -616,9 +611,17 @@ document.addEventListener("DOMContentLoaded", () => {
         div.setAttribute("data-priority", task.priority);
         div.setAttribute("data-status", task.status);
 
-        const tagsHtml = (task.tags && Array.isArray(task.tags) && task.tags.length > 0) ?
-          `<small class="text-muted d-block"><strong>Tags:</strong> ${task.tags.map(sanitizeInput).join(", ")}</small>` : "";
-        const categoryHtml = task.category ? `<small class="text-muted d-block"><strong>Categoria:</strong> ${sanitizeInput(task.category)}</small>` : "";
+        const categoryHtml = task.category 
+            ? `<span class="task-category-badge">${sanitizeInput(task.category)}</span>` 
+            : "";
+
+        const tagsHtml = (task.tags && Array.isArray(task.tags) && task.tags.length > 0) 
+            ? task.tags.map(tag => `<span class="task-tag-badge">${sanitizeInput(tag)}</span>`).join('') 
+            : "";
+        
+        const metaHtml = (categoryHtml || tagsHtml)
+            ? `<div class="task-meta-wrapper">${categoryHtml}${tagsHtml}</div>`
+            : "";
 
         div.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-2">
@@ -643,8 +646,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
           <small class="text-muted d-block"><strong>Prazo:</strong> ${sanitizeInput(task.dueDate)}</small>
           <small class="text-muted d-block"><strong>Prioridade:</strong> ${sanitizeInput(task.priority)} | <strong>Status:</strong> ${sanitizeInput(task.status)}</small>
-          ${categoryHtml}
-          ${tagsHtml}
+          ${metaHtml}
         `;
         DOM.taskList.appendChild(div);
       });
@@ -702,7 +704,6 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.show();
   }
 
-  // --- FUNÇÃO DE EDIÇÃO DE TAREFA ATUALIZADA ---
   function editTask(index) {
     if (index < 0 || index >= tasksCache.length) {
       showUIMessage("Tarefa inválida para edição.", true);
@@ -720,12 +721,11 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.editStatusInput.value = task.status;
     DOM.editCategoryInput.value = task.category || '';
     
-    // --- LÓGICA ATUALIZADA para popular as pílulas de tags ---
-    DOM.editTagsContainer.innerHTML = ''; // Limpa tags antigas
+    DOM.editTagsContainer.innerHTML = '';
     if (task.tags && Array.isArray(task.tags)) {
         task.tags.forEach(tag => createTagPill(tag, DOM.editTagsContainer));
     }
-    DOM.editTagsInput.value = ''; // Limpa o campo de input
+    DOM.editTagsInput.value = '';
     
     editingTaskIndex = index;
 
@@ -842,7 +842,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
 
-    // --- ADICIONADO: Ativa a funcionalidade de input de tag ---
     if(DOM.taskTagsInput && DOM.tagsContainer) {
         setupTagInput(DOM.taskTagsInput, DOM.tagsContainer);
     }

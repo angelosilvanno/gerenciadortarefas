@@ -15,6 +15,7 @@
     <link rel="shortcut icon" href="image/icone.png" type="image/x-icon" />
   </head>
   <body class="bg-light">
+    <!-- MODAL DE EDIÇÃO ATUALIZADO -->
     <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -55,9 +56,13 @@
                 <label for="edit-category" class="form-label">Categoria</label>
                 <input type="text" class="form-control" id="edit-category" />
               </div>
+              <!-- ESTRUTURA ATUALIZADA PARA ETIQUETAS (EDITAR) -->
               <div class="mb-3">
-                <label for="edit-tags" class="form-label">Tags (separadas por vírgula)</label>
-                <input type="text" class="form-control" id="edit-tags" />
+                <label for="edit-tags" class="form-label">Tags</label>
+                <div class="input-group">
+                  <div id="edit-tags-container" class="tags-container"></div>
+                  <input type="text" class="form-control" id="edit-tags" placeholder="Digite uma tag e aperte Enter" />
+                </div>
               </div>
             </div>
             <div class="modal-footer">
@@ -137,9 +142,14 @@
         <div class="container mt-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="mt-2 mb-0">Tarefas</h4>
-            <button id="logout-btn" class="btn btn-danger">
-              <i class="bi bi-box-arrow-left me-1"></i> Sair
-            </button>
+            <div class="d-flex align-items-center">
+              <button id="theme-toggle-btn" class="btn btn-outline-secondary me-2" title="Alternar modo claro/escuro" aria-label="Alternar modo claro/escuro">
+                <i class="bi bi-moon-fill"></i>
+              </button>
+              <button id="logout-btn" class="btn btn-danger">
+                <i class="bi bi-box-arrow-left me-1"></i> Sair
+              </button>
+            </div>
           </div>
 
           <div class="row g-3 mb-3 align-items-end">
@@ -203,9 +213,13 @@
                     <span class="input-group-text"><i class="bi bi-folder-fill"></i></span>
                     <input type="text" id="category" class="form-control" placeholder="Categoria (opcional)" />
                   </div>
-                  <div class="mb-2 input-group">
-                    <span class="input-group-text"><i class="bi bi-tags-fill"></i></span>
-                    <input type="text" id="tags" class="form-control" placeholder="Etiquetas (opcional)" />
+                   <!-- ESTRUTURA ATUALIZADA PARA ETIQUETAS (CRIAR) -->
+                  <div class="mb-2">
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-tags-fill"></i></span>
+                      <div id="tags-container" class="tags-container"></div>
+                      <input type="text" id="tags" class="form-control" placeholder="Digite uma tag e aperte Enter" />
+                    </div>
                   </div>
                   <button type="submit" class="btn btn-primary w-100 mt-2">
                     <i class="bi bi-plus-circle me-1"></i> Criar Tarefa

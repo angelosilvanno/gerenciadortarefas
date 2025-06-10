@@ -47,6 +47,10 @@ document.addEventListener("DOMContentLoaded", () => {
     editStatusInput: document.getElementById('edit-status'),
     editCategoryInput: document.getElementById('edit-category'),
     editTagsInput: document.getElementById('edit-tags'),
+    themeToggleButton: document.getElementById("theme-toggle-btn"),
+    // --- REFERÊNCIAS ADICIONADAS ---
+    tagsContainer: document.getElementById("tags-container"),
+    editTagsContainer: document.getElementById("edit-tags-container"),
   };
 
   let editingTaskIndex = null;
@@ -87,7 +91,71 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }, 4000);
   };
+  
+  const applyTheme = (theme) => {
+    const body = document.body;
+    const icon = DOM.themeToggleButton.querySelector('i');
 
+    if (theme === 'dark') {
+      body.classList.add('dark-mode');
+      icon.classList.remove('bi-moon-fill');
+      icon.classList.add('bi-sun-fill');
+      DOM.themeToggleButton.setAttribute('title', 'Alternar para modo claro');
+    } else {
+      body.classList.remove('dark-mode');
+      icon.classList.remove('bi-sun-fill');
+      icon.classList.add('bi-moon-fill');
+      DOM.themeToggleButton.setAttribute('title', 'Alternar para modo escuro');
+    }
+
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+      const tooltipInstance = bootstrap.Tooltip.getInstance(DOM.themeToggleButton);
+      if (tooltipInstance) {
+        tooltipInstance.dispose();
+      }
+      new bootstrap.Tooltip(DOM.themeToggleButton);
+    }
+  };
+
+  // --- FUNÇÕES ADICIONADAS PARA GERENCIAR ETIQUETAS ---
+  const setupTagInput = (inputElement, containerElement) => {
+    inputElement.addEventListener("keyup", (e) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const tagValue = inputElement.value.trim().replace(/,$/, '');
+        if (tagValue && tagRegex.test(tagValue)) {
+          createTagPill(tagValue, containerElement);
+          inputElement.value = "";
+        } else if (tagValue) {
+            showUIMessage(`Tag inválida: "${sanitizeInput(tagValue)}". Use apenas letras, números ou traços.`);
+        }
+      }
+    });
+  };
+
+  const createTagPill = (tagValue, containerElement) => {
+    const pill = document.createElement('div');
+    pill.className = 'tag-pill';
+    
+    const text = document.createElement('span');
+    text.textContent = tagValue;
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'tag-remove-btn';
+    removeBtn.innerHTML = '×';
+    removeBtn.setAttribute('aria-label', `Remover tag ${tagValue}`);
+    removeBtn.onclick = () => pill.remove();
+
+    pill.appendChild(text);
+    pill.appendChild(removeBtn);
+    containerElement.appendChild(pill);
+  };
+  
+  const getTagsFromContainer = (containerElement) => {
+    return Array.from(containerElement.querySelectorAll('.tag-pill span')).map(span => span.textContent);
+  };
+  // --- FIM DAS FUNÇÕES ADICIONADAS ---
+  
   const saveTasks = () => {
     const currentUserItem = localStorage.getItem("currentUser");
     if (!currentUserItem) return;
@@ -179,6 +247,15 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Erro ao mostrar modal de esquecer senha:", err);
       }
     }
+  }
+
+  if (DOM.themeToggleButton) {
+    DOM.themeToggleButton.addEventListener("click", () => {
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      const newTheme = isDarkMode ? 'light' : 'dark';
+      localStorage.setItem('theme', newTheme);
+      applyTheme(newTheme);
+    });
   }
 
   if (DOM.showRegisterLink) {
@@ -334,6 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- LÓGICA DE CRIAÇÃO DE TAREFA ATUALIZADA ---
   if (DOM.taskForm) {
     if (DOM.taskTitleInput && DOM.taskDescriptionInput && DOM.taskDueDateInput && DOM.taskPriorityInput && DOM.taskCategoryInput && DOM.taskTagsInput) {
       DOM.taskForm.addEventListener("submit", (e) => {
@@ -344,19 +422,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const priority = DOM.taskPriorityInput.value;
         const status = "pendente";
         const category = DOM.taskCategoryInput.value.trim();
-        const tagsValue = DOM.taskTagsInput.value.trim();
-        const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
+        const tags = getTagsFromContainer(DOM.tagsContainer); // MODIFICADO
 
         if (!title || !description || !dueDate) {
           showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");
           return;
         }
-        for (let tag of tags) {
-          if (tag && !tagRegex.test(tag)) {
-            showUIMessage(`Tag inválida: "${sanitizeInput(tag)}". Use apenas letras, números ou traços.`);
-            return;
-          }
-        }
+
         const taskObj = {
           title,
           description,
@@ -370,12 +442,14 @@ document.addEventListener("DOMContentLoaded", () => {
         tasksCache.push(taskObj);
         saveTasks();
         DOM.taskForm.reset();
+        DOM.tagsContainer.innerHTML = ''; // ADICIONADO para limpar as pílulas
         showUIMessage("Tarefa criada com sucesso!", false);
         renderTasks(tasksCache);
       });
     }
   }
 
+  // --- LÓGICA DE EDIÇÃO DE TAREFA ATUALIZADA ---
   if (DOM.editTaskForm && DOM.editTitleInput && DOM.editDescriptionInput && DOM.editDueDateInput && DOM.editPriorityInput && DOM.editStatusInput && DOM.editCategoryInput && DOM.editTagsInput) {
     DOM.editTaskForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -389,18 +463,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const priority = DOM.editPriorityInput.value;
       const status = DOM.editStatusInput.value;
       const category = DOM.editCategoryInput.value.trim();
-      const tagsValue = DOM.editTagsInput.value.trim();
-      const tags = tagsValue ? tagsValue.split(",").map(tag => tag.trim().toLowerCase()).filter(tag => tag) : [];
+      const tags = getTagsFromContainer(DOM.editTagsContainer); // MODIFICADO
 
       if (!title || !description || !dueDate) {
         showUIMessage("Preencha os campos obrigatórios no formulário de edição: Título, Descrição e Prazo.", true);
         return;
-      }
-      for (let tag of tags) {
-        if (tag && !tagRegex.test(tag)) {
-          showUIMessage(`Tag inválida na edição: "${sanitizeInput(tag)}". Use apenas letras, números ou traços.`, true);
-          return;
-        }
       }
 
       const task = tasksCache[editingTaskIndex];
@@ -635,6 +702,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.show();
   }
 
+  // --- FUNÇÃO DE EDIÇÃO DE TAREFA ATUALIZADA ---
   function editTask(index) {
     if (index < 0 || index >= tasksCache.length) {
       showUIMessage("Tarefa inválida para edição.", true);
@@ -651,7 +719,14 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.editPriorityInput.value = task.priority;
     DOM.editStatusInput.value = task.status;
     DOM.editCategoryInput.value = task.category || '';
-    DOM.editTagsInput.value = (task.tags && Array.isArray(task.tags)) ? task.tags.join(', ') : '';
+    
+    // --- LÓGICA ATUALIZADA para popular as pílulas de tags ---
+    DOM.editTagsContainer.innerHTML = ''; // Limpa tags antigas
+    if (task.tags && Array.isArray(task.tags)) {
+        task.tags.forEach(tag => createTagPill(tag, DOM.editTagsContainer));
+    }
+    DOM.editTagsInput.value = ''; // Limpa o campo de input
+    
     editingTaskIndex = index;
 
     if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
@@ -764,6 +839,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initializeApp() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    // --- ADICIONADO: Ativa a funcionalidade de input de tag ---
+    if(DOM.taskTagsInput && DOM.tagsContainer) {
+        setupTagInput(DOM.taskTagsInput, DOM.tagsContainer);
+    }
+    if(DOM.editTagsInput && DOM.editTagsContainer) {
+        setupTagInput(DOM.editTagsInput, DOM.editTagsContainer);
+    }
+
     const currentUserItem = localStorage.getItem("currentUser");
     if (currentUserItem) {
       try {

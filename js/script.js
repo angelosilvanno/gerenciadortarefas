@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loginEyeBtn: document.getElementById('login-eye-btn'),
     registerEyeBtn: document.getElementById('register-eye-btn'),
     confirmRegisterEyeBtn: document.getElementById('confirm-register-eye-btn'),
-    taskListTitle: document.querySelector("#task-list").parentElement.querySelector("h5"),
+    taskListTitle: document.querySelector("#main-panel h5"),
   };
 
   let editingTaskIndex = null;
@@ -99,6 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   const applyTheme = (theme) => {
     const body = document.body;
+    if (!DOM.themeToggleButton) return;
     const icon = DOM.themeToggleButton.querySelector('i');
 
     if (theme === 'dark') {
@@ -123,6 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   const setupTagInput = (inputElement, containerElement) => {
+    if (!inputElement || !containerElement) return;
     inputElement.addEventListener("keyup", (e) => {
       if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
@@ -156,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   
   const getTagsFromContainer = (containerElement) => {
+    if (!containerElement) return [];
     return Array.from(containerElement.querySelectorAll('.tag-pill span')).map(span => span.textContent);
   };
   
@@ -190,13 +193,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if (currentFilter.value !== 'todos') {
         filteredTasks = filteredTasks.filter(task => normalizeStatus(task.status) === normalizeStatus(currentFilter.value));
       }
-      DOM.taskListTitle.textContent = "Lista de Tarefas";
+      if (DOM.taskListTitle) DOM.taskListTitle.textContent = "Lista de Tarefas";
     } else if (currentFilter.type === 'category') {
       filteredTasks = filteredTasks.filter(task => task.category && task.category.toLowerCase() === currentFilter.value.toLowerCase());
-      DOM.taskListTitle.innerHTML = `Lista de Tarefas <small class="text-muted fs-6">(Categoria: ${sanitizeInput(currentFilter.value)})</small>`;
+      if (DOM.taskListTitle) DOM.taskListTitle.innerHTML = `Lista de Tarefas <small class="text-muted fs-6">(Categoria: ${sanitizeInput(currentFilter.value)})</small>`;
     } else if (currentFilter.type === 'tag') {
       filteredTasks = filteredTasks.filter(task => task.tags && task.tags.includes(currentFilter.value));
-      DOM.taskListTitle.innerHTML = `Lista de Tarefas <small class="text-muted fs-6">(Tag: ${sanitizeInput(currentFilter.value)})</small>`;
+      if (DOM.taskListTitle) DOM.taskListTitle.innerHTML = `Lista de Tarefas <small class="text-muted fs-6">(Tag: ${sanitizeInput(currentFilter.value)})</small>`;
     }
     
     if (query) {
@@ -472,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tasksCache.push(taskObj);
         saveTasks();
         DOM.taskForm.reset();
-        DOM.tagsContainer.innerHTML = '';
+        if (DOM.tagsContainer) DOM.tagsContainer.innerHTML = '';
         showUIMessage("Tarefa criada com sucesso!", false);
         filterAndRender();
       });
@@ -528,24 +531,27 @@ document.addEventListener("DOMContentLoaded", () => {
     if (button) {
       const originalIndexAttr = button.dataset.index;
       const index = parseInt(originalIndexAttr, 10);
+      
+      const task = tasksCache.find(t => t.id === parseInt(button.dataset.id));
+      const taskIndex = tasksCache.indexOf(task);
 
-      if (isNaN(index) || index < 0 || index >= tasksCache.length) {
+      if (!task) {
         showUIMessage("Erro ao processar ação da tarefa: tarefa não encontrada.", true);
         return;
       }
 
       if (button.classList.contains("edit-btn")) {
-        editTask(index);
+        editTask(taskIndex);
       } else if (button.classList.contains("delete-btn")) {
-        confirmTaskDeletion(index);
+        confirmTaskDeletion(taskIndex);
       }
     } else if (badge) {
         if (badge.dataset.category) {
             currentFilter = { type: 'category', value: badge.dataset.category };
-            DOM.filterStatusSelect.value = 'todos';
+            if (DOM.filterStatusSelect) DOM.filterStatusSelect.value = 'todos';
         } else if (badge.dataset.tag) {
             currentFilter = { type: 'tag', value: badge.dataset.tag };
-            DOM.filterStatusSelect.value = 'todos';
+            if (DOM.filterStatusSelect) DOM.filterStatusSelect.value = 'todos';
         }
         filterAndRender();
     }
@@ -556,15 +562,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!checkbox) return;
 
     const originalIndexAttr = checkbox.dataset.index;
-    const index = parseInt(originalIndexAttr, 10);
+    const task = tasksCache.find(t => t.id === parseInt(checkbox.dataset.id));
 
-    if (isNaN(index) || index < 0 || index >= tasksCache.length) {
-      showUIMessage("Erro ao atualizar status da tarefa: tarefa não encontrada.", true);
-      return;
-    }
-    const task = tasksCache[index];
     if (!task) {
-      showUIMessage("Erro ao atualizar status da tarefa: dados da tarefa inconsistentes.", true);
+      showUIMessage("Erro ao atualizar status da tarefa: tarefa não encontrada.", true);
       return;
     }
     task.status = checkbox.checked ? "concluída" : "pendente";
@@ -655,7 +656,7 @@ document.addEventListener("DOMContentLoaded", () => {
         div.setAttribute("role", "listitem");
         div.setAttribute("data-priority", task.priority);
         div.setAttribute("data-status", task.status);
-
+        
         const categoryHtml = task.category 
             ? `<span class="task-category-badge" data-category="${sanitizeInput(task.category)}">${sanitizeInput(task.category)}</span>` 
             : "";
@@ -673,17 +674,17 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="d-flex align-items-center flex-grow-1">
               ${normStatus === "concluida" ?
               `<i class="bi bi-check-circle-fill text-success me-2 fs-5" title="Tarefa concluída"></i>` :
-              `<input type="checkbox" class="form-check-input me-2 complete-checkbox" data-index="${originalIndex}" aria-label="Marcar tarefa ${sanitizeInput(task.title)} como concluída">`
+              `<input type="checkbox" class="form-check-input me-2 complete-checkbox" data-index="${originalIndex}" data-id="${task.id}" aria-label="Marcar tarefa ${sanitizeInput(task.title)} como concluída">`
               }
               <h5 class="mb-0 flex-grow-1 task-title" style="word-break: break-word;">
                 ${sanitizeInput(task.title)}
               </h5>
             </div>
             <div>
-              <button class="btn btn-warning btn-sm me-2 edit-btn" data-index="${originalIndex}" title="Editar tarefa ${sanitizeInput(task.title)}" aria-label="Editar tarefa ${sanitizeInput(task.title)}">
+              <button class="btn btn-warning btn-sm me-2 edit-btn" data-index="${originalIndex}" data-id="${task.id}" title="Editar tarefa ${sanitizeInput(task.title)}" aria-label="Editar tarefa ${sanitizeInput(task.title)}">
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" title="Excluir tarefa ${sanitizeInput(task.title)}" aria-label="Excluir tarefa ${sanitizeInput(task.title)}">
+              <button class="btn btn-danger btn-sm delete-btn" data-index="${originalIndex}" data-id="${task.id}" title="Excluir tarefa ${sanitizeInput(task.title)}" aria-label="Excluir tarefa ${sanitizeInput(task.title)}">
                 <i class="bi bi-trash-fill"></i>
               </button>
             </div>
@@ -755,11 +756,11 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.editStatusInput.value = task.status;
     DOM.editCategoryInput.value = task.category || '';
     
-    DOM.editTagsContainer.innerHTML = '';
+    if (DOM.editTagsContainer) DOM.editTagsContainer.innerHTML = '';
     if (task.tags && Array.isArray(task.tags)) {
         task.tags.forEach(tag => createTagPill(tag, DOM.editTagsContainer));
     }
-    DOM.editTagsInput.value = '';
+    if (DOM.editTagsInput) DOM.editTagsInput.value = '';
     
     editingTaskIndex = index;
 
@@ -881,16 +882,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setupPasswordToggle(DOM.registerPasswordInput, DOM.registerEyeBtn);
     setupPasswordToggle(DOM.registerConfirmPasswordInput, DOM.confirmRegisterEyeBtn);
 
-    if(DOM.taskTagsInput && DOM.tagsContainer) {
-        setupTagInput(DOM.taskTagsInput, DOM.tagsContainer);
-    }
-    if(DOM.editTagsInput && DOM.editTagsContainer) {
-        setupTagInput(DOM.editTagsInput, DOM.editTagsContainer);
-    }
+    setupTagInput(DOM.taskTagsInput, DOM.tagsContainer);
+    setupTagInput(DOM.editTagsInput, DOM.editTagsContainer);
 
-    DOM.taskList.addEventListener("click", handleTaskActions);
-    DOM.taskList.addEventListener("change", handleCheckboxClick);
-
+    if (DOM.taskList) {
+        DOM.taskList.addEventListener("click", handleTaskActions);
+        DOM.taskList.addEventListener("change", handleCheckboxClick);
+    }
+    
     const currentUserItem = localStorage.getItem("currentUser");
     if (currentUserItem) {
       try {
@@ -901,6 +900,7 @@ document.addEventListener("DOMContentLoaded", () => {
           showMainAppPanel();
           filterAndRender();
         } else {
+          localStorage.removeItem("currentUser");
           showLoginPanel();
           tasksCache = [];
         }

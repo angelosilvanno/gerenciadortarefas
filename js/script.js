@@ -441,17 +441,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const hashedPassword = await hashPassword(password);
-        const usersRaw = localStorage.getItem("users");
-        const users = usersRaw ? JSON.parse(usersRaw) : [];
-        const user = users.find(u => u.username === username && u.password === hashedPassword);
 
-        if (user) {
-          localStorage.setItem("currentUser", JSON.stringify({
-            username: user.username,
-            email: user.email
-          }));
-          const userTasksRaw = localStorage.getItem(`tasks_${user.username}`);
-          tasksCache = userTasksRaw ? JSON.parse(userTasksRaw) : [];
+        const res = await fetch("http://localhost:3000/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password: hashedPassword })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem("currentUser", JSON.stringify(data.user));
+          tasksCache = [];
           showMainAppPanel();
           filterAndRender();
           updateProgress();
@@ -948,5 +949,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  initializeApp();
+  function initializeApplogged() {
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    if (currentUser) {
+      tasksCache = [];
+      showMainAppPanel();
+      filterAndRender();
+      updateProgress();
+    } else {
+      showLoginPanel();
+    }
+  }
+
+  initializeApplogged();
 });

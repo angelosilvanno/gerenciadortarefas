@@ -348,10 +348,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (DOM.registerForm && DOM.registerUsernameInput && DOM.registerEmailInput && DOM.registerPasswordInput && DOM.registerConfirmPasswordInput) {
+  if (
+    DOM.registerForm &&
+    DOM.registerUsernameInput &&
+    DOM.registerEmailInput &&
+    DOM.registerPasswordInput &&
+    DOM.registerConfirmPasswordInput
+  ) {
     DOM.registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const inputs = [DOM.registerUsernameInput, DOM.registerEmailInput, DOM.registerPasswordInput, DOM.registerConfirmPasswordInput];
+
+      const inputs = [
+        DOM.registerUsernameInput,
+        DOM.registerEmailInput,
+        DOM.registerPasswordInput,
+        DOM.registerConfirmPasswordInput
+      ];
       inputs.forEach(input => input.classList.remove("is-invalid"));
 
       const username = DOM.registerUsernameInput.value.trim();
@@ -364,43 +376,56 @@ document.addEventListener("DOMContentLoaded", () => {
         showUIMessage("Nome de usuário inválido. Use 3 a 15 letras ou números.");
         return;
       }
+
       if (!emailRegex.test(email)) {
         DOM.registerEmailInput.classList.add("is-invalid");
         showUIMessage("E-mail inválido.");
         return;
       }
+
       if (!passwordRegex.test(password)) {
         DOM.registerPasswordInput.classList.add("is-invalid");
         showUIMessage("Senha inválida. Sua senha deve ter entre 6 a 80 caracteres, com pelo menos uma letra e um número.");
         return;
       }
+
       if (password !== confirmPassword) {
         DOM.registerConfirmPasswordInput.classList.add("is-invalid");
         showUIMessage("As senhas não coincidem.");
         return;
       }
-      const usersRaw = localStorage.getItem("users");
-      const users = usersRaw ? JSON.parse(usersRaw) : [];
-      if (users.some(u => u.email === email)) {
-        DOM.registerEmailInput.classList.add("is-invalid");
-        showUIMessage("Este e-mail já está cadastrado.");
-        return;
-      }
-      if (users.some(u => u.username === username)) {
-        DOM.registerUsernameInput.classList.add("is-invalid");
-        showUIMessage("Nome de usuário já existe.");
-        return;
-      }
+
       const hashedPassword = await hashPassword(password);
-      users.push({
-        username,
-        email,
-        password: hashedPassword
-      });
-      localStorage.setItem("users", JSON.stringify(users));
-      showUIMessage("Cadastro realizado com sucesso!", false);
-      showLoginPanel();
-      DOM.registerForm.reset();
+
+      try {
+        const res = await fetch("http://localhost:3000/api/cadastrar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: username,
+            email,
+            password: hashedPassword
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showUIMessage("Cadastro realizado com sucesso!", false);
+          showLoginPanel();
+          DOM.registerForm.reset();
+        } else {
+          if (data.message.includes("Email")) {
+            DOM.registerEmailInput.classList.add("is-invalid");
+          }
+          if (data.message.includes("nome")) {
+            DOM.registerUsernameInput.classList.add("is-invalid");
+          }
+          showUIMessage(data.message, true);
+        }
+      } catch (err) {
+        console.error("Erro ao enviar dados para o servidor:", err);
+        showUIMessage("Erro ao tentar se cadastrar. Tente novamente.", true);
+      }
     });
   }
 

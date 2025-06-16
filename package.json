@@ -2,12 +2,12 @@
   "name": "gerenciadortarefas",
   "version": "1.0.0",
   "description": "<h1 align=\"center\"> Projeto de Teste de Software </h1>\r <h1 align=\"center\"> Gerenciamento de Tarefa: NextTask 📃 </h1>",
-  "main": "index.js",
+  "main": "server.js",
   "directories": {
     "doc": "doc"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

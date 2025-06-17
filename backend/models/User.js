@@ -1,7 +1,7 @@
 const pool = require("../db");
 
 const User = {
-  async create(name, email, hashedPassword) { // Renomeado para hashedPassword para clareza
+  async create(name, email, hashedPassword) { 
     try {
       const result = await pool.query(
         "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email",
@@ -9,9 +9,7 @@ const User = {
       );
       return result.rows[0];
     } catch (error) {
-      // Se o erro for de violação de constraint única (usuário ou email já existe)
       if (error.code === '23505') { 
-        // A mensagem de erro do PostgreSQL dirá qual constraint foi violada
         if (error.constraint === 'users_name_key') {
             throw new Error('Este nome de usuário já está em uso.');
         }
@@ -19,7 +17,7 @@ const User = {
             throw new Error('Este e-mail já está em uso.');
         }
       }
-      throw error; // Propaga outros erros
+      throw error; 
     }
   },
 

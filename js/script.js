@@ -1,8 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // ----------------------------------------------------------------------------------
-  //  1. SERVIÇO DE API CENTRALIZADO
-  //  (Comunicação com o Backend)
-  // ----------------------------------------------------------------------------------
   const apiService = {
     BASE_URL: "http://localhost:3000/api",
 
@@ -38,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
     
-    // Autenticação
     login: (username, password) => apiService._fetch("/login", {
       method: "POST",
       body: JSON.stringify({ username, password }),
@@ -48,7 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({ name, email, password }),
     }),
 
-    // Tarefas (Tasks)
     getTasks: () => apiService._fetch("/tasks"),
     createTask: (taskData) => apiService._fetch("/tasks", {
       method: "POST",
@@ -63,10 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }),
   };
   
-  // ----------------------------------------------------------------------------------
-  //  2. SELETORES DO DOM
-  //  (Centralização dos elementos da página)
-  // ----------------------------------------------------------------------------------
   const DOM = {
     loginContainer: document.getElementById("login-container"),
     registerContainer: document.getElementById("register-container"),
@@ -125,10 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
     taskListTitle: document.querySelector("#main-panel h5"),
   };
 
-  // ----------------------------------------------------------------------------------
-  //  3. ESTADO DA APLICAÇÃO E UTILITÁRIOS
-  // ----------------------------------------------------------------------------------
-  let editingTask = null; // Armazena o objeto da tarefa sendo editada
+  let editingTask = null;
   let tasksCache = [];
   let currentFilter = { type: 'status', value: 'todos' };
 
@@ -153,10 +140,7 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.messageDiv.tabIndex = -1;
     DOM.messageDiv.focus();
     setTimeout(() => {
-      if (DOM.messageDiv) {
-        DOM.messageDiv.classList.add("d-none");
-        DOM.messageDiv.textContent = "";
-      }
+      if (DOM.messageDiv) DOM.messageDiv.classList.add("d-none");
     }, 4000);
   };
   
@@ -164,7 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const body = document.body;
     if (!DOM.themeToggleButton) return;
     const icon = DOM.themeToggleButton.querySelector('i');
-
     if (theme === 'dark') {
       body.classList.add('dark-mode');
       icon.classList.remove('bi-moon-fill');
@@ -176,7 +159,6 @@ document.addEventListener("DOMContentLoaded", () => {
       icon.classList.add('bi-moon-fill');
       DOM.themeToggleButton.setAttribute('title', 'Alternar para modo escuro');
     }
-
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
       const tooltipInstance = bootstrap.Tooltip.getInstance(DOM.themeToggleButton);
       if (tooltipInstance) tooltipInstance.dispose();
@@ -194,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
           createTagPill(tagValue, containerElement);
           inputElement.value = "";
         } else if (tagValue) {
-            showUIMessage(`Tag inválida: "${sanitizeInput(tagValue)}". Use apenas letras, números ou traços.`);
+          showUIMessage(`Tag inválida: "${sanitizeInput(tagValue)}". Use apenas letras, números ou traços.`);
         }
       }
     });
@@ -258,7 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const debounce = (func, wait) => {
     let timeout;
-    return function executedFunction(...args) {
+    return (...args) => {
       const later = () => {
         clearTimeout(timeout);
         func(...args);
@@ -271,16 +253,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const setupPasswordToggle = (inputEl, buttonEl) => {
     if (!inputEl || !buttonEl) return;
     buttonEl.addEventListener('click', () => {
-        const icon = buttonEl.querySelector('i');
-        if (inputEl.type === 'password') {
-            inputEl.type = 'text';
-            icon.classList.remove('bi-eye-slash');
-            icon.classList.add('bi-eye');
-        } else {
-            inputEl.type = 'password';
-            icon.classList.remove('bi-eye');
-            icon.classList.add('bi-eye-slash');
-        }
+      const icon = buttonEl.querySelector('i');
+      if (inputEl.type === 'password') {
+        inputEl.type = 'text';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+      } else {
+        inputEl.type = 'password';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+      }
     });
   };
 
@@ -330,12 +312,16 @@ document.addEventListener("DOMContentLoaded", () => {
   
   async function loadAndRenderTasks() {
     try {
-      tasksCache = await apiService.getTasks();
+      const tasksFromServer = await apiService.getTasks();
+      tasksCache = tasksFromServer.map(task => ({
+        ...task,
+        due_date: task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : null
+      }));
       filterAndRender();
     } catch (error) {
-      showUIMessage("Falha ao carregar as tarefas. Verifique sua conexão ou tente logar novamente.", true);
-      if (String(error.message).includes('401') || String(error.message).includes('403')) {
-          handleLogout();
+      showUIMessage(error.message || "Falha ao carregar as tarefas.", true);
+      if (String(error.message).includes('Acesso negado') || String(error.message).includes('inválido')) {
+        handleLogout();
       }
     }
   }
@@ -366,17 +352,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const groupedByDate = {};
     tasksToDisplay.forEach(task => {
-      if (!task || typeof task.dueDate !== 'string') return;
-      const [year, month, day] = task.dueDate.split("-");
-      if (!year || !month || !day || isNaN(parseInt(year)) || isNaN(parseInt(month)) || isNaN(parseInt(day))) {
-        const dateKey = 'Data Inválida';
-        if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
-        groupedByDate[dateKey].push(task);
-        return;
-      }
-      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toISOString().split("T")[0];
-      if (!groupedByDate[date]) groupedByDate[date] = [];
-      groupedByDate[date].push(task);
+      const dateKey = task.due_date || 'Data Inválida';
+      if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
+      groupedByDate[dateKey].push(task);
     });
 
     const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
@@ -402,13 +380,15 @@ document.addEventListener("DOMContentLoaded", () => {
       groupedByDate[date].forEach(task => {
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-        const [ano, mes, dia] = task.dueDate.split("-").map(Number);
-        const dataTarefa = new Date(ano, mes - 1, dia);
+        if (task.due_date) {
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            const [ano, mes, dia] = task.due_date.split("-").map(Number);
+            const dataTarefa = new Date(ano, mes - 1, dia);
 
-        if (dataTarefa < hoje && normalizeStatus(task.status) !== "concluida") {
-          div.classList.add("tarefa-atrasada");
+            if (dataTarefa < hoje && normalizeStatus(task.status) !== "concluida") {
+            div.classList.add("tarefa-atrasada");
+            }
         }
         const normStatus = normalizeStatus(task.status);
         if (statusClassMap[normStatus]) {
@@ -419,10 +399,8 @@ document.addEventListener("DOMContentLoaded", () => {
         div.setAttribute("data-status", task.status);
         div.setAttribute("data-id", task.id);
         
-        const categoryHtml = task.category 
-            ? `<span class="task-category-badge" data-category="${sanitizeInput(task.category)}">${sanitizeInput(task.category)}</span>` : "";
-        const tagsHtml = (task.tags && Array.isArray(task.tags) && task.tags.length > 0) 
-            ? task.tags.map(tag => `<span class="task-tag-badge" data-tag="${sanitizeInput(tag)}">${sanitizeInput(tag)}</span>`).join('') : "";
+        const categoryHtml = task.category ? `<span class="task-category-badge" data-category="${sanitizeInput(task.category)}">${sanitizeInput(task.category)}</span>` : "";
+        const tagsHtml = (task.tags && Array.isArray(task.tags) && task.tags.length > 0) ? task.tags.map(tag => `<span class="task-tag-badge" data-tag="${sanitizeInput(tag)}">${sanitizeInput(tag)}</span>`).join('') : "";
         const metaHtml = (categoryHtml || tagsHtml) ? `<div class="task-meta-wrapper">${categoryHtml}${tagsHtml}</div>` : "";
 
         div.innerHTML = `
@@ -430,17 +408,17 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="d-flex align-items-center flex-grow-1">
               ${normStatus === "concluida" ?
               `<i class="bi bi-check-circle-fill text-success me-2 fs-5" title="Tarefa concluída"></i>` :
-              `<input type="checkbox" class="form-check-input me-2 complete-checkbox" data-id="${task.id}" ${task.status === "concluída" ? "checked" : ""} aria-label="Marcar tarefa ${sanitizeInput(task.title)} como concluída">`
+              `<input type="checkbox" class="form-check-input me-2 complete-checkbox" data-id="${task.id}" ${task.status === "concluída" ? "checked" : ""} aria-label="Marcar tarefa como concluída">`
               }
               <h5 class="mb-0 flex-grow-1 task-title" style="word-break: break-word;">${sanitizeInput(task.title)}</h5>
             </div>
             <div>
-              <button class="btn btn-warning btn-sm me-2 edit-btn" data-id="${task.id}" title="Editar tarefa" aria-label="Editar tarefa ${sanitizeInput(task.title)}"><i class="bi bi-pencil-fill"></i></button>
-              <button class="btn btn-danger btn-sm delete-btn" data-id="${task.id}" title="Excluir tarefa" aria-label="Excluir tarefa ${sanitizeInput(task.title)}"><i class="bi bi-trash-fill"></i></button>
+              <button class="btn btn-warning btn-sm me-2 edit-btn" data-id="${task.id}" title="Editar tarefa"><i class="bi bi-pencil-fill"></i></button>
+              <button class="btn btn-danger btn-sm delete-btn" data-id="${task.id}" title="Excluir tarefa"><i class="bi bi-trash-fill"></i></button>
             </div>
           </div>
           <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
-          <small class="text-muted d-block"><strong>Prazo:</strong> ${sanitizeInput(task.dueDate)}</small>
+          <small class="text-muted d-block"><strong>Prazo:</strong> ${task.due_date ? formattedDate : 'N/A'}</small>
           <small class="text-muted d-block"><strong>Prioridade:</strong> ${sanitizeInput(task.priority)} | <strong>Status:</strong> ${sanitizeInput(task.status)}</small>
           ${metaHtml}
         `;
@@ -451,10 +429,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateProgress();
   }
 
-  // ----------------------------------------------------------------------------------
-  //  4. EVENT HANDLERS E LÓGICA DE AÇÕES
-  // ----------------------------------------------------------------------------------
-
   if (DOM.themeToggleButton) {
     DOM.themeToggleButton.addEventListener("click", () => {
       const isDarkMode = document.body.classList.contains('dark-mode');
@@ -464,26 +438,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (DOM.showRegisterLink) {
-    DOM.showRegisterLink.addEventListener("click", (e) => { e.preventDefault(); showRegisterPanel(); });
-  }
-
-  if (DOM.showLoginLink) {
-    DOM.showLoginLink.addEventListener("click", (e) => { e.preventDefault(); showLoginPanel(); });
-  }
-  
-  if (DOM.logoutBtn) {
-    DOM.logoutBtn.addEventListener("click", handleLogout);
-  }
-
-  if (DOM.forgotPasswordLink) {
-    DOM.forgotPasswordLink.addEventListener("click", (e) => { e.preventDefault(); showForgotPasswordModal(); });
-  }
+  if (DOM.showRegisterLink) DOM.showRegisterLink.addEventListener("click", (e) => { e.preventDefault(); showRegisterPanel(); });
+  if (DOM.showLoginLink) DOM.showLoginLink.addEventListener("click", (e) => { e.preventDefault(); showLoginPanel(); });
+  if (DOM.logoutBtn) DOM.logoutBtn.addEventListener("click", handleLogout);
+  if (DOM.forgotPasswordLink) DOM.forgotPasswordLink.addEventListener("click", (e) => { e.preventDefault(); showForgotPasswordModal(); });
 
   if (DOM.forgotPasswordForm) {
     DOM.forgotPasswordForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      // Esta funcionalidade ainda é um placeholder, pois requer um backend mais complexo (envio de email).
       showUIMessage("Funcionalidade de recuperação de senha em desenvolvimento.", false);
       const modalInstance = bootstrap.Modal.getInstance(DOM.forgotPasswordModalElement);
       if (modalInstance) modalInstance.hide();
@@ -502,22 +464,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = DOM.registerPasswordInput.value;
       const confirmPassword = DOM.registerConfirmPasswordInput.value;
 
-      if (!usernameRegex.test(username)) {
-        DOM.registerUsernameInput.classList.add("is-invalid");
-        return showUIMessage("Nome de usuário inválido. Use 3 a 15 letras ou números.");
-      }
-      if (!emailRegex.test(email)) {
-        DOM.registerEmailInput.classList.add("is-invalid");
-        return showUIMessage("E-mail inválido.");
-      }
-      if (!passwordRegex.test(password)) {
-        DOM.registerPasswordInput.classList.add("is-invalid");
-        return showUIMessage("Senha inválida. Sua senha deve ter entre 6 a 80 caracteres, com pelo menos uma letra e um número.");
-      }
-      if (password !== confirmPassword) {
-        DOM.registerConfirmPasswordInput.classList.add("is-invalid");
-        return showUIMessage("As senhas não coincidem.");
-      }
+      if (!usernameRegex.test(username)) return showUIMessage("Nome de usuário inválido. Use 3 a 15 letras ou números.");
+      if (!emailRegex.test(email)) return showUIMessage("E-mail inválido.");
+      if (!passwordRegex.test(password)) return showUIMessage("Senha inválida. Sua senha deve ter entre 6 a 80 caracteres, com pelo menos uma letra e um número.");
+      if (password !== confirmPassword) return showUIMessage("As senhas não coincidem.");
 
       try {
         await apiService.register(username, email, password);
@@ -541,7 +491,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = DOM.loginPasswordInput.value;
 
       try {
-        const data = await apiService.login(username, password); // API deve retornar { user: {...}, token: "..." }
+        const data = await apiService.login(username, password);
         localStorage.setItem("currentUser", JSON.stringify({ user: data.user, token: data.token }));
         showMainAppPanel();
         await loadAndRenderTasks();
@@ -559,19 +509,19 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.taskForm) {
     DOM.taskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const title = DOM.taskTitleInput.value.trim();
-      const description = DOM.taskDescriptionInput.value.trim();
-      const dueDate = DOM.taskDueDateInput.value;
-      const priority = DOM.taskPriorityInput.value;
-      const status = DOM.taskStatusInput.value;
-      const category = DOM.taskCategoryInput.value.trim();
-      const tags = getTagsFromContainer(DOM.tagsContainer);
+      const taskData = {
+        title: DOM.taskTitleInput.value.trim(),
+        description: DOM.taskDescriptionInput.value.trim(),
+        due_date: DOM.taskDueDateInput.value,
+        priority: DOM.taskPriorityInput.value,
+        status: DOM.taskStatusInput.value,
+        category: DOM.taskCategoryInput.value.trim(),
+        tags: getTagsFromContainer(DOM.tagsContainer),
+      };
 
-      if (!title || !description || !dueDate) {
+      if (!taskData.title || !taskData.description || !taskData.due_date) {
         return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");
       }
-
-      const taskData = { title, description, dueDate, priority, status, category, tags };
       
       try {
         await apiService.createTask(taskData);
@@ -593,14 +543,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const updatedData = {
         title: DOM.editTitleInput.value.trim(),
         description: DOM.editDescriptionInput.value.trim(),
-        dueDate: DOM.editDueDateInput.value,
+        due_date: DOM.editDueDateInput.value,
         priority: DOM.editPriorityInput.value,
         status: DOM.editStatusInput.value,
         category: DOM.editCategoryInput.value.trim(),
         tags: getTagsFromContainer(DOM.editTagsContainer),
       };
 
-      if (!updatedData.title || !updatedData.description || !updatedData.dueDate) {
+      if (!updatedData.title || !updatedData.description || !updatedData.due_date) {
         return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.", true);
       }
       
@@ -620,15 +570,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentDeleteHandler = null;
   function confirmTaskDeletion(task) {
     if (!DOM.deleteModalElement || !DOM.confirmDeleteButton) return;
-    
     const modalBody = DOM.deleteModalElement.querySelector('.modal-body');
     if (modalBody) modalBody.textContent = `Deseja realmente excluir a tarefa "${sanitizeInput(task.title)}"?`;
-    
     const modal = bootstrap.Modal.getOrCreateInstance(DOM.deleteModalElement);
     if (currentDeleteHandler) {
       DOM.confirmDeleteButton.removeEventListener('click', currentDeleteHandler);
     }
-    currentDeleteHandler = async function onConfirm() {
+    currentDeleteHandler = async () => {
       try {
         await apiService.deleteTask(task.id);
         showUIMessage("Tarefa removida com sucesso!", false);
@@ -644,18 +592,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function editTask(task) {
     if (!task) return;
-    editingTask = task; // Armazena o objeto da tarefa
+    editingTask = task;
     
     DOM.editTitleInput.value = task.title;
     DOM.editDescriptionInput.value = task.description;
-    DOM.editDueDateInput.value = task.dueDate;
+    DOM.editDueDateInput.value = task.due_date;
     DOM.editPriorityInput.value = task.priority;
     DOM.editStatusInput.value = task.status;
     DOM.editCategoryInput.value = task.category || '';
     
     if (DOM.editTagsContainer) DOM.editTagsContainer.innerHTML = '';
     if (task.tags && Array.isArray(task.tags)) {
-        task.tags.forEach(tag => createTagPill(tag, DOM.editTagsContainer));
+      task.tags.forEach(tag => createTagPill(tag, DOM.editTagsContainer));
     }
     if (DOM.editTagsInput) DOM.editTagsInput.value = '';
     
@@ -674,33 +622,26 @@ document.addEventListener("DOMContentLoaded", () => {
       if (button.classList.contains("edit-btn")) editTask(task);
       else if (button.classList.contains("delete-btn")) confirmTaskDeletion(task);
     } else if (badge) {
-        if (badge.dataset.category) {
-            currentFilter = { type: 'category', value: badge.dataset.category };
-        } else if (badge.dataset.tag) {
-            currentFilter = { type: 'tag', value: badge.dataset.tag };
-        }
-        if (DOM.filterStatusSelect) DOM.filterStatusSelect.value = 'todos';
-        filterAndRender();
+      if (badge.dataset.category) {
+        currentFilter = { type: 'category', value: badge.dataset.category };
+      } else if (badge.dataset.tag) {
+        currentFilter = { type: 'tag', value: badge.dataset.tag };
+      }
+      if (DOM.filterStatusSelect) DOM.filterStatusSelect.value = 'todos';
+      filterAndRender();
     }
   }
 
   async function handleCheckboxClick(e) {
     const checkbox = e.target.closest(".complete-checkbox[data-id]");
     if (!checkbox) return;
-
     const taskId = checkbox.dataset.id;
-    const task = tasksCache.find(t => t.id == taskId);
-    if (!task) return;
-
     const newStatus = checkbox.checked ? "concluída" : "pendente";
-    
     try {
-        await apiService.updateTask(taskId, { status: newStatus });
-        task.status = newStatus;
-        filterAndRender();
+      await apiService.updateTask(taskId, { status: newStatus });
+      await loadAndRenderTasks();
     } catch (error) {
-        showUIMessage(error.message || "Erro ao atualizar status da tarefa.");
-        checkbox.checked = !checkbox.checked; // Reverte a UI em caso de erro
+      showUIMessage(error.message || "Erro ao atualizar status da tarefa.");
     }
   }
   
@@ -717,18 +658,17 @@ document.addEventListener("DOMContentLoaded", () => {
   
   if (DOM.clearCompletedBtn) {
     DOM.clearCompletedBtn.addEventListener("click", async () => {
-        const completedTasks = tasksCache.filter(task => normalizeStatus(task.status) === 'concluida');
-        if (completedTasks.length === 0) {
-            return showUIMessage("Nenhuma tarefa concluída para limpar.", false);
-        }
-        try {
-            // Deleção em massa no backend é o ideal. Se não tiver, deletar uma a uma.
-            await Promise.all(completedTasks.map(task => apiService.deleteTask(task.id)));
-            showUIMessage("Tarefas concluídas foram limpas.", false);
-            await loadAndRenderTasks();
-        } catch (error) {
-            showUIMessage(error.message || "Erro ao limpar tarefas concluídas.");
-        }
+      const completedTasks = tasksCache.filter(task => normalizeStatus(task.status) === 'concluida');
+      if (completedTasks.length === 0) {
+        return showUIMessage("Nenhuma tarefa concluída para limpar.", false);
+      }
+      try {
+        await Promise.all(completedTasks.map(task => apiService.deleteTask(task.id)));
+        showUIMessage("Tarefas concluídas foram limpas.", false);
+        await loadAndRenderTasks();
+      } catch (error) {
+        showUIMessage(error.message || "Erro ao limpar tarefas concluídas.");
+      }
     });
   }
 
@@ -738,7 +678,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const escapeCsvField = (field) => `"${String(field == null ? '' : field).replace(/"/g, '""')}"`;
       const csvHeader = ["Título", "Descrição", "Prazo", "Prioridade", "Status", "Categoria", "Tags"].map(escapeCsvField);
       const csvRows = tasksCache.map(task => [
-        escapeCsvField(task.title), escapeCsvField(task.description), escapeCsvField(task.dueDate),
+        escapeCsvField(task.title), escapeCsvField(task.description), escapeCsvField(task.due_date),
         escapeCsvField(task.priority), escapeCsvField(task.status), escapeCsvField(task.category),
         escapeCsvField(task.tags && Array.isArray(task.tags) ? task.tags.join(";") : "")
       ]);
@@ -762,9 +702,9 @@ document.addEventListener("DOMContentLoaded", () => {
     today.setHours(0, 0, 0, 0);
 
     tasksCache.forEach(task => {
-      if (!task || normalizeStatus(task.status) === "concluida" || !task.dueDate) return;
+      if (!task || normalizeStatus(task.status) === "concluida" || !task.due_date) return;
       try {
-        const [year, month, day] = task.dueDate.split('-').map(Number);
+        const [year, month, day] = task.due_date.split('-').map(Number);
         if (isNaN(year) || isNaN(month) || isNaN(day)) return;
         const dueDate = new Date(year, month - 1, day);
         dueDate.setHours(0, 0, 0, 0);
@@ -773,7 +713,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let notificationTitle = "";
         if (daysUntilDue === 0) notificationTitle = `Tarefa "${sanitizeInput(task.title)}" vence HOJE!`;
         else if (daysUntilDue === 1) notificationTitle = `Tarefa "${sanitizeInput(task.title)}" vence AMANHÃ!`;
-        if (notificationTitle) new Notification(notificationTitle, { body: `Prazo: ${sanitizeInput(task.dueDate)}` });
+        if (notificationTitle) new Notification(notificationTitle, { body: `Prazo: ${task.due_date}` });
       } catch (error) { console.warn("Erro ao processar data para notificação:", task.title, error); }
     });
   }
@@ -787,9 +727,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ----------------------------------------------------------------------------------
-  //  5. INICIALIZAÇÃO DA APLICAÇÃO
-  // ----------------------------------------------------------------------------------
   function initializeApp() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
@@ -802,8 +739,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setupTagInput(DOM.editTagsInput, DOM.editTagsContainer);
 
     if (DOM.taskList) {
-        DOM.taskList.addEventListener("click", handleTaskActions);
-        DOM.taskList.addEventListener("change", handleCheckboxClick);
+      DOM.taskList.addEventListener("click", handleTaskActions);
+      DOM.taskList.addEventListener("change", handleCheckboxClick);
     }
     
     const currentUserData = localStorage.getItem("currentUser");
@@ -822,8 +759,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       showLoginPanel();
     }
-    updateProgress();
-    showWelcomeModal();
 
     document.querySelectorAll('[title]').forEach(el => {
       if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {

@@ -1,20 +1,15 @@
+require('dotenv').config();
+
 const express = require("express");
 const cors = require("cors");
 const app = express();
-require('dotenv').config();
 
-// --- INÍCIO DA MUDANÇA ---
-
-// Configurações do CORS
 const corsOptions = {
-  origin: 'http://127.0.0.1:5500', // Permite requisições SOMENTE desta origem
-  optionsSuccessStatus: 200 // Para navegadores mais antigos
+  origin: 'http://127.0.0.1:5500',
+  optionsSuccessStatus: 200
 };
 
-app.use(cors(corsOptions)); // Usa as opções que definimos
-
-// --- FIM DA MUDANÇA ---
-
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const authRoutes = require("./routes/authRoutes");

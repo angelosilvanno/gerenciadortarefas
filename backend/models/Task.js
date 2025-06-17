@@ -12,12 +12,12 @@ const Task = {
 
   // Cria uma nova tarefa para um usuário
   async create(userId, taskData) {
-    const { title, description, dueDate, priority, status, category, tags } = taskData;
+    const { title, description, due_date, priority, status, category, tags } = taskData;
     const result = await pool.query(
       `INSERT INTO tasks (user_id, title, description, due_date, priority, status, category, tags) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
        RETURNING *`,
-      [userId, title, description, dueDate, priority, status, category, tags]
+      [userId, title, description, due_date, priority, status, category, tags]
     );
     return result.rows[0];
   },

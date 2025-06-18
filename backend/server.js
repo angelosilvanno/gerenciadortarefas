@@ -9,7 +9,7 @@ const app = express();
 
 const corsOptions = {
   origin: [
-    'https://nexttaskapp.netlify.app', 
+    'https:// nexttaskapp.netlify.app', 
     'http://127.0.0.1:5500'
   ],
   optionsSuccessStatus: 200

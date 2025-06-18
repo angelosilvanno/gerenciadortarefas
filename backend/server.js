@@ -7,7 +7,7 @@ const app = express();
 
 // Lista de origens permitidas para acessar a API
 const allowedOrigins = [
-  'https://nexttaskdev.vercel.app', // Sua URL de produção
+  'https://nexttaskweb.vercel.app/', // Sua URL de produção
   'http://127.0.0.1:5500',         // Ambiente de desenvolvimento local
   'http://localhost:5500'          // Alternativa para desenvolvimento local
 ];

@@ -5,19 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 
-// Lista de origens permitidas para acessar a API
-const allowedOrigins = [
-  'https://nexttaskweb.vercel.app/', // Sua URL de produção
-  'http://127.0.0.1:5500',         // Ambiente de desenvolvimento local
-  'http://localhost:5500'          // Alternativa para desenvolvimento local
-];
-
-const corsOptions = {
-  origin: allowedOrigins
-};
-
-
-app.use(cors(corsOptions));
+app.use(cors());
 
 app.use(express.json());
 
@@ -26,10 +14,12 @@ const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const extraRoutes = require("./routes/extraRoutes");
 
+// 4. Associa os roteadores aos seus caminhos base.
 app.use("/api", authRoutes);
 app.use("/api", taskRoutes);
 app.use("/api", extraRoutes);
 
+// 5. Configura a porta e inicia o servidor.
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

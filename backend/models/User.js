@@ -2,7 +2,6 @@ const pool = require("../db");
 
 const User = {
   /**
-   * Cria um novo usuário no banco de dados.
    * @param {string} name - O nome do usuário.
    * @param {string} email - O e-mail do usuário.
    * @param {string} hashedPassword - A senha já processada com bcrypt.
@@ -43,7 +42,6 @@ const User = {
   },
 
   /**
-   * Encontra um usuário pelo seu e-mail. Útil para verificações de duplicidade.
    * @param {string} email - O e-mail do usuário.
    * @returns {Promise<object|undefined>} O objeto do usuário ou undefined se não for encontrado.
    */
@@ -56,7 +54,6 @@ const User = {
   },
   
   /**
-    * Encontra um usuário pelo nome de usuário ou e-mail.
    * @param {string} identifier - O nome de usuário ou e-mail.
    * @returns {Promise<object|undefined>} O objeto completo do usuário (incluindo a senha) ou undefined.
    */

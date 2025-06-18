@@ -14,9 +14,8 @@ module.exports = function(req, res, next) {
   try {
     // Verifica o token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // Adiciona o usuário do payload do token ao objeto req
     req.user = decoded; 
-    next(); // Passa para a próxima função (o controller)
+    next(); 
   } catch (ex) {
     res.status(400).json({ message: 'Token inválido.' });
   }

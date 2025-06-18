@@ -17,9 +17,11 @@ app.use(express.json());
 
 const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+const extraRoutes = require("./routes/extraRoutes");
 
 app.use("/api", taskRoutes);
 app.use("/api", authRoutes);
+app.use("/api", extraRoutes);
 
 app.listen(3000, () => {
   console.log("Servidor rodando na porta 3000");

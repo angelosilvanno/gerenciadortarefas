@@ -107,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     historyList: document.getElementById('history-list'),
     addCommentForm: document.getElementById('add-comment-form'),
     commentTextInput: document.getElementById('comment-text'),
+    addCommentButton: document.querySelector('#add-comment-form button[type="submit"]'),
   };
 
   let editingTask = null;
@@ -563,21 +564,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (DOM.addCommentForm) {
-    DOM.addCommentForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const content = DOM.commentTextInput.value.trim();
-        if (content && editingTask) {
-            try {
-                await apiService.addComment(editingTask.id, content);
-                DOM.commentTextInput.value = '';
-                await loadComments(editingTask.id);
-            } catch (error) {
-                showUIMessage('Falha ao adicionar comentário.', true);
-            }
-        }
-    });
-  }
+   // Em script.js, dentro de initializeApp() (VERSÃO CORRIGIDA)
+if (DOM.addCommentForm) {
+  DOM.addCommentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const content = DOM.commentTextInput.value.trim();
+    
+    // Ignora se não houver conteúdo ou tarefa em edição
+    if (!content || !editingTask) return;
+
+    // Desabilita o botão para prevenir cliques duplos
+    if (DOM.addCommentButton) {
+        DOM.addCommentButton.disabled = true;
+        DOM.addCommentButton.textContent = 'Adicionando...';
+    }
+
+    try {
+      await apiService.addComment(editingTask.id, content);
+      DOM.commentTextInput.value = ''; // Limpa o campo de texto
+      await loadComments(editingTask.id); // Recarrega a lista de comentários
+    } catch (error) {
+      showUIMessage('Falha ao adicionar comentário.', true);
+    } finally {
+      // Reabilita o botão em todos os casos (sucesso ou erro)
+      if (DOM.addCommentButton) {
+          DOM.addCommentButton.disabled = false;
+          DOM.addCommentButton.textContent = 'Adicionar Comentário';
+      }
+    }
+  });
+}
 
   let currentDeleteHandler = null;
   function confirmTaskDeletion(task) {

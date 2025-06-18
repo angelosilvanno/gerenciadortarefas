@@ -5,38 +5,31 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 
+// Lista de origens permitidas para acessar a API
 const allowedOrigins = [
-  'http://127.0.0.1:5500', 
-  'http://localhost:5500',  
+  'https://nexttaskdev.vercel.app', // Sua URL de produção
+  'http://127.0.0.1:5500',         // Ambiente de desenvolvimento local
+  'http://localhost:5500'          // Alternativa para desenvolvimento local
 ];
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Não permitido pela política de CORS'));
-    }
-  },
-  optionsSuccessStatus: 200
+  origin: allowedOrigins
 };
 
+
 app.use(cors(corsOptions));
+
 app.use(express.json());
 
-// Importação dos arquivos de rota
+// 3. Importa os arquivos de rota.
 const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const extraRoutes = require("./routes/extraRoutes");
 
-// Rotas públicas de autenticação
 app.use("/api", authRoutes);
-// Rotas protegidas de tarefas
 app.use("/api", taskRoutes);
-// Rotas protegidas para comentários e histórico
 app.use("/api", extraRoutes);
 
-// Configuração da porta do servidor
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

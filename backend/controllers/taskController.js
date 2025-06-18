@@ -16,11 +16,9 @@ exports.createTask = async (req, res) => {
   try {
     const newTask = await Task.create(req.user.id, req.body);
     
-    // Busca o nome do usuário para o log
     const user = await User.findById(req.user.id);
     const userName = user ? user.name : "Usuário desconhecido";
     
-    // Cria um registro de log para a criação da tarefa
     await ActivityLog.create(
       newTask.id,
       req.user.id,
@@ -40,20 +38,16 @@ exports.updateTask = async (req, res) => {
     const taskId = req.params.id;
     const userId = req.user.id;
 
-    // Busca o estado original da tarefa para comparação
     const originalTask = await Task.findById(taskId);
     if (!originalTask || originalTask.user_id !== userId) {
       return res.status(404).json({ message: "Tarefa não encontrada ou não pertence ao usuário." });
     }
 
-    // Atualiza a tarefa
     const updatedTask = await Task.update(taskId, userId, req.body);
     if (!updatedTask) {
-        // Esta verificação é redundante se a anterior já foi feita, mas é uma boa prática
         return res.status(404).json({ message: "Falha ao atualizar a tarefa." });
     }
 
-    // Compara os campos para gerar o log de atividades
     const user = await User.findById(userId);
     const userName = user ? user.name : "Usuário desconhecido";
     const logMessages = [];
@@ -70,15 +64,13 @@ exports.updateTask = async (req, res) => {
     if (originalTask.priority !== updatedTask.priority) {
         logMessages.push(`alterou a prioridade para "${updatedTask.priority}".`);
     }
-    // Adicione mais comparações para outros campos se desejar (descrição, categoria, etc.)
 
-    // Se houver alguma mudança, cria um único registro de log
     if (logMessages.length > 0) {
       await ActivityLog.create(
         updatedTask.id,
         userId,
         userName,
-        logMessages.join(" E ") // Junta as mensagens: "alterou o status... E mudou a data..."
+        logMessages.join(" e ")
       );
     }
     
@@ -95,7 +87,6 @@ exports.deleteTask = async (req, res) => {
     if (!deletedTask) {
       return res.status(404).json({ message: "Tarefa não encontrada ou não pertence ao usuário" });
     }
-
     res.status(204).send();
   } catch (err) {
     console.error("Erro ao deletar tarefa:", err);

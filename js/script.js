@@ -5,28 +5,22 @@ document.addEventListener("DOMContentLoaded", () => {
     async _fetch(endpoint, options = {}) {
       const currentUserData = JSON.parse(localStorage.getItem("currentUser"));
       const token = currentUserData?.token;
-      
       const headers = {
         "Content-Type": "application/json",
         ...options.headers,
       };
-
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      
       try {
         const response = await fetch(`${this.BASE_URL}${endpoint}`, { ...options, headers });
-        
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ message: response.statusText }));
-            throw new Error(errorData.message || 'Ocorreu um erro na comunicação com o servidor.');
+          const errorData = await response.json().catch(() => ({ message: response.statusText }));
+          throw new Error(errorData.message || 'Ocorreu um erro na comunicação com o servidor.');
         }
-        
         if (response.status === 204) {
-            return {};
+          return {};
         }
-
         return await response.json();
       } catch (error) {
         console.error(`API Error on ${endpoint}:`, error);
@@ -36,12 +30,10 @@ document.addEventListener("DOMContentLoaded", () => {
     
     login: (username, password) => apiService._fetch("/login", { method: "POST", body: JSON.stringify({ username, password }) }),
     register: (name, email, password) => apiService._fetch("/cadastrar", { method: "POST", body: JSON.stringify({ name, email, password }) }),
-    
     getTasks: () => apiService._fetch("/tasks"),
     createTask: (taskData) => apiService._fetch("/tasks", { method: "POST", body: JSON.stringify(taskData) }),
     updateTask: (taskId, updateData) => apiService._fetch(`/tasks/${taskId}`, { method: "PUT", body: JSON.stringify(updateData) }),
     deleteTask: (taskId) => apiService._fetch(`/tasks/${taskId}`, { method: "DELETE" }),
-    
     getComments: (taskId) => apiService._fetch(`/tasks/${taskId}/comments`),
     addComment: (taskId, content) => apiService._fetch(`/tasks/${taskId}/comments`, { method: "POST", body: JSON.stringify({ content }) }),
     getHistory: (taskId) => apiService._fetch(`/tasks/${taskId}/history`),
@@ -208,7 +200,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const filterAndRender = () => {
     let filteredTasks = [...tasksCache];
     const query = DOM.searchTasksInput.value.toLowerCase().trim();
-
     if (currentFilter.type === 'status') {
       if (currentFilter.value !== 'todos') {
         filteredTasks = filteredTasks.filter(task => normalizeStatus(task.status) === normalizeStatus(currentFilter.value));
@@ -221,7 +212,6 @@ document.addEventListener("DOMContentLoaded", () => {
       filteredTasks = filteredTasks.filter(task => task.tags && task.tags.includes(currentFilter.value));
       if (DOM.taskListTitle) DOM.taskListTitle.innerHTML = `Lista de Tarefas <small class="text-muted fs-6">(Tag: ${sanitizeInput(currentFilter.value)})</small>`;
     }
-    
     if (query) {
       filteredTasks = filteredTasks.filter(task =>
         task.title.toLowerCase().includes(query) ||
@@ -564,37 +554,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-   // Em script.js, dentro de initializeApp() (VERSÃO CORRIGIDA)
-if (DOM.addCommentForm) {
-  DOM.addCommentForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const content = DOM.commentTextInput.value.trim();
-    
-    // Ignora se não houver conteúdo ou tarefa em edição
-    if (!content || !editingTask) return;
-
-    // Desabilita o botão para prevenir cliques duplos
-    if (DOM.addCommentButton) {
-        DOM.addCommentButton.disabled = true;
-        DOM.addCommentButton.textContent = 'Adicionando...';
-    }
-
-    try {
-      await apiService.addComment(editingTask.id, content);
-      DOM.commentTextInput.value = ''; // Limpa o campo de texto
-      await loadComments(editingTask.id); // Recarrega a lista de comentários
-    } catch (error) {
-      showUIMessage('Falha ao adicionar comentário.', true);
-    } finally {
-      // Reabilita o botão em todos os casos (sucesso ou erro)
-      if (DOM.addCommentButton) {
-          DOM.addCommentButton.disabled = false;
-          DOM.addCommentButton.textContent = 'Adicionar Comentário';
-      }
-    }
-  });
-}
-
   let currentDeleteHandler = null;
   function confirmTaskDeletion(task) {
     if (!DOM.deleteModalElement || !DOM.confirmDeleteButton) return;
@@ -763,13 +722,23 @@ if (DOM.addCommentForm) {
       DOM.addCommentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const content = DOM.commentTextInput.value.trim();
-        if (content && editingTask) {
-          try {
-            await apiService.addComment(editingTask.id, content);
-            DOM.commentTextInput.value = '';
-            await loadComments(editingTask.id);
-          } catch (error) {
-            showUIMessage('Falha ao adicionar comentário.', true);
+        if (!content || !editingTask) return;
+        
+        if (DOM.addCommentButton) {
+            DOM.addCommentButton.disabled = true;
+            DOM.addCommentButton.textContent = 'Adicionando...';
+        }
+
+        try {
+          await apiService.addComment(editingTask.id, content);
+          DOM.commentTextInput.value = '';
+          await loadComments(editingTask.id);
+        } catch (error) {
+          showUIMessage('Falha ao adicionar comentário.', true);
+        } finally {
+          if (DOM.addCommentButton) {
+            DOM.addCommentButton.disabled = false;
+            DOM.addCommentButton.textContent = 'Adicionar Comentário';
           }
         }
       });

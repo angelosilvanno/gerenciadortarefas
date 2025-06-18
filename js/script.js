@@ -34,27 +34,17 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
     
-    login: (username, password) => apiService._fetch("/login", {
-      method: "POST",
-      body: JSON.stringify({ username, password }),
-    }),
-    register: (name, email, password) => apiService._fetch("/cadastrar", {
-      method: "POST",
-      body: JSON.stringify({ name, email, password }),
-    }),
-
+    login: (username, password) => apiService._fetch("/login", { method: "POST", body: JSON.stringify({ username, password }) }),
+    register: (name, email, password) => apiService._fetch("/cadastrar", { method: "POST", body: JSON.stringify({ name, email, password }) }),
+    
     getTasks: () => apiService._fetch("/tasks"),
-    createTask: (taskData) => apiService._fetch("/tasks", {
-      method: "POST",
-      body: JSON.stringify(taskData),
-    }),
-    updateTask: (taskId, updateData) => apiService._fetch(`/tasks/${taskId}`, {
-      method: "PUT",
-      body: JSON.stringify(updateData),
-    }),
-    deleteTask: (taskId) => apiService._fetch(`/tasks/${taskId}`, {
-      method: "DELETE",
-    }),
+    createTask: (taskData) => apiService._fetch("/tasks", { method: "POST", body: JSON.stringify(taskData) }),
+    updateTask: (taskId, updateData) => apiService._fetch(`/tasks/${taskId}`, { method: "PUT", body: JSON.stringify(updateData) }),
+    deleteTask: (taskId) => apiService._fetch(`/tasks/${taskId}`, { method: "DELETE" }),
+    
+    getComments: (taskId) => apiService._fetch(`/tasks/${taskId}/comments`),
+    addComment: (taskId, content) => apiService._fetch(`/tasks/${taskId}/comments`, { method: "POST", body: JSON.stringify({ content }) }),
+    getHistory: (taskId) => apiService._fetch(`/tasks/${taskId}/history`),
   };
   
   const DOM = {
@@ -113,6 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
     registerEyeBtn: document.getElementById('register-eye-btn'),
     confirmRegisterEyeBtn: document.getElementById('confirm-register-eye-btn'),
     taskListTitle: document.querySelector("#main-panel h5"),
+    commentsList: document.getElementById('comments-list'),
+    historyList: document.getElementById('history-list'),
+    addCommentForm: document.getElementById('add-comment-form'),
+    commentTextInput: document.getElementById('comment-text'),
   };
 
   let editingTask = null;
@@ -139,9 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.messageDiv.setAttribute("role", "alert");
     DOM.messageDiv.tabIndex = -1;
     DOM.messageDiv.focus();
-    setTimeout(() => {
-      if (DOM.messageDiv) DOM.messageDiv.classList.add("d-none");
-    }, 4000);
+    setTimeout(() => { if (DOM.messageDiv) DOM.messageDiv.classList.add("d-none"); }, 4000);
   };
   
   const applyTheme = (theme) => {
@@ -241,10 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const debounce = (func, wait) => {
     let timeout;
     return (...args) => {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
+      const later = () => { clearTimeout(timeout); func(...args); };
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
     };
@@ -337,38 +326,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderTasks(tasksToDisplay) {
     if (!DOM.taskList) return;
-
-    const statusClassMap = {
-      "pendente": "task-status-pendente",
-      "emandamento": "task-status-em-andamento",
-      "concluida": "task-status-concluida"
-    };
+    const statusClassMap = { pendente: "task-status-pendente", emandamento: "task-status-em-andamento", concluida: "task-status-concluida" };
     DOM.taskList.innerHTML = "";
     if (!Array.isArray(tasksToDisplay) || tasksToDisplay.length === 0) {
       DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir.</p>';
       updateProgress();
       return;
     }
-
     const groupedByDate = {};
     tasksToDisplay.forEach(task => {
       const dateKey = task.due_date || 'Data Inválida';
       if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
       groupedByDate[dateKey].push(task);
     });
-
     const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
-      if (a === 'Data Inválida') return 1;
-      if (b === 'Data Inválida') return -1;
+      if (a === 'Data Inválida') return 1; if (b === 'Data Inválida') return -1;
       return new Date(a) - new Date(b);
     });
-
     sortedDates.forEach(date => {
       let formattedDate = date;
-      if (date !== 'Data Inválida') {
-        const [y, m, d] = date.split("-");
-        formattedDate = `${d}/${m}/${y}`;
-      }
+      if (date !== 'Data Inválida') { const [y, m, d] = date.split("-"); formattedDate = `${d}/${m}/${y}`; }
       const dateHeaderWrapper = document.createElement("div");
       dateHeaderWrapper.className = "mt-4 mb-2 d-flex align-items-center justify-content-start";
       const datePill = document.createElement("span");
@@ -376,40 +353,28 @@ document.addEventListener("DOMContentLoaded", () => {
       datePill.innerHTML = `🗓️ ${formattedDate}`;
       dateHeaderWrapper.appendChild(datePill);
       DOM.taskList.appendChild(dateHeaderWrapper);
-
       groupedByDate[date].forEach(task => {
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
         if (task.due_date) {
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
+            const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
             const [ano, mes, dia] = task.due_date.split("-").map(Number);
             const dataTarefa = new Date(ano, mes - 1, dia);
-
-            if (dataTarefa < hoje && normalizeStatus(task.status) !== "concluida") {
-            div.classList.add("tarefa-atrasada");
-            }
+            if (dataTarefa < hoje && normalizeStatus(task.status) !== "concluida") { div.classList.add("tarefa-atrasada"); }
         }
         const normStatus = normalizeStatus(task.status);
-        if (statusClassMap[normStatus]) {
-          div.classList.add(statusClassMap[normStatus]);
-        }
+        if (statusClassMap[normStatus]) { div.classList.add(statusClassMap[normStatus]); }
         div.setAttribute("role", "listitem");
         div.setAttribute("data-priority", task.priority);
         div.setAttribute("data-status", task.status);
         div.setAttribute("data-id", task.id);
-        
         const categoryHtml = task.category ? `<span class="task-category-badge" data-category="${sanitizeInput(task.category)}">${sanitizeInput(task.category)}</span>` : "";
         const tagsHtml = (task.tags && Array.isArray(task.tags) && task.tags.length > 0) ? task.tags.map(tag => `<span class="task-tag-badge" data-tag="${sanitizeInput(tag)}">${sanitizeInput(tag)}</span>`).join('') : "";
         const metaHtml = (categoryHtml || tagsHtml) ? `<div class="task-meta-wrapper">${categoryHtml}${tagsHtml}</div>` : "";
-
         div.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center flex-grow-1">
-              ${normStatus === "concluida" ?
-              `<i class="bi bi-check-circle-fill text-success me-2 fs-5" title="Tarefa concluída"></i>` :
-              `<input type="checkbox" class="form-check-input me-2 complete-checkbox" data-id="${task.id}" ${task.status === "concluída" ? "checked" : ""} aria-label="Marcar tarefa como concluída">`
-              }
+              ${normStatus === "concluida" ? `<i class="bi bi-check-circle-fill text-success me-2 fs-5" title="Tarefa concluída"></i>` : `<input type="checkbox" class="form-check-input me-2 complete-checkbox" data-id="${task.id}" ${task.status === "concluída" ? "checked" : ""} aria-label="Marcar tarefa como concluída">`}
               <h5 class="mb-0 flex-grow-1 task-title" style="word-break: break-word;">${sanitizeInput(task.title)}</h5>
             </div>
             <div>
@@ -425,18 +390,65 @@ document.addEventListener("DOMContentLoaded", () => {
         DOM.taskList.appendChild(div);
       });
     });
-    
     updateProgress();
   }
 
-  if (DOM.themeToggleButton) {
-    DOM.themeToggleButton.addEventListener("click", () => {
-      const isDarkMode = document.body.classList.contains('dark-mode');
-      const newTheme = isDarkMode ? 'light' : 'dark';
-      localStorage.setItem('theme', newTheme);
-      applyTheme(newTheme);
-    });
+  async function loadComments(taskId) {
+    if (!DOM.commentsList) return;
+    DOM.commentsList.innerHTML = '<p class="text-center text-muted">Carregando...</p>';
+    try {
+      const comments = await apiService.getComments(taskId);
+      DOM.commentsList.innerHTML = '';
+      if (comments.length === 0) {
+        DOM.commentsList.innerHTML = '<p class="text-center text-muted">Nenhum comentário ainda.</p>';
+        return;
+      }
+      comments.forEach(comment => {
+        const commentDiv = document.createElement('div');
+        commentDiv.className = 'mb-2 p-2 border rounded small';
+        const formattedDate = new Date(comment.created_at).toLocaleString('pt-BR');
+        commentDiv.innerHTML = `
+          <p class="mb-1">${sanitizeInput(comment.content)}</p>
+          <small class="text-muted"><strong>${sanitizeInput(comment.user_name)}</strong> em ${formattedDate}</small>
+        `;
+        DOM.commentsList.appendChild(commentDiv);
+      });
+    } catch (error) {
+      DOM.commentsList.innerHTML = '<p class="text-center text-danger">Falha ao carregar comentários.</p>';
+    }
   }
+
+  async function loadHistory(taskId) {
+    if (!DOM.historyList) return;
+    DOM.historyList.innerHTML = '<p class="text-center text-muted">Carregando...</p>';
+    try {
+      const historyLogs = await apiService.getHistory(taskId);
+      DOM.historyList.innerHTML = '';
+      if (historyLogs.length === 0) {
+        DOM.historyList.innerHTML = '<p class="text-center text-muted">Nenhum histórico para esta tarefa.</p>';
+        return;
+      }
+      historyLogs.forEach(log => {
+        const historyDiv = document.createElement('div');
+        historyDiv.className = 'mb-2 p-2 border rounded small';
+        const formattedDate = new Date(log.created_at).toLocaleString('pt-BR');
+        historyDiv.innerHTML = `
+          <p class="mb-0"><strong>${sanitizeInput(log.user_name)}</strong> ${sanitizeInput(log.description)}</p>
+          <small class="text-muted">${formattedDate}</small>
+        `;
+        DOM.historyList.appendChild(historyDiv);
+      });
+    } catch (error) {
+      DOM.historyList.innerHTML = '<p class="text-center text-danger">Falha ao carregar histórico.</p>';
+    }
+  }
+
+  if (DOM.themeToggleButton) DOM.themeToggleButton.addEventListener("click", () => {
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const newTheme = isDarkMode ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    applyTheme(newTheme);
+  });
 
   if (DOM.showRegisterLink) DOM.showRegisterLink.addEventListener("click", (e) => { e.preventDefault(); showRegisterPanel(); });
   if (DOM.showLoginLink) DOM.showLoginLink.addEventListener("click", (e) => { e.preventDefault(); showLoginPanel(); });
@@ -458,17 +470,14 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const inputs = [ DOM.registerUsernameInput, DOM.registerEmailInput, DOM.registerPasswordInput, DOM.registerConfirmPasswordInput ];
       inputs.forEach(input => input.classList.remove("is-invalid"));
-
       const username = DOM.registerUsernameInput.value.trim();
       const email = DOM.registerEmailInput.value.trim();
       const password = DOM.registerPasswordInput.value;
       const confirmPassword = DOM.registerConfirmPasswordInput.value;
-
       if (!usernameRegex.test(username)) return showUIMessage("Nome de usuário inválido. Use 3 a 15 letras ou números.");
       if (!emailRegex.test(email)) return showUIMessage("E-mail inválido.");
       if (!passwordRegex.test(password)) return showUIMessage("Senha inválida. Sua senha deve ter entre 6 a 80 caracteres, com pelo menos uma letra e um número.");
       if (password !== confirmPassword) return showUIMessage("As senhas não coincidem.");
-
       try {
         await apiService.register(username, email, password);
         showUIMessage("Cadastro realizado com sucesso! Faça o login.", false);
@@ -486,10 +495,8 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.loginUsernameInput.classList.remove("is-invalid");
       DOM.loginPasswordInput.classList.remove("is-invalid");
       DOM.loginButton.disabled = true;
-
       const username = DOM.loginUsernameInput.value.trim();
       const password = DOM.loginPasswordInput.value;
-
       try {
         const data = await apiService.login(username, password);
         localStorage.setItem("currentUser", JSON.stringify({ user: data.user, token: data.token }));
@@ -510,19 +517,14 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.taskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const taskData = {
-        title: DOM.taskTitleInput.value.trim(),
-        description: DOM.taskDescriptionInput.value.trim(),
-        due_date: DOM.taskDueDateInput.value,
-        priority: DOM.taskPriorityInput.value,
-        status: DOM.taskStatusInput.value,
-        category: DOM.taskCategoryInput.value.trim(),
+        title: DOM.taskTitleInput.value.trim(), description: DOM.taskDescriptionInput.value.trim(),
+        due_date: DOM.taskDueDateInput.value, priority: DOM.taskPriorityInput.value,
+        status: DOM.taskStatusInput.value, category: DOM.taskCategoryInput.value.trim(),
         tags: getTagsFromContainer(DOM.tagsContainer),
       };
-
       if (!taskData.title || !taskData.description || !taskData.due_date) {
         return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");
       }
-      
       try {
         await apiService.createTask(taskData);
         showUIMessage("Tarefa criada com sucesso!", false);
@@ -539,21 +541,15 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.editTaskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!editingTask) return showUIMessage("Erro: Nenhuma tarefa selecionada para edição.", true);
-      
       const updatedData = {
-        title: DOM.editTitleInput.value.trim(),
-        description: DOM.editDescriptionInput.value.trim(),
-        due_date: DOM.editDueDateInput.value,
-        priority: DOM.editPriorityInput.value,
-        status: DOM.editStatusInput.value,
-        category: DOM.editCategoryInput.value.trim(),
+        title: DOM.editTitleInput.value.trim(), description: DOM.editDescriptionInput.value.trim(),
+        due_date: DOM.editDueDateInput.value, priority: DOM.editPriorityInput.value,
+        status: DOM.editStatusInput.value, category: DOM.editCategoryInput.value.trim(),
         tags: getTagsFromContainer(DOM.editTagsContainer),
       };
-
       if (!updatedData.title || !updatedData.description || !updatedData.due_date) {
         return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.", true);
       }
-      
       try {
         await apiService.updateTask(editingTask.id, updatedData);
         showUIMessage("Tarefa atualizada com sucesso!", false);
@@ -564,6 +560,22 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (error) {
         showUIMessage(error.message || "Erro ao atualizar tarefa.");
       }
+    });
+  }
+
+  if (DOM.addCommentForm) {
+    DOM.addCommentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = DOM.commentTextInput.value.trim();
+        if (content && editingTask) {
+            try {
+                await apiService.addComment(editingTask.id, content);
+                DOM.commentTextInput.value = '';
+                await loadComments(editingTask.id);
+            } catch (error) {
+                showUIMessage('Falha ao adicionar comentário.', true);
+            }
+        }
     });
   }
 
@@ -581,9 +593,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await apiService.deleteTask(task.id);
         showUIMessage("Tarefa removida com sucesso!", false);
         await loadAndRenderTasks();
-      } catch (error) {
-        showUIMessage(error.message || "Erro ao remover tarefa.");
-      }
+      } catch (error) { showUIMessage(error.message || "Erro ao remover tarefa."); }
       modal.hide();
     };
     DOM.confirmDeleteButton.addEventListener('click', currentDeleteHandler, { once: true });
@@ -607,6 +617,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (DOM.editTagsInput) DOM.editTagsInput.value = '';
     
+    loadComments(task.id);
+    loadHistory(task.id);
+
     const modal = bootstrap.Modal.getOrCreateInstance(DOM.editTaskModalElement);
     modal.show();
   }
@@ -614,7 +627,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleTaskActions(event) {
     const button = event.target.closest('button[data-id]');
     const badge = event.target.closest('[data-category], [data-tag]');
-
     if (button) {
       const taskId = button.dataset.id;
       const task = tasksCache.find(t => t.id == taskId);
@@ -622,11 +634,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (button.classList.contains("edit-btn")) editTask(task);
       else if (button.classList.contains("delete-btn")) confirmTaskDeletion(task);
     } else if (badge) {
-      if (badge.dataset.category) {
-        currentFilter = { type: 'category', value: badge.dataset.category };
-      } else if (badge.dataset.tag) {
-        currentFilter = { type: 'tag', value: badge.dataset.tag };
-      }
+      if (badge.dataset.category) currentFilter = { type: 'category', value: badge.dataset.category };
+      else if (badge.dataset.tag) currentFilter = { type: 'tag', value: badge.dataset.tag };
       if (DOM.filterStatusSelect) DOM.filterStatusSelect.value = 'todos';
       filterAndRender();
     }
@@ -645,30 +654,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  if (DOM.filterStatusSelect) {
-    DOM.filterStatusSelect.addEventListener("change", (e) => {
-      currentFilter = { type: 'status', value: e.target.value };
-      filterAndRender();
-    });
-  }
+  if (DOM.filterStatusSelect) DOM.filterStatusSelect.addEventListener("change", (e) => {
+    currentFilter = { type: 'status', value: e.target.value };
+    filterAndRender();
+  });
 
-  if (DOM.searchTasksInput) {
-    DOM.searchTasksInput.addEventListener("input", debounce(filterAndRender, 300));
-  }
+  if (DOM.searchTasksInput) DOM.searchTasksInput.addEventListener("input", debounce(filterAndRender, 300));
   
   if (DOM.clearCompletedBtn) {
     DOM.clearCompletedBtn.addEventListener("click", async () => {
       const completedTasks = tasksCache.filter(task => normalizeStatus(task.status) === 'concluida');
-      if (completedTasks.length === 0) {
-        return showUIMessage("Nenhuma tarefa concluída para limpar.", false);
-      }
+      if (completedTasks.length === 0) return showUIMessage("Nenhuma tarefa concluída para limpar.", false);
       try {
         await Promise.all(completedTasks.map(task => apiService.deleteTask(task.id)));
         showUIMessage("Tarefas concluídas foram limpas.", false);
         await loadAndRenderTasks();
-      } catch (error) {
-        showUIMessage(error.message || "Erro ao limpar tarefas concluídas.");
-      }
+      } catch (error) { showUIMessage(error.message || "Erro ao limpar tarefas concluídas."); }
     });
   }
 
@@ -700,7 +701,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!('Notification' in window) || Notification.permission !== "granted") return;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
     tasksCache.forEach(task => {
       if (!task || normalizeStatus(task.status) === "concluida" || !task.due_date) return;
       try {
@@ -743,6 +743,22 @@ document.addEventListener("DOMContentLoaded", () => {
       DOM.taskList.addEventListener("change", handleCheckboxClick);
     }
     
+    if (DOM.addCommentForm) {
+      DOM.addCommentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = DOM.commentTextInput.value.trim();
+        if (content && editingTask) {
+          try {
+            await apiService.addComment(editingTask.id, content);
+            DOM.commentTextInput.value = '';
+            await loadComments(editingTask.id);
+          } catch (error) {
+            showUIMessage('Falha ao adicionar comentário.', true);
+          }
+        }
+      });
+    }
+
     const currentUserData = localStorage.getItem("currentUser");
     if (currentUserData) {
       try {

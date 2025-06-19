@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const apiService = {
-    BASE_URL: "http://localhost:3000/api",
+    BASE_URL: "https://gerenciadortarefas-production.up.railway.app/api",
 
     async _fetch(endpoint, options = {}) {
       const currentUserData = JSON.parse(localStorage.getItem("currentUser"));

@@ -1,4 +1,4 @@
-const ActivityLog = require("../models/ActivityLog");
+const ActivityLog = require("./models/ActivityLog");
 
 // GET /api/tasks/:taskId/history
 exports.getHistoryForTask = async (req, res) => {

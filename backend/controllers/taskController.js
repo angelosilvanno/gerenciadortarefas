@@ -1,6 +1,6 @@
-const Task = require("../models/Task");
-const ActivityLog = require("../models/ActivityLog");
-const User = require("../models/User");
+const Task = require("./models/Task");
+const ActivityLog = require("./models/ActivityLog");
+const User = require("./models/User");
 
 exports.getTasks = async (req, res) => {
   try {

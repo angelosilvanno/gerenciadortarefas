@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const taskController = require('../controllers/taskController');
-const authMiddleware = require('../middleware/authMiddleware');
+const taskController = require('./controllers/taskController');
+const authMiddleware = require('./middleware/authMiddleware');
 
 // Rota para obter todas as tarefas do usuário autenticado.
 router.get('/tasks', authMiddleware, taskController.getTasks);

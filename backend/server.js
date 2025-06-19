@@ -10,9 +10,9 @@ app.use(cors());
 app.use(express.json());
 
 // 3. Importa os arquivos de rota.
-const authRoutes = require("../routes/authRoutes");
-const taskRoutes = require("../routes/taskRoutes");
-const extraRoutes = require("../routes/extraRoutes");
+const authRoutes = require("./routes/authRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+const extraRoutes = require("./routes/extraRoutes");
 
 // 4. Associa os roteadores aos seus caminhos base.
 app.use("/api", authRoutes);

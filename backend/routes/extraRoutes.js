@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const commentController = require('../controllers/commentController');
-const activityLogController = require('../controllers/activityLogController');
-const authMiddleware = require('../middleware/authMiddleware');
+const commentController = require('./controllers/commentController');
+const activityLogController = require('./controllers/activityLogController');
+const authMiddleware = require('./middleware/authMiddleware');
 
 // Protege todas estas rotas
 router.use(authMiddleware);

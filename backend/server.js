@@ -9,8 +9,7 @@ const app = express();
 const allowedOrigins = [
   'https://nexttaskweb.vercel.app', // Sua URL de produção na Vercel
   'http://127.0.0.1:5500',         // Ambiente de desenvolvimento local
-  'http://localhost:5500',
-  'http://localhost:3000'          // Alternativa para desenvolvimento local
+  'http://localhost:5500',         // Alternativa para desenvolvimento local
 ];
 
 // Configuração do CORS para usar a lista de origens permitidas

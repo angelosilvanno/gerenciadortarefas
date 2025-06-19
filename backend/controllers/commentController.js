@@ -1,4 +1,4 @@
-const Comment = require("./models/Comment");
+const Comment = require("../models/Comment");
 
 // GET /api/tasks/:taskId/comments
 exports.getCommentsForTask = async (req, res) => {

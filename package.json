@@ -1,11 +1,8 @@
 {
   "name": "gerenciadortarefas",
   "version": "1.0.0",
-  "description": "<h1 align=\"center\"> Projeto de Teste de Software </h1>\r <h1 align=\"center\"> Gerenciamento de Tarefa: NextTask 📃 </h1>",
-  "main": "server.js",
-  "directories": {
-    "doc": "doc"
-  },
+  "description": "Um gerenciador de tarefas completo com front-end e back-end.",
+  "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,19 +11,26 @@
     "type": "git",
     "url": "git+https://github.com/angelosilvanno/gerenciadortarefas.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "tasks",
+    "todo",
+    "fullstack",
+    "nodejs",
+    "express",
+    "postgresql"
+  ],
+  "author": "Angelo Silvano",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/angelosilvanno/gerenciadortarefas/issues"
   },
   "homepage": "https://github.com/angelosilvanno/gerenciadortarefas#readme",
   "dependencies": {
-    "bcryptjs": "^3.0.2",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.0"
+    "pg": "^8.11.5"
   }
 }

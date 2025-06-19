@@ -129,10 +129,19 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => { if (DOM.messageDiv) DOM.messageDiv.classList.add("d-none"); }, 4000);
   };
   
+  function updateLogoForTheme() {
+    const logo = document.getElementById("logo-switch");
+    const isDark = document.body.classList.contains("dark-mode");
+    if (logo) {
+      logo.src =isDark ? "image/img-dark.png" : "image/img.png";
+    }
+  }
+
   const applyTheme = (theme) => {
     const body = document.body;
     if (!DOM.themeToggleButton) return;
     const icon = DOM.themeToggleButton.querySelector('i');
+
     if (theme === 'dark') {
       body.classList.add('dark-mode');
       icon.classList.remove('bi-moon-fill');
@@ -144,6 +153,9 @@ document.addEventListener("DOMContentLoaded", () => {
       icon.classList.add('bi-moon-fill');
       DOM.themeToggleButton.setAttribute('title', 'Alternar para modo escuro');
     }
+
+    updateLogoForTheme();
+    
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
       const tooltipInstance = bootstrap.Tooltip.getInstance(DOM.themeToggleButton);
       if (tooltipInstance) tooltipInstance.dispose();

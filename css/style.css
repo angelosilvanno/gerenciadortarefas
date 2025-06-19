@@ -591,4 +591,11 @@ body.dark-mode #login-image {
       font-size: 1.5rem;
     }
   }
+
+  #main-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+  }
   

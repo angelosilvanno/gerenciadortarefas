@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     updateLogoForTheme();
-    
+
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
       const tooltipInstance = bootstrap.Tooltip.getInstance(DOM.themeToggleButton);
       if (tooltipInstance) tooltipInstance.dispose();
@@ -504,6 +504,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await apiService.login(username, password);
         localStorage.setItem("currentUser", JSON.stringify({ user: data.user, token: data.token }));
         showMainAppPanel();
+        document.getElementById("main-header").style.display = "flex";
         await loadAndRenderTasks();
         DOM.loginForm.reset();
       } catch (error) {

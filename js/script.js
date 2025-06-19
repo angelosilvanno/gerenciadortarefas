@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const apiService = {
-    BASE_URL: "https://gerenciadortarefas-production.up.railway.app/api",
+    BASE_URL: "https://nexttaskweb.vercel.app/api",
 
     async _fetch(endpoint, options = {}) {
       const currentUserData = JSON.parse(localStorage.getItem("currentUser"));

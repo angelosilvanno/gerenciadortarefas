@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const apiService = {
-    BASE_URL: "https://fe50-177-73-9-11.ngrok-free.app/api",
+    BASE_URL: "http://localhost:3000/api",
 
     async _fetch(endpoint, options = {}) {
       const currentUserData = JSON.parse(localStorage.getItem("currentUser"));

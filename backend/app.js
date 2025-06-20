@@ -13,6 +13,7 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
+
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -22,7 +23,7 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 
 const authRoutes = require("./routes/authRoutes");

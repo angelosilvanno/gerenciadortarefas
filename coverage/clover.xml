@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1750371179161" clover="3.2.0">
-  <project timestamp="1750371179161" name="All files">
-    <metrics statements="4" coveredstatements="4" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1" elements="7" coveredelements="7" complexity="0" loc="4" ncloc="4" packages="1" files="1" classes="1"/>
+<coverage generated="1750394268603" clover="3.2.0">
+  <project timestamp="1750394268603" name="All files">
+    <metrics statements="11" coveredstatements="11" conditionals="18" coveredconditionals="18" methods="3" coveredmethods="3" elements="32" coveredelements="32" complexity="0" loc="11" ncloc="11" packages="1" files="2" classes="2"/>
     <file name="taskUtils.js" path="C:\Users\PC\gerenciadortarefas\backend\utils\taskUtils.js">
-      <metrics statements="4" coveredstatements="4" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
+      <metrics statements="7" coveredstatements="7" conditionals="10" coveredconditionals="10" methods="2" coveredmethods="2"/>
       <line num="2" count="3" type="cond" truecount="2" falsecount="0"/>
       <line num="3" count="2" type="stmt"/>
       <line num="4" count="2" type="stmt"/>
+      <line num="8" count="3" type="cond" truecount="4" falsecount="0"/>
+      <line num="9" count="2" type="cond" truecount="4" falsecount="0"/>
+      <line num="10" count="1" type="stmt"/>
+      <line num="13" count="2" type="stmt"/>
+    </file>
+    <file name="validationUtils.js" path="C:\Users\PC\gerenciadortarefas\backend\utils\validationUtils.js">
+      <metrics statements="4" coveredstatements="4" conditionals="8" coveredconditionals="8" methods="1" coveredmethods="1"/>
+      <line num="2" count="3" type="cond" truecount="4" falsecount="0"/>
+      <line num="3" count="2" type="cond" truecount="4" falsecount="0"/>
+      <line num="4" count="1" type="stmt"/>
       <line num="7" count="1" type="stmt"/>
     </file>
   </project>

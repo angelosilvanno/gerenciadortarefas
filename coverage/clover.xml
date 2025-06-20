@@ -1,23 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1750394268603" clover="3.2.0">
-  <project timestamp="1750394268603" name="All files">
-    <metrics statements="11" coveredstatements="11" conditionals="18" coveredconditionals="18" methods="3" coveredmethods="3" elements="32" coveredelements="32" complexity="0" loc="11" ncloc="11" packages="1" files="2" classes="2"/>
-    <file name="taskUtils.js" path="C:\Users\PC\gerenciadortarefas\backend\utils\taskUtils.js">
-      <metrics statements="7" coveredstatements="7" conditionals="10" coveredconditionals="10" methods="2" coveredmethods="2"/>
-      <line num="2" count="3" type="cond" truecount="2" falsecount="0"/>
-      <line num="3" count="2" type="stmt"/>
-      <line num="4" count="2" type="stmt"/>
-      <line num="8" count="3" type="cond" truecount="4" falsecount="0"/>
-      <line num="9" count="2" type="cond" truecount="4" falsecount="0"/>
-      <line num="10" count="1" type="stmt"/>
-      <line num="13" count="2" type="stmt"/>
-    </file>
-    <file name="validationUtils.js" path="C:\Users\PC\gerenciadortarefas\backend\utils\validationUtils.js">
-      <metrics statements="4" coveredstatements="4" conditionals="8" coveredconditionals="8" methods="1" coveredmethods="1"/>
-      <line num="2" count="3" type="cond" truecount="4" falsecount="0"/>
-      <line num="3" count="2" type="cond" truecount="4" falsecount="0"/>
-      <line num="4" count="1" type="stmt"/>
-      <line num="7" count="1" type="stmt"/>
-    </file>
+<coverage generated="1750395023763" clover="3.2.0">
+  <project timestamp="1750395023763" name="All files">
+    <metrics statements="22" coveredstatements="22" conditionals="22" coveredconditionals="22" methods="4" coveredmethods="4" elements="48" coveredelements="48" complexity="0" loc="22" ncloc="22" packages="2" files="3" classes="3"/>
+    <package name="middleware">
+      <metrics statements="11" coveredstatements="11" conditionals="4" coveredconditionals="4" methods="1" coveredmethods="1"/>
+      <file name="authMiddleware.js" path="C:\Users\PC\gerenciadortarefas\backend\middleware\authMiddleware.js">
+        <metrics statements="11" coveredstatements="11" conditionals="4" coveredconditionals="4" methods="1" coveredmethods="1"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="5" count="3" type="stmt"/>
+        <line num="8" count="3" type="cond" truecount="4" falsecount="0"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="12" count="2" type="stmt"/>
+        <line num="14" count="2" type="stmt"/>
+        <line num="16" count="2" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="utils">
+      <metrics statements="11" coveredstatements="11" conditionals="18" coveredconditionals="18" methods="3" coveredmethods="3"/>
+      <file name="taskUtils.js" path="C:\Users\PC\gerenciadortarefas\backend\utils\taskUtils.js">
+        <metrics statements="7" coveredstatements="7" conditionals="10" coveredconditionals="10" methods="2" coveredmethods="2"/>
+        <line num="2" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="3" count="2" type="stmt"/>
+        <line num="4" count="2" type="stmt"/>
+        <line num="8" count="3" type="cond" truecount="4" falsecount="0"/>
+        <line num="9" count="2" type="cond" truecount="4" falsecount="0"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="13" count="2" type="stmt"/>
+      </file>
+      <file name="validationUtils.js" path="C:\Users\PC\gerenciadortarefas\backend\utils\validationUtils.js">
+        <metrics statements="4" coveredstatements="4" conditionals="8" coveredconditionals="8" methods="1" coveredmethods="1"/>
+        <line num="2" count="3" type="cond" truecount="4" falsecount="0"/>
+        <line num="3" count="2" type="cond" truecount="4" falsecount="0"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+      </file>
+    </package>
   </project>
 </coverage>

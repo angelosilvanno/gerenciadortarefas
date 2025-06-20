@@ -1,24 +1,23 @@
 name: Testes Automatizados
 
-on:
-  push:
-  pull_request:
+on: [push]
 
 jobs:
   run-tests:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clonar o repositório
-      uses: actions/checkout@v3
+      - name: Checkout código
+        uses: actions/checkout@v3
 
-    - name: Instalar o Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-    
-    - name: Instalar dependências (forçando peer deps)
-      run: npm install --legacy-peer-deps
-      
-    - name: Rodar testes com Jest
-      run: npm test
+      - name: Instalar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Instalar dependências (forçando peer deps)
+        run: npm install --legacy-peer-deps
+
+      - name: Rodar testes unitários com coverage
+        run: jest tests/unit --coverage
+

@@ -57,7 +57,7 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ where: { name: username } });
+    const user = await User.findByUsernameOrEmail(username);
 
     if (!user) {
       return res.status(401).json({ success: false, message: "Credenciais inválidas." });
@@ -68,9 +68,9 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ success: false, message: "Credenciais inválidas." });
     }
-    
+
     const token = generateToken(user.id);
-    
+
     res.status(200).json({
       success: true,
       token,

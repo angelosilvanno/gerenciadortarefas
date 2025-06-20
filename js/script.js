@@ -1,43 +1,81 @@
 document.addEventListener("DOMContentLoaded", () => {
   const apiService = {
     BASE_URL: "http://localhost:3000/api",
-
+  
     async _fetch(endpoint, options = {}) {
       const currentUserData = JSON.parse(localStorage.getItem("currentUser"));
       const token = currentUserData?.token;
+  
       const headers = {
         "Content-Type": "application/json",
-        ...options.headers,
+        ...(options.headers || {}),
       };
+  
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
+  
       try {
-        const response = await fetch(`${this.BASE_URL}${endpoint}`, { ...options, headers });
+        const response = await fetch(`${this.BASE_URL}${endpoint}`, {
+          method: options.method || 'GET',
+          headers,
+          body: options.body,
+        });
+  
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: response.statusText }));
           throw new Error(errorData.message || 'Ocorreu um erro na comunicação com o servidor.');
         }
-        if (response.status === 204) {
-          return {};
-        }
-        return await response.json();
+  
+        return response.status === 204 ? {} : await response.json();
       } catch (error) {
         console.error(`API Error on ${endpoint}:`, error);
         throw error;
       }
-    },
-    
-    login: (username, password) => apiService._fetch("/login", { method: "POST", body: JSON.stringify({ username, password }) }),
-    register: (name, email, password) => apiService._fetch("/cadastrar", { method: "POST", body: JSON.stringify({ name, email, password }) }),
+    }, 
+  
+    login: (username, password) =>
+      apiService._fetch("/login", {
+        method: "POST",
+        body: JSON.stringify({ username, password })
+      }),
+  
+    register: (username, email, password) =>
+      apiService._fetch("/cadastrar", {
+        method: "POST",
+        body: JSON.stringify({ username, email, password })
+      }),
+  
     getTasks: () => apiService._fetch("/tasks"),
-    createTask: (taskData) => apiService._fetch("/tasks", { method: "POST", body: JSON.stringify(taskData) }),
-    updateTask: (taskId, updateData) => apiService._fetch(`/tasks/${taskId}`, { method: "PUT", body: JSON.stringify(updateData) }),
-    deleteTask: (taskId) => apiService._fetch(`/tasks/${taskId}`, { method: "DELETE" }),
+  
+    createTask: (taskData) =>
+      apiService._fetch("/tasks", {
+        method: "POST",
+        body: JSON.stringify(taskData)
+      }),
+  
+    updateTask: (taskId, updateData) =>
+      apiService._fetch(`/tasks/${taskId}`, {
+        method: "PUT",
+        body: JSON.stringify(updateData)
+      }),
+  
+    deleteTask: (taskId) =>
+      apiService._fetch(`/tasks/${taskId}`, {
+        method: "DELETE"
+      }),
+  
     getComments: (taskId) => apiService._fetch(`/tasks/${taskId}/comments`),
-    addComment: (taskId, content) => apiService._fetch(`/tasks/${taskId}/comments`, { method: "POST", body: JSON.stringify({ content }) }),
+  
+    addComment: (taskId, content) =>
+      apiService._fetch(`/tasks/${taskId}/comments`, {
+        method: "POST",
+        body: JSON.stringify({ content })
+      }),
+  
     getHistory: (taskId) => apiService._fetch(`/tasks/${taskId}/history`),
   };
+  
   
   const DOM = {
     loginContainer: document.getElementById("login-container"),

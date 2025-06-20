@@ -15,10 +15,10 @@ exports.getTasks = async (req, res) => {
 exports.createTask = async (req, res) => {
   try {
     const newTask = await Task.create(req.user.id, req.body);
-    
+
     const user = await User.findById(req.user.id);
     const userName = user ? user.name : "Usuário desconhecido";
-    
+
     await ActivityLog.create(
       newTask.id,
       req.user.id,
@@ -45,7 +45,7 @@ exports.updateTask = async (req, res) => {
 
     const updatedTask = await Task.update(taskId, userId, req.body);
     if (!updatedTask) {
-        return res.status(404).json({ message: "Falha ao atualizar a tarefa." });
+      return res.status(404).json({ message: "Falha ao atualizar a tarefa." });
     }
 
     const user = await User.findById(userId);
@@ -59,10 +59,10 @@ exports.updateTask = async (req, res) => {
       logMessages.push(`alterou o status de "${originalTask.status}" para "${updatedTask.status}".`);
     }
     if (String(originalTask.due_date) !== String(updatedTask.due_date)) {
-        logMessages.push(`mudou a data de vencimento.`);
+      logMessages.push(`mudou a data de vencimento.`);
     }
     if (originalTask.priority !== updatedTask.priority) {
-        logMessages.push(`alterou a prioridade para "${updatedTask.priority}".`);
+      logMessages.push(`alterou a prioridade para "${updatedTask.priority}".`);
     }
 
     if (logMessages.length > 0) {
@@ -73,7 +73,7 @@ exports.updateTask = async (req, res) => {
         logMessages.join(" e ")
       );
     }
-    
+
     res.status(200).json(updatedTask);
   } catch (err) {
     console.error("Erro ao atualizar tarefa:", err);
@@ -82,14 +82,24 @@ exports.updateTask = async (req, res) => {
 };
 
 exports.deleteTask = async (req, res) => {
+  console.log("🛠️ Entrou no deleteTask()");
+  console.log("req.user.id:", req.user.id);
+  console.log("req.params.id:", req.params.id);
+
   try {
     const deletedTask = await Task.delete(req.params.id, req.user.id);
+
     if (!deletedTask) {
+      console.log("Nenhuma tarefa deletada. Provavelmente não pertence ao usuário.");
       return res.status(404).json({ message: "Tarefa não encontrada ou não pertence ao usuário" });
     }
+
+    console.log("Tarefa deletada com sucesso!");
     res.status(204).send();
   } catch (err) {
     console.error("Erro ao deletar tarefa:", err);
     res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
+
+

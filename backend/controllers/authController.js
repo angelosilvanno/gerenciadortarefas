@@ -14,9 +14,10 @@ function generateToken(userId) {
 }
 
 exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
+  console.log("REQ.BODY RECEBIDO:", req.body);
+  const { username, email, password } = req.body;
 
-  if (!name || !email || !password) {
+  if (!username || !email || !password) {
     return res.status(400).json({ success: false, message: "Por favor, preencha todos os campos." });
   }
 
@@ -24,7 +25,7 @@ exports.register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = await User.create(name, email, hashedPassword);
+    const newUser = await User.create(username, email, hashedPassword);
 
     res.status(201).json({ 
         success: true, 
@@ -47,6 +48,8 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
+  console.log("HEADERS RECEBIDOS:", req.headers);
+
   const { username, password } = req.body;
 
   if (!username || !password) {

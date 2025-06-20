@@ -3,6 +3,14 @@ function formatarData(dataStr) {
     const [ano, mes, dia] = dataStr.split('-');
     return `${dia}/${mes}/${ano}`;
   }
-  
-  module.exports = { formatarData };
-  
+
+  function validarCamposTarefa(titulo, data) {
+    if (!titulo || titulo.trim() === "") return "Título obrigatório";
+    if (!data || data.trim() === "") return "Data obrigatória";
+    return "ok";
+  }
+
+  module.exports = {
+    formatarData,
+    validarCamposTarefa
+  };

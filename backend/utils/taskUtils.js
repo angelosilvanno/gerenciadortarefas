@@ -10,7 +10,13 @@ function formatarData(dataStr) {
     return "ok";
   }
 
+function filtrarTarefasPorStatus(status, tarefas) {
+  return tarefas.filter(tarefa => tarefa.status === status);
+}
+
   module.exports = {
     formatarData,
-    validarCamposTarefa
+    validarCamposTarefa,
+    filtrarTarefasPorStatus
   };
+

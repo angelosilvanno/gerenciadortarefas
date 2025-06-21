@@ -92,6 +92,10 @@ document.addEventListener("DOMContentLoaded", () => {
     taskList: document.getElementById("task-list"),
     searchTasksInput: document.getElementById("search-tasks"),
     filterStatusSelect: document.getElementById("filter-status"),
+    filterPrioritySelect: document.getElementById("filter-priority"),
+    filterCategoryInput: document.getElementById("filter-category"),
+    filterDueDateInput: document.getElementById("filter-dueDate"),
+    searchTasksInput: document.getElementById("search-tasks"),
     exportTasksBtn: document.getElementById("export-tasks"),
     messageDiv: document.getElementById("message"),
     progressBar: document.getElementById("progress-bar"),
@@ -142,7 +146,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let editingTask = null;
   let tasksCache = [];
-  let currentFilter = { type: 'status', value: 'todos' };
 
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,80}$/;
@@ -249,25 +252,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const filterAndRender = () => {
     let filteredTasks = [...tasksCache];
-    const query = DOM.searchTasksInput.value.toLowerCase().trim();
-    if (currentFilter.type === 'status') {
-      if (currentFilter.value !== 'todos') {
-        filteredTasks = filteredTasks.filter(task => normalizeStatus(task.status) === normalizeStatus(currentFilter.value));
-      }
-      if (DOM.taskListTitle) DOM.taskListTitle.textContent = "Lista de Tarefas";
-    } else if (currentFilter.type === 'category') {
-      filteredTasks = filteredTasks.filter(task => task.category && task.category.toLowerCase() === currentFilter.value.toLowerCase());
-      if (DOM.taskListTitle) DOM.taskListTitle.innerHTML = `Lista de Tarefas <small class="text-muted fs-6">(Categoria: ${sanitizeInput(currentFilter.value)})</small>`;
-    } else if (currentFilter.type === 'tag') {
-      filteredTasks = filteredTasks.filter(task => task.tags && task.tags.includes(currentFilter.value));
-      if (DOM.taskListTitle) DOM.taskListTitle.innerHTML = `Lista de Tarefas <small class="text-muted fs-6">(Tag: ${sanitizeInput(currentFilter.value)})</small>`;
+
+    const searchQuery = DOM.searchTasksInput?.value.toLowerCase().trim() || "";
+    const statusFilter = DOM.filterStatusSelect?.value || "";
+    const priorityFilter = DOM.filterPrioritySelect?.value || "";
+    const categoryFilter = DOM.filterCategoryInput?.value.toLowerCase().trim() || "";
+    const dueDateFilter = DOM.filterDueDateInput?.value || "";
+
+    if (statusFilter && statusFilter !== "todos") {
+      filteredTasks = filteredTasks.filter(task => normalizeStatus(task.status) === normalizeStatus(statusFilter));
     }
-    if (query) {
+
+    if (priorityFilter) {
+      filteredTasks = filteredTasks.filter(task => task.priority === priorityFilter);
+    }
+
+    if (categoryFilter) {
       filteredTasks = filteredTasks.filter(task =>
-        task.title.toLowerCase().includes(query) ||
-        (task.tags && task.tags.some(tag => tag.toLowerCase().includes(query)))
+        task.category && task.category.toLowerCase().includes(categoryFilter)
       );
     }
+
+    if (dueDateFilter) {
+      filteredTasks = filteredTasks.filter(task => task.due_date === dueDateFilter);
+    }
+
+    if (searchQuery) {
+      filteredTasks = filteredTasks.filter(task =>
+        task.title.toLowerCase().includes(searchQuery) ||
+        (task.tags && task.tags.some(tag => tag.toLowerCase().includes(searchQuery)))
+      );
+    }
+
     renderTasks(filteredTasks);
   };
 
@@ -680,10 +696,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   
-  if (DOM.filterStatusSelect) DOM.filterStatusSelect.addEventListener("change", (e) => {
-    currentFilter = { type: 'status', value: e.target.value };
-    filterAndRender();
-  });
+  DOM.filterStatusSelect?.addEventListener("change", filterAndRender);
+  DOM.filterPrioritySelect?.addEventListener("change", filterAndRender);
+  DOM.filterCategoryInput?.addEventListener("input", debounce(filterAndRender, 300));
+  DOM.filterDueDateInput?.addEventListener("change", filterAndRender);
+  DOM.searchTasksInput?.addEventListener("input", debounce(filterAndRender, 300));
 
   if (DOM.searchTasksInput) DOM.searchTasksInput.addEventListener("input", debounce(filterAndRender, 300));
   

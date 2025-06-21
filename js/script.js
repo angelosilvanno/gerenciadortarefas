@@ -1,3 +1,5 @@
+import { handleLogout } from './logout.js'; 
+
 document.addEventListener("DOMContentLoaded", () => {
   const apiService = {
     BASE_URL: "http://localhost:3000/api",
@@ -838,10 +840,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initializeApp();
 });
-
-export function handleLogout() {
-  localStorage.removeItem("currentUser");
-  DOM.taskList.innerHTML = "";
-  DOM.taskListTitle.textContent = "Minhas Tarefas";
-  showLoginPanel();
-}

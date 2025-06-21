@@ -184,22 +184,41 @@
             </button>
           </div>
       
-          <div class="row g-3 mb-3 align-items-end">
-            <div class="col-lg-6">
-              <input type="text" id="search-tasks" class="form-control" placeholder="Buscar tarefas por título ou tags..." />
-            </div>
-            <div class="col-lg-3">
-              <select id="filter-status" class="form-select">
-                <option value="todos">Todos</option>
-                <option value="pendente">Pendente</option>
-                <option value="em andamento">Em andamento</option>
-                <option value="concluída">Concluída</option>
-              </select>
-            </div>
-            <div class="col-lg-3">
-              <button id="export-tasks" class="btn btn-outline-primary w-100">
-                <i class="bi bi-download me-1"></i> Exportar
-              </button>
+          <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title"><i class="bi bi-funnel-fill me-1"></i>Filtros</h5>
+              <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                  <input type="text" id="search-tasks" class="form-control" placeholder="Buscar por título ou tags" />
+                </div>
+                <div class="col-md-2">
+                  <select id="filter-status" class="form-select">
+                    <option value="">Status</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="em andamento">Em andamento</option>
+                    <option value="concluída">Concluída</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <select id="filter-priority" class="form-select">
+                    <option value="">Prioridade</option>
+                    <option value="baixa">Baixa</option>
+                    <option value="média">Média</option>
+                    <option value="alta">Alta</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <input type="text" id="filter-category" class="form-control" placeholder="Categoria" />
+                </div>
+                <div class="col-md-2">
+                  <input type="date" id="filter-dueDate" class="form-control" />
+                </div>
+                <div class="col-md-1">
+                  <button id="export-tasks" class="btn btn-outline-primary w-100" title="Exportar tarefas">
+                    <i class="bi bi-download"></i>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
       

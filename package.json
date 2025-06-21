@@ -42,6 +42,7 @@
     "@babel/plugin-transform-modules-commonjs": "^7.27.1",
     "@babel/preset-env": "^7.27.2",
     "jest": "^30.0.2",
+    "jest-environment-jsdom": "^30.0.2",
     "supertest": "^7.1.1"
   }
 }

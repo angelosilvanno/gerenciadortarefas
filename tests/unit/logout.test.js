@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { handleLogout } from '../../js/script';
+import { handleLogout } from '../../js/script,js';
 
 describe('Função handleLogout', () => {
   let removeItemSpy;

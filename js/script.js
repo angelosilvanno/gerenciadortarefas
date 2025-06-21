@@ -838,4 +838,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initializeApp();
 });
-export { handleLogout };
+

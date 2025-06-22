@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <link rel="shortcut icon" href="image/icone.png" type="image/x-icon" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <body class="bg-light">
 
     <div id="main-header" style="display: none;">
@@ -211,7 +212,7 @@
                   <input type="text" id="filter-category" class="form-control" placeholder="Categoria" />
                 </div>
                 <div class="col-md-2">
-                  <input type="date" id="filter-dueDate" class="form-control" />
+                  <input type="date" id="filter-dueDate" class="form-control" placeholder="Data" />
                 </div>
                 <div class="col-md-1">
                   <button id="export-tasks" class="btn btn-outline-primary w-100" title="Exportar tarefas">
@@ -260,6 +261,7 @@
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="deleteModalLabel">Confirmar Exclusão</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div><div class="modal-body">Deseja realmente excluir esta tarefa?</div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" id="confirmDelete" class="btn btn-danger">Excluir</button></div></div></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script type="module" src="js/script.js"></script>    
   </body>
 </html>

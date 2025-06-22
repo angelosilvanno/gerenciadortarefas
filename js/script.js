@@ -834,6 +834,28 @@ document.addEventListener("DOMContentLoaded", () => {
         new bootstrap.Tooltip(el);
       }
     });
+
+    flatpickr("#dueDate", {
+      dateFormat: "Y-m-d",
+      altInput: true,
+      altFormat: "d/m/Y",
+      locale: "pt",
+    });
+
+    flatpickr("#edit-dueDate", {
+      dateFormat: "Y-m-d",
+      altInput: true,
+      altFormat: "d/m/Y",
+      locale: "pt",
+    });
+
+    flatpickr("#filter-dueDate", {
+      dateFormat: "Y-m-d",
+      altInput: true,
+      altFormat: "d/m/Y",
+      allowInput: true,
+      locale: "pt",
+    });
   }
 
   initializeApp();

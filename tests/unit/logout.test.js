@@ -1,8 +1,5 @@
-/**
- * @jest-environment jsdom
- */
-
-import { handleLogout } from '../../js/script,js';
+/** @jest-environment jsdom */
+const { handleLogout } = require('../../js/logoutHelper');
 
 describe('Função handleLogout', () => {
   let removeItemSpy;
@@ -28,7 +25,7 @@ describe('Função handleLogout', () => {
   });
 
   it('deve limpar o localStorage e resetar o estado da aplicação', () => {
-    handleLogout();
+    handleLogout(DOM, showLoginPanel);
 
     expect(removeItemSpy).toHaveBeenCalledWith("currentUser");
     expect(DOM.taskList.innerHTML).toBe("");
@@ -36,6 +33,7 @@ describe('Função handleLogout', () => {
     expect(showLoginPanel).toHaveBeenCalled();
   });
 });
+
 
 
 

@@ -20,10 +20,13 @@ CREATE TABLE IF NOT EXISTS tasks (
     status VARCHAR(50) DEFAULT 'pendente' CHECK (status IN ('pendente', 'em andamento', 'concluída')),
     category VARCHAR(100),
     tags TEXT[], -- Campo do tipo array de texto para as tags
+
+    -- Campos adicionados:
+    date_time TIMESTAMP,
+    reminder_minutes INTEGER DEFAULT 15,
+
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    -- Chave estrangeira que liga a tarefa a um usuário
-    -- ON DELETE CASCADE: se o usuário for deletado, suas tarefas também serão
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 

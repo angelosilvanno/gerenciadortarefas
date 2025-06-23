@@ -142,10 +142,13 @@ document.addEventListener("DOMContentLoaded", () => {
     addCommentForm: document.getElementById('add-comment-form'),
     commentTextInput: document.getElementById('comment-text'),
     addCommentButton: document.querySelector('#add-comment-form button[type="submit"]'),
+    taskDateTimeInput: document.getElementById("dateTime"),
+    taskReminderSelect: document.getElementById("reminderMinutes"),  
   };
 
   let editingTask = null;
   let tasksCache = [];
+  window.tasksCache = tasksCache;
 
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,80}$/;
@@ -359,11 +362,21 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadAndRenderTasks() {
     try {
       const tasksFromServer = await apiService.getTasks();
+  
       tasksCache = tasksFromServer.map(task => ({
         ...task,
         due_date: task.due_date ? new Date(task.due_date).toISOString().split('T')[0] : null
       }));
+  
+      window.tasksCache = tasksCache;
+  
+      console.log("tasksCache atualizado:", tasksCache); 
       filterAndRender();
+  
+      if ("Notification" in window && Notification.permission === "granted") {
+        setInterval(verificarLembretes, 60000);
+      }
+  
     } catch (error) {
       showUIMessage(error.message || "Falha ao carregar as tarefas.", true);
       if (String(error.message).includes('Acesso negado') || String(error.message).includes('inválido')) {
@@ -371,7 +384,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
-
+      
   function handleLogout() {
     localStorage.removeItem("currentUser");
     tasksCache = [];
@@ -575,11 +588,17 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.taskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const taskData = {
-        title: DOM.taskTitleInput.value.trim(), description: DOM.taskDescriptionInput.value.trim(),
-        due_date: DOM.taskDueDateInput.value, priority: DOM.taskPriorityInput.value,
-        status: DOM.taskStatusInput.value, category: DOM.taskCategoryInput.value.trim(),
+        title: DOM.taskTitleInput.value.trim(),
+        description: DOM.taskDescriptionInput.value.trim(),
+        due_date: DOM.taskDateTimeInput.value ? DOM.taskDateTimeInput.value.split('T')[0] : null,
+        date_time: DOM.taskDateTimeInput.value || null,
+        reminder_minutes: parseInt(DOM.taskReminderSelect.value) || 15,
+        priority: DOM.taskPriorityInput.value,
+        status: DOM.taskStatusInput.value,
+        category: DOM.taskCategoryInput.value.trim(),
         tags: getTagsFromContainer(DOM.tagsContainer),
-      };
+      };         
+
       if (!taskData.title || !taskData.description || !taskData.due_date) {
         return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");
       }
@@ -770,6 +789,43 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const lembretesEnviados = new Set();
+
+function verificarLembretes() {
+  console.log("🕐 Rodando verificarLembretes", new Date().toLocaleTimeString());
+
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+  const agora = new Date();
+
+  tasksCache.forEach(task => {
+    if (
+      !task.date_time ||
+      !task.reminder_minutes ||
+      !task.id || // garante que o ID exista
+      normalizeStatus(task.status) === "concluida"
+    ) return;
+
+    const dataTarefa = new Date(task.date_time);
+    const diffMin = Math.floor((dataTarefa - agora) / 60000); // diferença em minutos
+
+    // Verifica se a diferença é exatamente igual ao tempo de lembrete
+    if (
+      diffMin === Number(task.reminder_minutes) &&
+      !lembretesEnviados.has(task.id)
+    ) {
+      const titulo = `Lembrete: ${sanitizeInput(task.title)}`;
+      const corpo = `Sua tarefa '${task.title}' começa em ${task.reminder_minutes} minutos.`;
+
+      new Notification(titulo, { body: corpo });
+      lembretesEnviados.add(task.id);
+
+      console.log("🔔 Notificação enviada:", task.title, "->", diffMin, "min antes");
+    }
+  });
+}
+
+  
   function initializeApp() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
@@ -856,6 +912,14 @@ document.addEventListener("DOMContentLoaded", () => {
       allowInput: true,
       locale: "pt",
     });
+
+    if ("Notification" in window) {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          setInterval(verificarLembretes, 60000);
+        }
+      });
+    }
   }
 
   initializeApp();

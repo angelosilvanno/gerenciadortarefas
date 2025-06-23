@@ -2,19 +2,22 @@ const pool = require("../db");
 
 const Task = {
   async create(userId, taskData) {
-    const { title, description, due_date, priority, status, category, tags } = taskData;
+    const { title, description, due_date, priority, status, category, tags, date_time, reminder_minutes } = taskData;
+  
     const result = await pool.query(
-      `INSERT INTO tasks (user_id, title, description, due_date, priority, status, category, tags) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+      `INSERT INTO tasks 
+       (user_id, title, description, due_date, priority, status, category, tags, date_time, reminder_minutes) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
        RETURNING *`,
-      [userId, title, description, due_date, priority, status, category, tags]
+      [userId, title, description, due_date, priority, status, category, tags, date_time, reminder_minutes]
     );
+  
     return result.rows[0];
   },
-
+  
   async findByUserId(userId) {
     const result = await pool.query(
-      "SELECT * FROM tasks WHERE user_id = $1 ORDER BY due_date ASC, created_at DESC",
+    "SELECT id, user_id, title, description, due_date, priority, status, category, tags, date_time, reminder_minutes FROM tasks WHERE user_id = $1 ORDER BY due_date ASC, created_at DESC",
       [userId]
     );
     return result.rows;
@@ -56,7 +59,7 @@ const Task = {
     console.log("Resultado do DELETE:", result.rows);
   
     return result.rows[0];
-  }  
+  },
 };
 
 module.exports = Task;

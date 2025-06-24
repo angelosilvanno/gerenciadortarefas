@@ -145,6 +145,9 @@ document.addEventListener("DOMContentLoaded", () => {
     addCommentButton: document.querySelector('#add-comment-form button[type="submit"]'),
     taskDateTimeInput: document.getElementById("dateTime"),
     taskReminderSelect: document.getElementById("reminderMinutes"),  
+    editDateTimeInput: document.getElementById("edit-dateTime"),
+    editDueTimeInput: document.getElementById("edit-dueTime"),
+    editReminderSelect: document.getElementById("edit-reminder-minutes"),
   };
 
   let editingTask = null;
@@ -629,15 +632,26 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.editTaskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       if (!editingTask) return showUIMessage("Erro: Nenhuma tarefa selecionada para edição.", true);
+  
       const updatedData = {
-        title: DOM.editTitleInput.value.trim(), description: DOM.editDescriptionInput.value.trim(),
-        due_date: DOM.editDueDateInput.value, priority: DOM.editPriorityInput.value,
-        status: DOM.editStatusInput.value, category: DOM.editCategoryInput.value.trim(),
+        title: DOM.editTitleInput.value.trim(),
+        description: DOM.editDescriptionInput.value.trim(),
+        due_date: DOM.editDueDateInput.value,
+        date_time:
+          DOM.editDueDateInput.value && DOM.editDueTimeInput.value
+            ? `${DOM.editDueDateInput.value}T${DOM.editDueTimeInput.value}`
+            : null,
+        reminder_minutes: parseInt(DOM.editReminderSelect.value) || null,
+        priority: DOM.editPriorityInput.value,
+        status: DOM.editStatusInput.value,
+        category: DOM.editCategoryInput.value.trim(),
         tags: getTagsFromContainer(DOM.editTagsContainer),
       };
+  
       if (!updatedData.title || !updatedData.description || !updatedData.due_date) {
         return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.", true);
       }
+  
       try {
         await apiService.updateTask(editingTask.id, updatedData);
         showUIMessage("Tarefa atualizada com sucesso!", false);
@@ -650,7 +664,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
+  
+  
   let currentDeleteHandler = null;
   function confirmTaskDeletion(task) {
     if (!DOM.deleteModalElement || !DOM.confirmDeleteButton) return;
@@ -679,6 +694,7 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.editTitleInput.value = task.title;
     DOM.editDescriptionInput.value = task.description;
     DOM.editDueDateInput.value = task.due_date;
+    DOM.editDateTimeInput.value = task.date_time || '';
     DOM.editPriorityInput.value = task.priority;
     DOM.editStatusInput.value = task.status;
     DOM.editCategoryInput.value = task.category || '';

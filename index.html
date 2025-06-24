@@ -48,57 +48,84 @@
             
             <!-- CONTEÚDO DAS ABAS -->
             <div class="tab-content pt-3" id="taskTabContent">
+
               <!-- Aba 1: Detalhes da Tarefa -->
-              <div class="tab-pane fade show active" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
-                <form id="edit-task-form">
-                  <div class="mb-3">
-                    <label for="edit-title" class="form-label">Título</label>
-                    <input type="text" class="form-control" id="edit-title" required />
-                  </div>
-                  <div class="mb-3">
-                    <label for="edit-description" class="form-label">Descrição</label>
-                    <textarea class="form-control" id="edit-description" rows="3" required></textarea>
-                  </div>
-                  <div class="row">
-                    <div class="col-md-6 mb-3">
-                      <label for="edit-dueDate" class="form-label">Data de Vencimento</label>
-                      <input type="date" class="form-control" id="edit-dueDate" required />
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label for="edit-priority" class="form-label">Prioridade</label>
-                      <select class="form-select" id="edit-priority">
-                        <option value="baixa">Baixa</option>
-                        <option value="média">Média</option>
-                        <option value="alta">Alta</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="edit-status" class="form-label">Status</label>
-                        <select class="form-select" id="edit-status">
-                          <option value="pendente">Pendente</option>
-                          <option value="em andamento">Em andamento</option>
-                          <option value="concluída">Concluída</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="edit-category" class="form-label">Categoria</label>
-                        <input type="text" class="form-control" id="edit-category" />
-                    </div>
-                  </div>
-                  <div class="mb-3">
-                    <label for="edit-tags" class="form-label">Tags</label>
-                    <div class="input-group">
-                      <div id="edit-tags-container" class="tags-container"></div>
-                      <input type="text" class="form-control" id="edit-tags" placeholder="Digite uma tag" />
-                    </div>
-                  </div>
-                   <div class="d-flex justify-content-end">
-                      <button type="submit" class="btn btn-success" id="save-edit-btn"><i class="bi bi-save me-1"></i>Salvar Alterações</button>
-                   </div>
-                </form>
-              </div>
+<div class="tab-pane fade show active" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
+  <form id="edit-task-form">
+    <div class="mb-3">
+      <label for="edit-title" class="form-label">Título</label>
+      <input type="text" class="form-control" id="edit-title" required />
+    </div>
+    <div class="mb-3">
+      <label for="edit-description" class="form-label">Descrição</label>
+      <textarea class="form-control" id="edit-description" rows="3" required></textarea>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="edit-dueDate" class="form-label">Data de Vencimento</label>
+        <input type="date" class="form-control" id="edit-dueDate" required />
+      </div>
+
+     <div class="col-md-6 mb-3">
+       <label for="edit-dateTime" class="form-label">Data e Hora Completa</label>
+       <input type="datetime-local" class="form-control" id="edit-dateTime" />
+     </div>
+      <div class="col-md-6 mb-3">
+        <label for="edit-dueTime" class="form-label">Hora</label>
+        <input type="time" class="form-control" id="edit-dueTime" required />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="edit-priority" class="form-label">Prioridade</label>
+        <select class="form-select" id="edit-priority">
+          <option value="baixa">Baixa</option>
+          <option value="média">Média</option>
+          <option value="alta">Alta</option>
+        </select>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="edit-status" class="form-label">Status</label>
+        <select class="form-select" id="edit-status">
+          <option value="pendente">Pendente</option>
+          <option value="em andamento">Em andamento</option>
+          <option value="concluída">Concluída</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="edit-category" class="form-label">Categoria</label>
+        <input type="text" class="form-control" id="edit-category" />
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="edit-reminder-minutes" class="form-label">Lembrete</label>
+        <select class="form-select" id="edit-reminder-minutes">
+          <option value="">Sem lembrete</option>
+          <option value="15">15 minutos antes</option>
+          <option value="30">30 minutos antes</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="edit-tags" class="form-label">Tags</label>
+      <div class="input-group">
+        <div id="edit-tags-container" class="tags-container"></div>
+        <input type="text" class="form-control" id="edit-tags" placeholder="Digite uma tag" />
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn btn-success" id="save-edit-btn">
+        <i class="bi bi-save me-1"></i>Salvar Alterações
+      </button>
+    </div>
+  </form>
+</div>
 
               <!-- Aba 2: Comentários -->
               <div class="tab-pane fade" id="comments-tab-pane" role="tabpanel" aria-labelledby="comments-tab" tabindex="0">

@@ -2,7 +2,7 @@ if (typeof document !== "undefined") {
 document.addEventListener("DOMContentLoaded", () => {
   const apiService = {
     BASE_URL: "http://localhost:3000/api",
-      
+
     async _fetch(endpoint, options = {}) {
       const currentUserData = JSON.parse(localStorage.getItem("currentUser"));
       const token = currentUserData?.token;
@@ -454,7 +454,10 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
           </div>
           <p class="mb-1 description-text">${sanitizeInput(task.description)}</p>
-          <small class="text-muted d-block"><strong>Prazo:</strong> ${task.due_date ? formattedDate : 'N/A'}</small>
+          <small class="text-muted d-block">
+              <strong>Prazo:</strong> ${task.due_date ? formattedDate : 'N/A'} |
+              <strong>Hora:</strong> ${task.date_time ? new Date(task.date_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+          </small>
           <small class="text-muted d-block"><strong>Prioridade:</strong> ${sanitizeInput(task.priority)} | <strong>Status:</strong> ${sanitizeInput(task.status)}</small>
           ${metaHtml}
         `;

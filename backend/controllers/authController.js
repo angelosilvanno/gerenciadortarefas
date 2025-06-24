@@ -49,6 +49,7 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   console.log("HEADERS RECEBIDOS:", req.headers);
+  console.log("BODY RECEBIDO:", req.body);
 
   const { username, password } = req.body;
 

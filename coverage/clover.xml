@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1750481539908" clover="3.2.0">
-  <project timestamp="1750481539908" name="All files">
+<coverage generated="1750718616554" clover="3.2.0">
+  <project timestamp="1750718616554" name="All files">
     <metrics statements="78" coveredstatements="50" conditionals="28" coveredconditionals="22" methods="20" coveredmethods="12" elements="126" coveredelements="84" complexity="0" loc="78" ncloc="78" packages="3" files="7" classes="7"/>
     <package name="middleware">
       <metrics statements="11" coveredstatements="11" conditionals="4" coveredconditionals="4" methods="1" coveredmethods="1"/>
@@ -50,22 +50,22 @@
         <line num="1" count="2" type="stmt"/>
         <line num="3" count="2" type="stmt"/>
         <line num="5" count="1" type="stmt"/>
-        <line num="6" count="1" type="stmt"/>
-        <line num="12" count="1" type="stmt"/>
-        <line num="16" count="0" type="stmt"/>
-        <line num="20" count="0" type="stmt"/>
-        <line num="24" count="1" type="stmt"/>
-        <line num="28" count="1" type="stmt"/>
-        <line num="32" count="4" type="stmt"/>
-        <line num="33" count="1" type="stmt"/>
-        <line num="35" count="1" type="stmt"/>
-        <line num="37" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="19" count="0" type="stmt"/>
+        <line num="23" count="0" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="35" count="4" type="stmt"/>
+        <line num="36" count="1" type="stmt"/>
         <line num="38" count="1" type="stmt"/>
-        <line num="42" count="0" type="stmt"/>
-        <line num="51" count="0" type="stmt"/>
-        <line num="56" count="0" type="stmt"/>
-        <line num="58" count="0" type="stmt"/>
-        <line num="62" count="2" type="stmt"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="41" count="1" type="stmt"/>
+        <line num="45" count="0" type="stmt"/>
+        <line num="54" count="0" type="stmt"/>
+        <line num="59" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="65" count="2" type="stmt"/>
       </file>
       <file name="User.js" path="C:\Users\PC\gerenciadortarefas\backend\models\User.js">
         <metrics statements="18" coveredstatements="5" conditionals="6" coveredconditionals="0" methods="4" coveredmethods="1"/>

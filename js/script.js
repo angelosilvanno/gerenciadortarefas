@@ -1,6 +1,7 @@
+if (typeof document !== "undefined") {
 document.addEventListener("DOMContentLoaded", () => {
   const apiService = {
-    BASE_URL: "http://localhost:3000/api",
+    BASE_URL: "https://seu-backend-deployado.vercel.app/api", 
   
     async _fetch(endpoint, options = {}) {
       const currentUserData = JSON.parse(localStorage.getItem("currentUser"));
@@ -587,6 +588,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.taskForm) {
     DOM.taskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+  
       const taskData = {
         title: DOM.taskTitleInput.value.trim(),
         description: DOM.taskDescriptionInput.value.trim(),
@@ -597,11 +599,17 @@ document.addEventListener("DOMContentLoaded", () => {
         status: DOM.taskStatusInput.value,
         category: DOM.taskCategoryInput.value.trim(),
         tags: getTagsFromContainer(DOM.tagsContainer),
-      };         
-
+      };
+  
       if (!taskData.title || !taskData.description || !taskData.due_date) {
         return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");
       }
+  
+      const currentUserData = JSON.parse(localStorage.getItem("currentUser"));
+      if (!currentUserData || !currentUserData.token) {
+        return showUIMessage("Você precisa estar logado para criar tarefas.", "danger");
+      }
+  
       try {
         await apiService.createTask(taskData);
         showUIMessage("Tarefa criada com sucesso!", false);
@@ -613,7 +621,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
+  
   if (DOM.editTaskForm) {
     DOM.editTaskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -923,5 +931,25 @@ function verificarLembretes() {
   }
 
   initializeApp();
+
+  function handleLogout() {
+    localStorage.removeItem("currentUser");
+  
+    if (typeof DOM !== "undefined") {
+      if (DOM.taskList) DOM.taskList.innerHTML = "";
+      if (DOM.taskListTitle) DOM.taskListTitle.textContent = "Minhas Tarefas";
+    }
+  
+    if (typeof showLoginPanel === "function") {
+      showLoginPanel();
+    }
+  }
+  
+  if (typeof module !== "undefined") {
+    module.exports = { handleLogout };
+  }
+  
 });
+
+}
 

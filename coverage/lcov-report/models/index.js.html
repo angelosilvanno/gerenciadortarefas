@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for models/ActivityLog.js</title>
+    <title>Code coverage report for models/index.js</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">models</a> ActivityLog.js</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">models</a> index.js</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/9</span>
+                <span class='fraction'>0/7</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/2</span>
+                <span class='fraction'>0/0</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/9</span>
+                <span class='fraction'>0/7</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -83,16 +83,9 @@
 <a name='L18'></a><a href='#L18'>18</a>
 <a name='L19'></a><a href='#L19'>19</a>
 <a name='L20'></a><a href='#L20'>20</a>
-<a name='L21'></a><a href='#L21'>21</a>
-<a name='L22'></a><a href='#L22'>22</a>
-<a name='L23'></a><a href='#L23'>23</a>
-<a name='L24'></a><a href='#L24'>24</a>
-<a name='L25'></a><a href='#L25'>25</a>
-<a name='L26'></a><a href='#L26'>26</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<a name='L21'></a><a href='#L21'>21</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -101,51 +94,43 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span></td><td class="text"><pre class="prettyprint lang-js">const pool = require("../db");
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import Sequelize from "sequelize";
+import db from "../db.js";
+import User from "./User.js";
+import Task from "./Task.js";
+import Comment from "./Comment.js";
+import ActivityLog from "./ActivityLog.js";
 &nbsp;
-const ActivityLog = {
-<span class="fstat-no" title="function not covered" >  as</span>ync findByTaskId(taskId) {
-    const query = <span class="cstat-no" title="statement not covered" >`</span>
-      SELECT id, description, user_name, created_at
-      FROM activity_logs
-      WHERE task_id = $1
-      ORDER BY created_at DESC
-    `;
-    const result = <span class="cstat-no" title="statement not covered" >await pool.query(query, [taskId]);</span>
-<span class="cstat-no" title="statement not covered" >    return result.rows;</span>
-  },
+// Associações, se houver
+<span class="cstat-no" title="statement not covered" >User.hasMany(Task, { foreignKey: "user_id" });</span>
+<span class="cstat-no" title="statement not covered" >Task.belongsTo(User, { foreignKey: "user_id" });</span>
 &nbsp;
-  async create(taskId, userId, userName, description) {
-    const query = `
-      INSERT INTO activity_logs (task_id, user_id, user_name, description)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *
-    `;
-    const result = await pool.query(query, [taskId, userId, userName, description]);
-    return result.rows[0];
-  }
-};
+<span class="cstat-no" title="statement not covered" >Task.hasMany(Comment, { foreignKey: "task_id" });</span>
+<span class="cstat-no" title="statement not covered" >Comment.belongsTo(Task, { foreignKey: "task_id" });</span>
 &nbsp;
-module.exports = ActivityLog;</pre></td></tr></table></pre>
+<span class="cstat-no" title="statement not covered" >User.hasMany(ActivityLog, { foreignKey: "user_id" });</span>
+<span class="cstat-no" title="statement not covered" >ActivityLog.belongsTo(User, { foreignKey: "user_id" });</span>
+&nbsp;
+const sequelize = <span class="cstat-no" title="statement not covered" >db;</span>
+&nbsp;
+export { sequelize, User, Task, Comment, ActivityLog };
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-23T22:43:36.521Z
+                at 2025-06-23T22:29:08.216Z
             </div>
         <script src="../prettify.js"></script>
         <script>

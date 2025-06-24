@@ -23,7 +23,7 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const authRoutes = require("./routes/authRoutes");
@@ -33,5 +33,10 @@ const extraRoutes = require("./routes/extraRoutes");
 app.use("/api", authRoutes);
 app.use("/api", taskRoutes);
 app.use("/api", extraRoutes);
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Ocorreu um erro inesperado no servidor.' });
+});
 
 module.exports = app;

@@ -1,84 +1,112 @@
-<h1 align="center"> Projeto de Teste de Software </h1>
-<h1 align="center"> Gerenciamento de Tarefa: NextTask 📃 </h1>
+<h1 align="center">🧪 Projeto de Teste de Software</h1>
+<h1 align="center">📃 Gerenciamento de Tarefa: NextTask</h1>
 
-<p align="justify"> Um gerenciador de tarefas online projetado para ajudar os usuários a organizar suas atividades diárias de forma eficiente e intuitiva. </p>
+<p align="justify">🧭 Um gerenciador de tarefas online projetado para ajudar os usuários a organizar suas atividades diárias de forma eficiente e intuitiva.</p>
 
 ## ✍🏽 Introdução
 
-<p align="justify"> O NextTask é uma aplicação web que visa simplificar o gerenciamento de tarefas, permitindo que os usuários criem, editem, priorizem e acompanhem o progresso de suas atividades. O objetivo principal é fornecer uma ferramenta de produtividade que seja fácil de usar, acessível e que ajude os usuários a manterem o foco em suas metas.</p>
+<p align="justify">📌 O NextTask é uma aplicação web que visa simplificar o gerenciamento de tarefas, permitindo que os usuários criem, editem, priorizem e acompanhem o progresso de suas atividades. O objetivo principal é fornecer uma ferramenta de produtividade que seja fácil de usar, acessível e que ajude os usuários a manterem o foco em suas metas.</p>
 
- <p align="justify"> Com o NextTask, você pode se livrar de listas de papel desorganizadas e centralizar todas as suas pendências em um único lugar, acessível de qualquer dispositivo com conexão à internet.</p>
+<p align="justify">📱 Com o NextTask, você pode se livrar de listas de papel desorganizadas e centralizar todas as suas pendências em um único lugar, acessível de qualquer dispositivo com conexão à internet.</p>
 
-## **:computer:** Funcionalidades Principais:
+## 💻 Funcionalidades Principais:
 
-*   **Autenticação de Usuário:**
-    *   Cadastro de novos usuários com nome de usuário, e-mail e senha.
-    *   Login seguro para usuários existentes.
-    *   Funcionalidade de "Esqueci minha senha" (envia mensagem de confirmação).
-*   **Gerenciamento de Tarefas:**
-  
-    *   **Criação de Tarefas:** Adicione novas tarefas com título, descrição detalhada, data de vencimento, prioridade (baixa, média, alta) e status inicial (pendente).
-    *   **Edição de Tarefas:** Modifique qualquer informação de uma tarefa existente.
-    *   **Exclusão de Tarefas:** Remova tarefas que não são mais necessárias, com confirmação.
-      
-    *   **Visualização de Tarefas:**
-      
-        *   Lista de tarefas organizada e de fácil leitura.
-        *   Agrupamento de tarefas por data de vencimento.
-        *   Indicação visual do status e prioridade.
-          
-    *   **Atualização de Status:** Marque tarefas como "pendente", "em andamento" ou "concluída" diretamente na lista.
-*   **Organização e Filtragem:**
-  
-    *   **Busca:** Encontre tarefas rapidamente pesquisando por título ou tags.
-    *   **Filtro por Status:** Visualize apenas tarefas pendentes, em andamento ou concluídas.
-    *   **Categorias e Tags:** Atribua categorias e múltiplas tags (separadas por vírgula) às tarefas para melhor organização e filtragem (a busca por tags está implementada).
-      
-*   **Acompanhamento de Progresso:**
-  
-    *   Barra de progresso visual que mostra a porcentagem de tarefas concluídas.
-    *   Contador textual indicando o número de tarefas concluídas em relação ao total.
-      
-*   **Recursos Adicionais:**
-    *   **Exportação de Tarefas:** Exporte sua lista de tarefas para um arquivo CSV.
-    *   **Notificações (Web Notifications API):** Receba notificações no navegador para tarefas que vencem hoje ou amanhã (requer permissão do usuário).
-    *   **Interface Responsiva:** Design adaptável para uso em desktops e dispositivos móveis.
-    *   **Mensagens de Feedback:** Alertas visuais para o usuário sobre o sucesso ou falha de operações.
-    *   **Modal de Boas-vindas:** Apresentação inicial para novos usuários.
+* 🔐 **Autenticação de Usuário:**
+  * Cadastro de novos usuários com nome de usuário, e-mail e senha.
+  * Login seguro para usuários existentes.
+  * Funcionalidade de "Esqueci minha senha" (envia mensagem de confirmação).
 
-## 🔨 Guia de Instalação  
+* ✅ **Gerenciamento de Tarefas:**
+  * **Criação de Tarefas:** Adicione novas tarefas com título, descrição detalhada, data e hora de vencimento, prioridade (baixa, média, alta), lembrete e status inicial (pendente).
+  * **Edição de Tarefas:** Modifique qualquer informação de uma tarefa existente, incluindo lembrete e data/hora.
+  * **Exclusão de Tarefas:** Remova tarefas que não são mais necessárias, com confirmação.
+  * **Visualização de Tarefas:** Lista organizada, agrupamento por data, status e prioridade com indicadores visuais.
+  * **Atualização de Status:** Marque como "pendente", "em andamento" ou "concluída" diretamente na lista.
 
-1. Clone o repositório:  
-   ```bash  
-   git clone https://github.com/angelosilvanno/gerenciadortarefas.git  
-   ```  
+* 📂 **Organização e Filtragem:**
+  * **Busca:** Pesquise por título ou tags.
+  * **Filtro por Status:** Visualize apenas tarefas pendentes, em andamento ou concluídas.
+  * **Categorias e Tags:** Atribua categorias e tags múltiplas (separadas por vírgula).
 
-2. Entre na pasta do projeto:  
-   ```bash  
-   cd gerenciadortarefas  
-   ```
+* 📊 **Acompanhamento de Progresso:**
+  * Barra de progresso visual.
+  * Contador textual de tarefas concluídas.
+
+* 🌗 **Tema Claro e Escuro:**
+  * Alternância entre tema escuro e claro com salvamento da preferência.
+
+* 🧰 **Recursos Adicionais:**
+  * **📤 Exportação:** Exporte tarefas para CSV.
+  * **🔔 Notificações:** Alertas via navegador sobre tarefas próximas (hoje ou amanhã).
+  * **📱 Responsividade:** Funciona bem em desktop e mobile.
+  * **🔎 Feedbacks Visuais:** Alertas de sucesso/erro.
+  * **👋 Modal de Boas-vindas:** Apresentação inicial para novos usuários.
+
+## 🧪 Testes Aplicados
+
+* ✅ **Testes de Caixa Branca:**
+  * Validação de campos obrigatórios (como `validarCamposTarefa`, `formatarData`, login, alternância de tema, token).
+
+* ✅ **Testes de Caixa Preta:**
+  * Fluxos de uso reais como login inválido, criação com campos vazios, filtros, edição e exclusão de tarefas.
+
+* 🧪 **Automação com Jest:**
+  * Cobertura de testes unitários com relatórios.
+
+* 🔄 **CI com GitHub Actions:**
+  * Execução automática dos testes a cada push.
+
+## 🔧 Guia de Instalação
+
+1. 🔽 Clone o repositório:
+```bash
+git clone https://github.com/angelosilvanno/gerenciadortarefas.git
+```
+
+2. 📁 Acesse a pasta:
+```bash
+cd gerenciadortarefas
+```
+
+3. 📦 Instale as dependências do back-end:
+```bash
+cd backend
+npm install
+```
+
+4. ⚙️ Crie o arquivo `.env`:
+```env
+DB_USER=seu_usuario
+DB_PASSWORD=sua_senha
+DB_NAME=nextask_db
+DB_HOST=localhost
+DB_PORT=5432
+JWT_SECRET=sua_chave_secreta
+```
+
+5. ▶️ Inicie o servidor:
+```bash
+node server.js
+```
+
+6. 🌐 Abra `index.html` no navegador ou use o Live Server.
 
 ## 👷 Autores
 
-* **Ângelo** - *Membro* - [angelosilvanno](https://github.com/angelosilvanno)
-* **Ludmila Monteiro** - *Membro* - [ludmilamonteiro](https://github.com/LudmilaMonteiro)
-* **Mateus Gomes** - *Membro* - [GSmateus07](https://github.com/GSmateus07)
-* **Levítico Rimon** - *Membro* - [LEVEL303](https://github.com/LEVEL303)
-* **Aluizio** - *Membro* - [Aluizio](https://github.com/aluiziairesjr007)
+* **Ângelo** - 👤 [angelosilvanno](https://github.com/angelosilvanno)
+* **Ludmila Monteiro** - 👤 [ludmilamonteiro](https://github.com/LudmilaMonteiro)
+* **Mateus Gomes** - 👤 [GSmateus07](https://github.com/GSmateus07)
+* **Levítico Rimon** - 👤 [LEVEL303](https://github.com/LEVEL303)
+* **Aluizio** - 👤 [aluiziairesjr007](https://github.com/aluiziairesjr007)
 
-## **:hammer_and_wrench:** Construído com
- *  [Meet](https://meet.google.com/)
-    * Chamada via meet (Reuniões e compartilhamento de tela ao vivo);    
- *  [PlantUML](https://plantuml.com/)
-    * Criação do diagrama de classe;
-    * Criação do diagrama de caso de uso;
- *  [Git e Github](https://github.com/)
-    * Hospedagem do código;
- *  [Visual Studio Code](https://code.visualstudio.com/)
-    * Criação do código;
- * [PostgreSQL](https://www.postgresql.org/)
-   * Banco de Dados.
+## 🛠️ Tecnologias Utilizadas
+
+* 📞 [Google Meet](https://meet.google.com/) — Reuniões e planejamento
+* 🧩 [PlantUML](https://plantuml.com/) — Diagramas UML
+* 🧠 [Git e GitHub](https://github.com/) — Controle de versão e repositório
+* 🧑‍💻 [VS Code](https://code.visualstudio.com/) — Editor de código
+* 🗃️ [PostgreSQL](https://www.postgresql.org/) — Banco de dados relacional
 
 ## 📄 Licença
 
-* Esse projeto está sob a licença Apache License - acesse os detalhes [LICENSE.md](https://github.com/angelosilvanno/gerenciadortarefas/tree/main?tab=Apache-2.0-1-ov-file).
+Este projeto está licenciado sob a Licença Apache 2.0. Consulte o arquivo [LICENSE.md](https://github.com/angelosilvanno/gerenciadortarefas/tree/main?tab=Apache-2.0-1-ov-file) para mais detalhes.

@@ -606,6 +606,14 @@ document.addEventListener("DOMContentLoaded", () => {
         category: DOM.taskCategoryInput.value.trim(),
         tags: getTagsFromContainer(DOM.tagsContainer),
       };
+
+      if (taskData.date_time) {
+        const now = new Date();
+        const taskDateTime = new Date(taskData.date_time);
+        if (taskDateTime < now) {
+          return showUIMessage("A data e hora da tarefa não podem estar no passado.", true);
+        }
+      }
   
       if (!taskData.title || !taskData.description || !taskData.due_date) {
         return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.");

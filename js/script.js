@@ -694,11 +694,40 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.editTitleInput.value = task.title;
     DOM.editDescriptionInput.value = task.description;
     DOM.editDueDateInput.value = task.due_date;
-    DOM.editDateTimeInput.value = task.date_time || '';
     DOM.editPriorityInput.value = task.priority;
     DOM.editStatusInput.value = task.status;
     DOM.editCategoryInput.value = task.category || '';
-    
+
+    if (task.date_time) {
+      
+      const localDate = new Date(task.date_time);
+
+      const year = localDate.getFullYear();
+      const month = String(localDate.getMonth() + 1).padStart(2, '0');
+      const day = String(localDate.getDate()).padStart(2, '0');
+      const hours = String(localDate.getHours()).padStart(2, '0');
+      const minutes = String(localDate.getMinutes()).padStart(2, '0');
+
+      const localDateString = `${year}-${month}-${day}`;
+      const localTimeString = `${hours}:${minutes}`;
+
+      if (DOM.editDueDateInput._flatpickr) {
+        DOM.editDueDateInput._flatpickr.setDate(localDateString, true);
+      } else {
+        DOM.editDueDateInput.value = localDateString;
+      }
+
+      DOM.editDueTimeInput.value = localTimeString;
+
+    } else {
+      if (DOM.editDueDateInput._flatpickr) {
+        DOM.editDueDateInput._flatpickr.clear();
+      }
+      DOM.editDueTimeInput.value = '';
+    }
+
+    DOM.editReminderSelect.value = task.reminder_minutes || '';
+
     if (DOM.editTagsContainer) DOM.editTagsContainer.innerHTML = '';
     if (task.tags && Array.isArray(task.tags)) {
       task.tags.forEach(tag => createTagPill(tag, DOM.editTagsContainer));

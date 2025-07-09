@@ -166,15 +166,24 @@ document.addEventListener("DOMContentLoaded", () => {
     return div.innerHTML;
   };
   
-  const showUIMessage = (msg, isError = true) => {
+  const showUIMessage = (msg, isError = true, onTop = false) => {
     if (!DOM.messageDiv) return;
+
+    DOM.messageDiv.style.zIndex = onTop ? '1060' : '1050';
+
     DOM.messageDiv.textContent = msg;
     DOM.messageDiv.className = `alert ${isError ? "alert-danger" : "alert-success"} text-center shadow p-3`;
     DOM.messageDiv.classList.remove("d-none");
     DOM.messageDiv.setAttribute("role", "alert");
     DOM.messageDiv.tabIndex = -1;
     DOM.messageDiv.focus();
-    setTimeout(() => { if (DOM.messageDiv) DOM.messageDiv.classList.add("d-none"); }, 4000);
+    
+    setTimeout(() => {
+      if (DOM.messageDiv) {
+        DOM.messageDiv.classList.add("d-none");
+        DOM.messageDiv.style.zIndex = 'auto'; 
+      }
+    }, 4000);
   };
   
   function updateLogoForTheme() {
@@ -655,6 +664,14 @@ document.addEventListener("DOMContentLoaded", () => {
         category: DOM.editCategoryInput.value.trim(),
         tags: getTagsFromContainer(DOM.editTagsContainer),
       };
+
+      if (updatedData.date_time) {
+        const now = new Date();
+        const taskDateTime = new Date(updatedData.date_time);
+        if (taskDateTime < now) {
+          return showUIMessage("A data e hora da tarefa não podem estar no passado.", true, true);
+        }
+      }
   
       if (!updatedData.title || !updatedData.description || !updatedData.due_date) {
         return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.", true);

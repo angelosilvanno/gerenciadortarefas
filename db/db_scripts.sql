@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS tasks (
     -- Regra para garantir que o status seja um dos valores permitidos
     status VARCHAR(50) DEFAULT 'pendente' CHECK (status IN ('pendente', 'em andamento', 'concluída')),
     category VARCHAR(100),
-    tags TEXT[], -- Campo do tipo array de texto para as tags
 
     -- Campos adicionados:
     date_time TIMESTAMP,

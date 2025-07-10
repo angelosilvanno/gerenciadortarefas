@@ -122,17 +122,13 @@ document.addEventListener("DOMContentLoaded", () => {
     taskPriorityInput: document.getElementById("priority"),
     taskStatusInput: document.getElementById("status"),
     taskCategoryInput: document.getElementById("category"),
-    taskTagsInput: document.getElementById("tags"),
     editTitleInput: document.getElementById('edit-title'),
     editDescriptionInput: document.getElementById('edit-description'),
     editDueDateInput: document.getElementById('edit-dueDate'),
     editPriorityInput: document.getElementById('edit-priority'),
     editStatusInput: document.getElementById('edit-status'),
     editCategoryInput: document.getElementById('edit-category'),
-    editTagsInput: document.getElementById('edit-tags'),
     themeToggleButton: document.getElementById("theme-toggle-btn"),
-    tagsContainer: document.getElementById("tags-container"),
-    editTagsContainer: document.getElementById("edit-tags-container"),
     clearCompletedBtn: document.getElementById("clear-completed-btn"),
     loginEyeBtn: document.getElementById('login-eye-btn'),
     registerEyeBtn: document.getElementById('register-eye-btn'),
@@ -157,7 +153,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const usernameRegex = /^[a-zA-Z0-9]{3,15}$/;
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,80}$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const tagRegex = /^[a-zA-Z0-9\u00C0-\u017F-]+$/;
 
   const sanitizeInput = (input) => {
     if (typeof input !== 'string' && typeof input !== 'number') return '';
@@ -219,42 +214,6 @@ document.addEventListener("DOMContentLoaded", () => {
       new bootstrap.Tooltip(DOM.themeToggleButton);
     }
   };
-
-  const setupTagInput = (inputElement, containerElement) => {
-    if (!inputElement || !containerElement) return;
-    inputElement.addEventListener("keyup", (e) => {
-      if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault();
-        const tagValue = inputElement.value.trim().replace(/,$/, '').toLowerCase();
-        if (tagValue && tagRegex.test(tagValue)) {
-          createTagPill(tagValue, containerElement);
-          inputElement.value = "";
-        } else if (tagValue) {
-          showUIMessage(`Tag inválida: "${sanitizeInput(tagValue)}". Use apenas letras, números ou traços.`);
-        }
-      }
-    });
-  };
-
-  const createTagPill = (tagValue, containerElement) => {
-    const pill = document.createElement('div');
-    pill.className = 'tag-pill';
-    const text = document.createElement('span');
-    text.textContent = tagValue;
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'tag-remove-btn';
-    removeBtn.innerHTML = '×';
-    removeBtn.setAttribute('aria-label', `Remover tag ${tagValue}`);
-    removeBtn.onclick = () => pill.remove();
-    pill.appendChild(text);
-    pill.appendChild(removeBtn);
-    containerElement.appendChild(pill);
-  };
-  
-  const getTagsFromContainer = (containerElement) => {
-    if (!containerElement) return [];
-    return Array.from(containerElement.querySelectorAll('.tag-pill span')).map(span => span.textContent);
-  };
   
   const updateProgress = () => {
     if (!DOM.progressBar || !DOM.progressText) return;
@@ -295,8 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (searchQuery) {
       filteredTasks = filteredTasks.filter(task =>
-        task.title.toLowerCase().includes(searchQuery) ||
-        (task.tags && task.tags.some(tag => tag.toLowerCase().includes(searchQuery)))
+        task.title.toLowerCase().includes(searchQuery)
       );
     }
 
@@ -452,8 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
         div.setAttribute("data-status", task.status);
         div.setAttribute("data-id", task.id);
         const categoryHtml = task.category ? `<span class="task-category-badge" data-category="${sanitizeInput(task.category)}">${sanitizeInput(task.category)}</span>` : "";
-        const tagsHtml = (task.tags && Array.isArray(task.tags) && task.tags.length > 0) ? task.tags.map(tag => `<span class="task-tag-badge" data-tag="${sanitizeInput(tag)}">${sanitizeInput(tag)}</span>`).join('') : "";
-        const metaHtml = (categoryHtml || tagsHtml) ? `<div class="task-meta-wrapper">${categoryHtml}${tagsHtml}</div>` : "";
+        const metaHtml = categoryHtml ? `<div class="task-meta-wrapper">${categoryHtml}</div>` : "";
         div.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center flex-grow-1">
@@ -612,8 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reminder_minutes: parseInt(DOM.taskReminderSelect.value) || 15,
         priority: DOM.taskPriorityInput.value,
         status: DOM.taskStatusInput.value,
-        category: DOM.taskCategoryInput.value.trim(),
-        tags: getTagsFromContainer(DOM.tagsContainer),
+        category: DOM.taskCategoryInput.value.trim()
       };
 
       if (taskData.date_time) {
@@ -637,7 +593,6 @@ document.addEventListener("DOMContentLoaded", () => {
         await apiService.createTask(taskData);
         showUIMessage("Tarefa criada com sucesso!", false);
         DOM.taskForm.reset();
-        if (DOM.tagsContainer) DOM.tagsContainer.innerHTML = '';
         await loadAndRenderTasks();
       } catch (error) {
         showUIMessage(error.message || "Erro ao criar tarefa.");
@@ -661,8 +616,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reminder_minutes: parseInt(DOM.editReminderSelect.value) || null,
         priority: DOM.editPriorityInput.value,
         status: DOM.editStatusInput.value,
-        category: DOM.editCategoryInput.value.trim(),
-        tags: getTagsFromContainer(DOM.editTagsContainer),
+        category: DOM.editCategoryInput.value.trim()
       };
 
       if (updatedData.date_time) {
@@ -752,12 +706,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     DOM.editReminderSelect.value = task.reminder_minutes || '';
-
-    if (DOM.editTagsContainer) DOM.editTagsContainer.innerHTML = '';
-    if (task.tags && Array.isArray(task.tags)) {
-      task.tags.forEach(tag => createTagPill(tag, DOM.editTagsContainer));
-    }
-    if (DOM.editTagsInput) DOM.editTagsInput.value = '';
     
     loadComments(task.id);
     loadHistory(task.id);
@@ -768,7 +716,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function handleTaskActions(event) {
     const button = event.target.closest('button[data-id]');
-    const badge = event.target.closest('[data-category], [data-tag]');
+    const badge = event.target.closest('[data-category]');
+
     if (button) {
       const taskId = button.dataset.id;
       const task = tasksCache.find(t => t.id == taskId);
@@ -776,10 +725,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (button.classList.contains("edit-btn")) editTask(task);
       else if (button.classList.contains("delete-btn")) confirmTaskDeletion(task);
     } else if (badge) {
-      if (badge.dataset.category) currentFilter = { type: 'category', value: badge.dataset.category };
-      else if (badge.dataset.tag) currentFilter = { type: 'tag', value: badge.dataset.tag };
-      if (DOM.filterStatusSelect) DOM.filterStatusSelect.value = 'todos';
-      filterAndRender();
+      if (badge.dataset.category) {
+          currentFilter = { type: 'category', value: badge.dataset.category };
+          if (DOM.filterStatusSelect) DOM.filterStatusSelect.value = 'todos';
+          filterAndRender();
+      }
     }
   }
 
@@ -820,11 +770,10 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.exportTasksBtn.addEventListener("click", () => {
       if (tasksCache.length === 0) return showUIMessage("Nenhuma tarefa para exportar.");
       const escapeCsvField = (field) => `"${String(field == null ? '' : field).replace(/"/g, '""')}"`;
-      const csvHeader = ["Título", "Descrição", "Prazo", "Prioridade", "Status", "Categoria", "Tags"].map(escapeCsvField);
+      const csvHeader = ["Título", "Descrição", "Prazo", "Prioridade", "Status", "Categoria"].map(escapeCsvField);
       const csvRows = tasksCache.map(task => [
         escapeCsvField(task.title), escapeCsvField(task.description), escapeCsvField(task.due_date),
-        escapeCsvField(task.priority), escapeCsvField(task.status), escapeCsvField(task.category),
-        escapeCsvField(task.tags && Array.isArray(task.tags) ? task.tags.join(";") : "")
+        escapeCsvField(task.priority), escapeCsvField(task.status), escapeCsvField(task.category)
       ]);
       const csvContent = [csvHeader.join(","), ...csvRows.map(row => row.join(","))].join("\n");
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -872,41 +821,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const lembretesEnviados = new Set();
 
-function verificarLembretes() {
-  console.log("🕐 Rodando verificarLembretes", new Date().toLocaleTimeString());
+  function verificarLembretes() {
+    console.log("🕐 Rodando verificarLembretes", new Date().toLocaleTimeString());
 
-  if (!("Notification" in window) || Notification.permission !== "granted") return;
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-  const agora = new Date();
+    const agora = new Date();
 
-  tasksCache.forEach(task => {
-    if (
-      !task.date_time ||
-      !task.reminder_minutes ||
-      !task.id || // garante que o ID exista
-      normalizeStatus(task.status) === "concluida"
-    ) return;
+    tasksCache.forEach(task => {
+      if (
+        !task.date_time ||
+        !task.reminder_minutes ||
+        !task.id ||
+        normalizeStatus(task.status) === "concluida"
+      ) return;
 
-    const dataTarefa = new Date(task.date_time);
-    const diffMin = Math.floor((dataTarefa - agora) / 60000); // diferença em minutos
+      const dataTarefa = new Date(task.date_time);
+      const diffMin = Math.floor((dataTarefa - agora) / 60000);
 
-    // Verifica se a diferença é exatamente igual ao tempo de lembrete
-    if (
-      diffMin === Number(task.reminder_minutes) &&
-      !lembretesEnviados.has(task.id)
-    ) {
-      const titulo = `Lembrete: ${sanitizeInput(task.title)}`;
-      const corpo = `Sua tarefa '${task.title}' começa em ${task.reminder_minutes} minutos.`;
+      if (
+        diffMin === Number(task.reminder_minutes) &&
+        !lembretesEnviados.has(task.id)
+      ) {
+        const titulo = `Lembrete: ${sanitizeInput(task.title)}`;
+        const corpo = `O prazo de sua tarefa '${task.title}' termina em ${task.reminder_minutes} minutos.`;
 
-      new Notification(titulo, { body: corpo });
-      lembretesEnviados.add(task.id);
+        new Notification(titulo, { body: corpo });
+        lembretesEnviados.add(task.id);
 
-      console.log("🔔 Notificação enviada:", task.title, "->", diffMin, "min antes");
-    }
-  });
-}
+        console.log("🔔 Notificação enviada:", task.title, "->", diffMin, "min antes");
+      }
+    });
+  }
 
-  
   function initializeApp() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
@@ -914,9 +861,6 @@ function verificarLembretes() {
     setupPasswordToggle(DOM.loginPasswordInput, DOM.loginEyeBtn);
     setupPasswordToggle(DOM.registerPasswordInput, DOM.registerEyeBtn);
     setupPasswordToggle(DOM.confirmRegisterPasswordInput, DOM.confirmRegisterEyeBtn);
-
-    setupTagInput(DOM.taskTagsInput, DOM.tagsContainer);
-    setupTagInput(DOM.editTagsInput, DOM.editTagsContainer);
 
     if (DOM.taskList) {
       DOM.taskList.addEventListener("click", handleTaskActions);

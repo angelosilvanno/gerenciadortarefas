@@ -73,6 +73,11 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         body: JSON.stringify({ content })
       }),
+    
+    deleteComment: (taskId, commentId) =>
+      apiService._fetch(`/tasks/${taskId}/comments/${commentId}`, {
+        method: "DELETE"
+      }),
   
     getHistory: (taskId) => apiService._fetch(`/tasks/${taskId}/history`),
   };
@@ -442,17 +447,34 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const comments = await apiService.getComments(taskId);
       DOM.commentsList.innerHTML = '';
+
       if (comments.length === 0) {
         DOM.commentsList.innerHTML = '<p class="text-center text-muted">Nenhum comentário ainda.</p>';
         return;
       }
+
+      const currentUserData = JSON.parse(localStorage.getItem("currentUser"));
+      const currentUserId = currentUserData?.user?.id;
+
       comments.forEach(comment => {
         const commentDiv = document.createElement('div');
-        commentDiv.className = 'mb-2 p-2 border rounded small';
+        commentDiv.className = 'comment-item mb-2 p-2 border rounded small';
+
+        const deleteButtonHtml = (currentUserId === comment.user_id)
+          ? `<button class="btn btn-outline-danger btn-sm py-0 px-1 float-end delete-comment-btn" data-comment-id="${comment.id}" title="Excluir Comentário">
+              <i class="bi bi-trash-fill"></i>
+            </button>`
+          : '';
+
         const formattedDate = new Date(comment.created_at).toLocaleString('pt-BR');
+        
         commentDiv.innerHTML = `
-          <p class="mb-1">${sanitizeInput(comment.content)}</p>
-          <small class="text-muted"><strong>${sanitizeInput(comment.user_name)}</strong> em ${formattedDate}</small>
+          <div class="d-flex justify-content-between align-items-center">
+            <strong class="comment-author">${sanitizeInput(comment.user_name)}</strong>
+            ${deleteButtonHtml}
+          </div>
+          <p class="mb-1 mt-1 comment-content">${sanitizeInput(comment.content)}</p>
+          <small class="text-muted comment-date">${formattedDate}</small>
         `;
         DOM.commentsList.appendChild(commentDiv);
       });
@@ -644,8 +666,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   
-  
   let currentDeleteHandler = null;
+  let currentCommentDeleteHandler = null;
+
   function confirmTaskDeletion(task) {
     if (!DOM.deleteModalElement || !DOM.confirmDeleteButton) return;
     const modalBody = DOM.deleteModalElement.querySelector('.modal-body');
@@ -663,6 +686,39 @@ document.addEventListener("DOMContentLoaded", () => {
       modal.hide();
     };
     DOM.confirmDeleteButton.addEventListener('click', currentDeleteHandler, { once: true });
+    modal.show();
+  }
+
+  function confirmCommentDeletion(commentId) {
+    if (!DOM.deleteModalElement || !DOM.confirmDeleteButton) return;
+    
+    const modalBody = DOM.deleteModalElement.querySelector('.modal-body');
+    if (modalBody) {
+      modalBody.textContent = "Deseja realmente excluir este comentário?";
+    }
+
+    const modal = bootstrap.Modal.getOrCreateInstance(DOM.deleteModalElement);
+
+    if (currentCommentDeleteHandler) {
+      DOM.confirmDeleteButton.removeEventListener('click', currentCommentDeleteHandler);
+    }
+    if (currentDeleteHandler) {
+        DOM.confirmDeleteButton.removeEventListener('click', currentDeleteHandler);
+    }
+
+    currentCommentDeleteHandler = async () => {
+      const taskId = editingTask.id;
+      try {
+        await apiService.deleteComment(taskId, commentId);
+        showUIMessage("Comentário removido com sucesso!", false, true);
+        await loadComments(taskId);
+      } catch (error) {
+        showUIMessage(error.message || "Erro ao remover comentário.", true, true);
+      }
+      modal.hide();
+    };
+
+    DOM.confirmDeleteButton.addEventListener('click', currentCommentDeleteHandler, { once: true });
     modal.show();
   }
 
@@ -854,6 +910,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function setupCommentDeletion() {
+    if (!DOM.commentsList) return;
+
+    DOM.commentsList.addEventListener('click', (e) => {
+      const deleteBtn = e.target.closest('.delete-comment-btn');
+
+      if (!deleteBtn) return;
+
+      const commentId = deleteBtn.dataset.commentId;
+      
+      confirmCommentDeletion(commentId);
+    });
+  }
+
   function initializeApp() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
@@ -861,6 +931,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setupPasswordToggle(DOM.loginPasswordInput, DOM.loginEyeBtn);
     setupPasswordToggle(DOM.registerPasswordInput, DOM.registerEyeBtn);
     setupPasswordToggle(DOM.confirmRegisterPasswordInput, DOM.confirmRegisterEyeBtn);
+
+    setupCommentDeletion();
 
     if (DOM.taskList) {
       DOM.taskList.addEventListener("click", handleTaskActions);

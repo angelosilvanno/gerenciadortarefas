@@ -10,6 +10,7 @@ router.use(authMiddleware);
 // Rotas de Comentários
 router.get('/tasks/:taskId/comments', commentController.getCommentsForTask);
 router.post('/tasks/:taskId/comments', commentController.addCommentToTask);
+router.delete('/tasks/:taskId/comments/:commentId', commentController.deleteComment);
 
 // Rota de Histórico
 router.get('/tasks/:taskId/history', activityLogController.getHistoryForTask);

@@ -22,3 +22,25 @@ exports.addCommentToTask = async (req, res) => {
     res.status(500).json({ message: "Erro ao adicionar comentário." });
   }
 };
+
+// DELETE /api/tasks/:taskId/comments/:commentId
+exports.deleteComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comentário não encontrado." });
+    }
+
+    if (comment.user_id !== req.user.id) {
+      return res.status(403).json({ message: "Acesso negado. Você só pode excluir seus próprios comentários." });
+    }
+
+    await Comment.remove(commentId);
+    res.status(204).send();
+
+  } catch (err) {
+    res.status(500).json({ message: "Erro ao excluir comentário." });
+  }
+};

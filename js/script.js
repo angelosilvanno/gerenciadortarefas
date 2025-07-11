@@ -125,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
     taskDescriptionInput: document.getElementById("description"),
     taskDueDateInput: document.getElementById("dueDate"),
     taskPriorityInput: document.getElementById("priority"),
-    taskStatusInput: document.getElementById("status"),
     taskCategoryInput: document.getElementById("category"),
     editTitleInput: document.getElementById('edit-title'),
     editDescriptionInput: document.getElementById('edit-description'),
@@ -590,7 +589,7 @@ document.addEventListener("DOMContentLoaded", () => {
         date_time: DOM.taskDateTimeInput.value || null,
         reminder_minutes: parseInt(DOM.taskReminderSelect.value) || 15,
         priority: DOM.taskPriorityInput.value,
-        status: DOM.taskStatusInput.value,
+        status: "pendente",
         category: DOM.taskCategoryInput.value.trim()
       };
 

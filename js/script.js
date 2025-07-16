@@ -624,8 +624,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.editTaskForm) {
     DOM.editTaskForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      if (!editingTask) return showUIMessage("Erro: Nenhuma tarefa selecionada para edição.", true);
-  
+      if (!editingTask) return showUIMessage("Erro: Nenhuma tarefa selecionada para edição.", true, true);
+
       const updatedData = {
         title: DOM.editTitleInput.value.trim(),
         description: DOM.editDescriptionInput.value.trim(),
@@ -647,20 +647,20 @@ document.addEventListener("DOMContentLoaded", () => {
           return showUIMessage("A data e hora da tarefa não podem estar no passado.", true, true);
         }
       }
-  
+
       if (!updatedData.title || !updatedData.description || !updatedData.due_date) {
-        return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.", true);
+        return showUIMessage("Preencha os campos obrigatórios: Título, Descrição e Prazo.", true, true);
       }
-  
+
       try {
         await apiService.updateTask(editingTask.id, updatedData);
-        showUIMessage("Tarefa atualizada com sucesso!", false);
+        showUIMessage("Tarefa atualizada com sucesso!", false); 
         const modalInstance = bootstrap.Modal.getInstance(DOM.editTaskModalElement);
         if (modalInstance) modalInstance.hide();
         editingTask = null;
         await loadAndRenderTasks();
       } catch (error) {
-        showUIMessage(error.message || "Erro ao atualizar tarefa.");
+        showUIMessage(error.message || "Erro ao atualizar tarefa.", true, true);
       }
     });
   }

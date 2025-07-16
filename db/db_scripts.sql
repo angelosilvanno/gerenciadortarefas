@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS tasks (
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT tasks_user_id_title_key UNIQUE (user_id, title)
 );
 
 -- Tabela para armazenar os comentários de cada tarefa

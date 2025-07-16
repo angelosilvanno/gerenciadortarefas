@@ -31,6 +31,12 @@ const Task = {
     return result.rows[0];
   },
 
+  async findByTitle(userId, title) {
+    const query = 'SELECT id FROM tasks WHERE user_id = $1 AND title = $2';
+    const result = await pool.query(query, [userId, title]);
+    return result.rows[0];
+  },
+
   async update(taskId, userId, updateData) {
     const fields = Object.keys(updateData).map((key, index) => `"${key}" = $${index + 3}`).join(', ');
     const values = Object.values(updateData);

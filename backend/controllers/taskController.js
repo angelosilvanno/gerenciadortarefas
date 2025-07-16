@@ -14,14 +14,21 @@ exports.getTasks = async (req, res) => {
 
 exports.createTask = async (req, res) => {
   try {
-    const newTask = await Task.create(req.user.id, req.body);
+    const { title } = req.body;
+    const userId = req.user.id;
 
-    const user = await User.findById(req.user.id);
+    const existingTask = await Task.findByTitle(userId, title);
+    if (existingTask) {
+      return res.status(409).json({ message: "Já existe uma tarefa com este título." });
+    }
+
+    const newTask = await Task.create(userId, req.body);
+    const user = await User.findById(userId);
     const userName = user ? user.name : "Usuário desconhecido";
 
     await ActivityLog.create(
       newTask.id,
-      req.user.id,
+      userId,
       userName,
       `criou a tarefa "${newTask.title}".`
     );
@@ -37,6 +44,14 @@ exports.updateTask = async (req, res) => {
   try {
     const taskId = req.params.id;
     const userId = req.user.id;
+    const { title } = req.body;
+
+    if (title) {
+      const existingTask = await Task.findByTitle(userId, title);
+      if (existingTask && existingTask.id !== Number(taskId)) {
+        return res.status(409).json({ message: "Já existe outra tarefa com este título." });
+      }
+    }
 
     const originalTask = await Task.findById(taskId);
     if (!originalTask || originalTask.user_id !== userId) {

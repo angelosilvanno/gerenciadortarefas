@@ -24,9 +24,9 @@
   * **Atualização de Status:** Marque como "pendente", "em andamento" ou "concluída" diretamente na lista.
 
 * 📂 **Organização e Filtragem:**
-  * **Busca:** Pesquise por título ou tags.
+  * **Busca:** Pesquise por título.
   * **Filtro por Status:** Visualize apenas tarefas pendentes, em andamento ou concluídas.
-  * **Categorias e Tags:** Atribua categorias e tags múltiplas (separadas por vírgula).
+  * **Categorias:** Atribua categorias.
 
 * 📊 **Acompanhamento de Progresso:**
   * Barra de progresso visual.
@@ -58,38 +58,64 @@
 
 ## 🔧 Guia de Instalação
 
-1. 🔽 Clone o repositório:
-```bash
-git clone https://github.com/angelosilvanno/gerenciadortarefas.git
-```
+#### Pré-requisitos
 
-2. 📁 Acesse a pasta:
-```bash
-cd gerenciadortarefas
-```
+Antes de começar, certifique-se de que você tem os seguintes softwares instalados:
+* **Node.js** (versão 18.x ou superior)
+* **npm** (geralmente instalado com o Node.js)
+* **PostgreSQL** (servidor de banco de dados)
 
-3. 📦 Instale as dependências do back-end:
-```bash
-cd backend
-npm install
-```
+#### Passos
 
-4. ⚙️ Crie o arquivo `.env`:
-```env
-DB_USER=seu_usuario
-DB_PASSWORD=sua_senha
-DB_NAME=nextask_db
-DB_HOST=localhost
-DB_PORT=5432
-JWT_SECRET=sua_chave_secreta
-```
+1.  **🔽 Clone o Repositório**
+    ```bash
+    git clone https://github.com/angelosilvanno/gerenciadortarefas.git
+    ```
 
-5. ▶️ Inicie o servidor:
-```bash
-node server.js
-```
+2.  **📁 Acesse a Pasta do Projeto**
+    ```bash
+    cd gerenciadortarefas
+    ```
 
-6. 🌐 Abra `index.html` no navegador ou use o Live Server.
+3.  **⚙️ Configure o Banco de Dados**
+    * Acesse o PostgreSQL e crie o banco de dados para a aplicação:
+        ```sql
+        CREATE DATABASE taskmanager;
+        ```
+    * Em seguida, execute o script SQL para criar as tabelas necessárias. O script se encontra em: `db/db_script.sql`.
+
+4.  **📦 Instale as Dependências do Backend**
+    * Navegue até a pasta do servidor e instale os pacotes necessários.
+        ```bash
+        cd backend
+        npm install
+        ```
+
+5.  **🔑 Crie o Arquivo de Variáveis de Ambiente (`.env`)**
+    * Ainda na pasta `backend`, crie um arquivo chamado `.env`.
+    * Preencha-o com suas credenciais do PostgreSQL e uma chave secreta para o JWT.
+        ```env
+        # Credenciais do seu banco de dados PostgreSQL
+        DB_USER=seu_usuario_do_postgres
+        DB_HOST=localhost
+        DB_NAME=taskmanager
+        DB_PASSWORD=sua_senha_do_postgres
+        DB_PORT=5432
+
+        # Chave secreta para gerar os tokens de autenticação
+        JWT_SECRET=crie_uma_chave_secreta_longa_e_aleatoria
+        ```
+
+6.  **▶️ Inicie o Servidor Backend**
+    * Com tudo configurado, inicie o servidor.
+      ```bash
+      npm start
+      ```
+    * Se tudo estiver correto, você verá uma mensagem no terminal indicando que o servidor está rodando na porta `3000`.
+
+7.  **🌐 Execute o Frontend**
+    * Abra o arquivo `index.html` que está na **raiz do projeto** (`gerenciadortarefas/index.html`) diretamente no seu navegador.
+    * **Recomendado:** Utilize a extensão **Live Server** do VS Code para uma melhor experiência de desenvolvimento.
 
 ## 👷 Autores
 

@@ -407,12 +407,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const dataTarefa = new Date(ano, mes - 1, dia);
             if (dataTarefa < hoje && normalizeStatus(task.status) !== "concluida") { div.classList.add("tarefa-atrasada"); }
         }
+        if (task.date_time && new Date(task.date_time) < new Date() && normalizeStatus(task.status) !== "concluida") {
+          div.classList.add("tarefa-atrasada");
+        }
         const normStatus = normalizeStatus(task.status);
         if (statusClassMap[normStatus]) { div.classList.add(statusClassMap[normStatus]); }
         div.setAttribute("role", "listitem");
         div.setAttribute("data-priority", task.priority);
         div.setAttribute("data-status", task.status);
         div.setAttribute("data-id", task.id);
+        div.setAttribute("data-datetime", task.date_time);
         const categoryHtml = task.category ? `<span class="task-category-badge" data-category="${sanitizeInput(task.category)}">${sanitizeInput(task.category)}</span>` : "";
         const metaHtml = categoryHtml ? `<div class="task-meta-wrapper">${categoryHtml}</div>` : "";
         div.innerHTML = `
@@ -923,6 +927,32 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function updateOverdueStatus() {
+    const agora = new Date();
+    const taskCards = document.querySelectorAll('.task-card');
+
+    taskCards.forEach(card => {
+      const status = card.dataset.status;
+      const isCompleted = normalizeStatus(status) === 'concluida';
+      
+      if (isCompleted) {
+        card.classList.remove('tarefa-atrasada');
+        return;
+      }
+
+      const dateTimeString = card.dataset.datetime;
+      if (dateTimeString) {
+        const dataTarefa = new Date(dateTimeString);
+        
+        if (dataTarefa < agora) {
+          card.classList.add('tarefa-atrasada');
+        } else {
+          card.classList.remove('tarefa-atrasada');
+        }
+      }
+    });
+  }
+
   function initializeApp() {
     const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
@@ -932,6 +962,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupPasswordToggle(DOM.confirmRegisterPasswordInput, DOM.confirmRegisterEyeBtn);
 
     setupCommentDeletion();
+    setInterval(updateOverdueStatus, 60000);
 
     if (DOM.taskList) {
       DOM.taskList.addEventListener("click", handleTaskActions);

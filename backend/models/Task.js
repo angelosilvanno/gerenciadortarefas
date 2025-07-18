@@ -37,11 +37,13 @@ const Task = {
   
     return result.rows[0];
   },
-  
-  
+
   async findByUserId(userId) {
     const result = await pool.query(
-    "SELECT id, user_id, title, description, due_date, priority, status, category, date_time, reminder_minutes FROM tasks WHERE user_id = $1 ORDER BY due_date ASC, created_at DESC",
+      `SELECT id, user_id, title, description, due_date, priority, status, category, date_time, reminder_minutes 
+       FROM tasks 
+       WHERE user_id = $1 
+       ORDER BY due_date ASC`,
       [userId]
     );
     return result.rows;
@@ -62,7 +64,17 @@ const Task = {
   },
 
   async update(taskId, userId, updateData) {
-    const fields = Object.keys(updateData).map((key, index) => `"${key}" = $${index + 3}`).join(', ');
+    const keys = Object.keys(updateData);
+
+    if (keys.length === 0) {
+      const result = await pool.query(
+        'SELECT * FROM tasks WHERE id = $1 AND user_id = $2',
+        [taskId, userId]
+      );
+      return result.rows[0];
+    }
+
+    const fields = keys.map((key, index) => `"${key}" = $${index + 3}`).join(', ');
     const values = Object.values(updateData);
 
     const query = `UPDATE tasks SET ${fields}, updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 RETURNING *`;

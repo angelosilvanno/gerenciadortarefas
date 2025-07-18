@@ -30,7 +30,8 @@ exports.createTask = async (req, res) => {
       newTask.id,
       userId,
       userName,
-      `criou a tarefa "${newTask.title}".`
+      "criação", 
+      `criou a tarefa "${newTask.title}".` 
     );
 
     res.status(201).json(newTask);
@@ -85,6 +86,7 @@ exports.updateTask = async (req, res) => {
         updatedTask.id,
         userId,
         userName,
+        "edição",
         logMessages.join(" e ")
       );
     }

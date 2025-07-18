@@ -7,6 +7,7 @@ module.exports = {
       'backend/models/**/*.js',
     ],
     coverageDirectory: 'coverage',
-    reporters: ['default']
+    reporters: ['default'],
+    setupFiles: ['<rootDir>/jest.env.js'] 
   };
   

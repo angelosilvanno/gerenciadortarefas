@@ -12,15 +12,17 @@ const ActivityLog = {
     return result.rows;
   },
 
-  async create(taskId, userId, userName, description) {
+  async create(taskId, userId, userName, action, description) {
     const query = `
-      INSERT INTO activity_logs (task_id, user_id, user_name, description)
-      VALUES ($1, $2, $3, $4)
-      RETURNING *
+      INSERT INTO activity_logs (task_id, user_id, user_name, action, description)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *;
     `;
-    const result = await pool.query(query, [taskId, userId, userName, description]);
+    const values = [taskId, userId, userName, action, description];
+    const result = await pool.query(query, values);
     return result.rows[0];
   }
+  
 };
 
 module.exports = ActivityLog;

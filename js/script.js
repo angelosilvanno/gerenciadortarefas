@@ -524,15 +524,36 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.forgotPasswordLink) DOM.forgotPasswordLink.addEventListener("click", (e) => { e.preventDefault(); showForgotPasswordModal(); });
 
   if (DOM.forgotPasswordForm) {
-    DOM.forgotPasswordForm.addEventListener("submit", (e) => {
+    DOM.forgotPasswordForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      showUIMessage("Funcionalidade de recuperação de senha em desenvolvimento.", false);
-      const modalInstance = bootstrap.Modal.getInstance(DOM.forgotPasswordModalElement);
-      if (modalInstance) modalInstance.hide();
-      DOM.forgotEmailInput.value = "";
+  
+      const email = DOM.forgotEmailInput.value.trim();
+  
+      if (!email || !emailRegex.test(email)) {
+        return showUIMessage("Por favor, insira um e-mail válido.");
+      }
+  
+      try {
+        const response = await fetch("http://localhost:3000/api/users/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+  
+        const result = await response.json();
+  
+        showUIMessage(result.message || "Verifique sua caixa de entrada.", false);
+  
+        const modalInstance = bootstrap.Modal.getInstance(DOM.forgotPasswordModalElement);
+        if (modalInstance) modalInstance.hide();
+        DOM.forgotEmailInput.value = "";
+      } catch (err) {
+        console.error("Erro ao enviar recuperação de senha:", err);
+        showUIMessage("Erro ao enviar o e-mail de recuperação. Tente novamente.");
+      }
     });
   }
-
+  
   if (DOM.registerForm) {
     DOM.registerForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -881,7 +902,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const lembretesEnviados = new Set();
 
   function verificarLembretes() {
-    console.log("🕐 Rodando verificarLembretes", new Date().toLocaleTimeString());
+    console.log("Rodando verificarLembretes", new Date().toLocaleTimeString());
 
     if (!("Notification" in window) || Notification.permission !== "granted") return;
 
@@ -908,7 +929,7 @@ document.addEventListener("DOMContentLoaded", () => {
         new Notification(titulo, { body: corpo });
         lembretesEnviados.add(task.id);
 
-        console.log("🔔 Notificação enviada:", task.title, "->", diffMin, "min antes");
+        console.log("Notificação enviada:", task.title, "->", diffMin, "min antes");
       }
     });
   }
@@ -1067,8 +1088,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof module !== "undefined") {
     module.exports = { handleLogout };
   }
-  
-});
-
-}
+ 
+ })
+};
 

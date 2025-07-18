@@ -2,7 +2,30 @@ const pool = require("../db");
 
 const Task = {
   async create(userId, taskData) {
-    const { title, description, due_date, priority, status, category, date_time, reminder_minutes } = taskData;
+    const {
+      title,
+      description,
+      due_date,
+      priority,
+      status,
+      category,
+      date_time,
+      reminder_minutes
+    } = taskData;
+  
+    if (due_date && new Date(due_date) < new Date()) {
+      throw new Error('A data de vencimento não pode estar no passado');
+    }
+  
+    const prioridadesValidas = ['baixa', 'media', 'alta'];
+    if (priority && !prioridadesValidas.includes(priority)) {
+      throw new Error('Prioridade inválida');
+    }
+  
+    const lembretesValidos = [15, 30];
+    if (reminder_minutes && !lembretesValidos.includes(reminder_minutes)) {
+      throw new Error('Lembrete inválido');
+    }
   
     const result = await pool.query(
       `INSERT INTO tasks 
@@ -14,6 +37,7 @@ const Task = {
   
     return result.rows[0];
   },
+  
   
   async findByUserId(userId) {
     const result = await pool.query(

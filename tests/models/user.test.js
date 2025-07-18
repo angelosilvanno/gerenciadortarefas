@@ -69,5 +69,18 @@ describe('User model', () => {
     const result = await User.findByUsernameOrEmail('naoexiste');
     expect(result).toBeUndefined();
   });
+
+  test('deve lançar erro genérico se o erro não tiver código', async () => {
+    const originalQuery = pool.query;
+  
+    pool.query = jest.fn().mockRejectedValue(new Error('Erro inesperado!'));
+  
+    await expect(
+      User.create('teste', 'erro@email.com', '123')
+    ).rejects.toThrow('Erro inesperado!');
+  
+    pool.query = originalQuery; // restaurar
+  });
+  
 });
 

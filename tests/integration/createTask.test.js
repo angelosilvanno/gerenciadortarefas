@@ -34,7 +34,7 @@ describe('Integração - Criar Tarefa', () => {
             .set('Authorization', `Bearer ${token}`)
             .send({
                 title: 'Tarefa Teste',
-                due_date: '2025-06-25',
+                due_date: '2099-12-31T12:00',
                 status: 'pendente',
                 priority: 'alta'
             });

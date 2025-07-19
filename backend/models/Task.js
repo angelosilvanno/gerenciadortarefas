@@ -12,29 +12,37 @@ const Task = {
       date_time,
       reminder_minutes
     } = taskData;
-  
+
     if (due_date && new Date(due_date) < new Date()) {
       throw new Error('A data de vencimento não pode estar no passado');
     }
-  
-    const prioridadesValidas = ['baixa', 'media', 'alta'];
-    if (priority && !prioridadesValidas.includes(priority)) {
+
+    const prioridadeNormalizada = priority?.toLowerCase()?.normalize("NFD").replace(/[\u0300-\u036f]/g, '');
+    const prioridadesMapeadas = {
+      baixa: 'baixa',
+      media: 'média',
+      alta: 'alta'
+    };
+
+    if (!prioridadesMapeadas[prioridadeNormalizada]) {
       throw new Error('Prioridade inválida');
     }
-  
+
+    const prioridadeFinal = prioridadesMapeadas[prioridadeNormalizada];
+
     const lembretesValidos = [15, 30];
     if (reminder_minutes && !lembretesValidos.includes(reminder_minutes)) {
       throw new Error('Lembrete inválido');
     }
-  
+
     const result = await pool.query(
       `INSERT INTO tasks 
         (user_id, title, description, due_date, priority, status, category, date_time, reminder_minutes) 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
         RETURNING *`,
-      [userId, title, description, due_date, priority, status, category, date_time, reminder_minutes]
+      [userId, title, description, due_date, prioridadeFinal, status, category, date_time, reminder_minutes]
     );
-  
+
     return result.rows[0];
   },
 
@@ -84,24 +92,14 @@ const Task = {
   },
 
   async delete(taskId, userId) {
-    console.log("🔍 Task.delete() recebeu:", {
-      taskId,
-      userId,
-      tipos: {
-        taskId: typeof taskId,
-        userId: typeof userId
-      }
-    });
-  
     const result = await pool.query(
       "DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING id, user_id",
       [Number(taskId), Number(userId)]
     );
-  
-    console.log("Resultado do DELETE:", result.rows);
-  
+
     return result.rows[0];
   },
 };
 
 module.exports = Task;
+

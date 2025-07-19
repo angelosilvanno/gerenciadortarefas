@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">21.42% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>3/14</span>
+                <span class='fraction'>14/14</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">21.42% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>3/14</span>
+                <span class='fraction'>14/14</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -100,88 +100,91 @@
 <a name='L35'></a><a href='#L35'>35</a>
 <a name='L36'></a><a href='#L36'>36</a>
 <a name='L37'></a><a href='#L37'>37</a>
-<a name='L38'></a><a href='#L38'>38</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span></td><td class="text"><pre class="prettyprint lang-js">const pool = require("../db");
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const pool = require("../db");
 &nbsp;
 const Comment = {
-<span class="fstat-no" title="function not covered" >  as</span>ync findByTaskId(taskId) {
-    const query = <span class="cstat-no" title="statement not covered" >`</span>
-      SELECT c.id, c.content, c.created_at, c.user_id, u.name as user_name
+  async findByTaskId(taskId) {
+    const query = `
+      SELECT c.id, c.text, c.created_at, c.user_id, u.name as user_name
       FROM comments c
       JOIN users u ON c.user_id = u.id
       WHERE c.task_id = $1
       ORDER BY c.created_at ASC
     `;
-    const result = <span class="cstat-no" title="statement not covered" >await pool.query(query, [taskId]);</span>
-<span class="cstat-no" title="statement not covered" >    return result.rows;</span>
+    const result = await pool.query(query, [taskId]);
+    return result.rows;
   },
 &nbsp;
-<span class="fstat-no" title="function not covered" >  as</span>ync findById(commentId) {
-    const query = <span class="cstat-no" title="statement not covered" >'SELECT * FROM comments WHERE id = $1';</span>
-    const result = <span class="cstat-no" title="statement not covered" >await pool.query(query, [commentId]);</span>
-<span class="cstat-no" title="statement not covered" >    return result.rows[0];</span>
+  async findById(commentId) {
+    const query = 'SELECT * FROM comments WHERE id = $1';
+    const result = await pool.query(query, [commentId]);
+    return result.rows[0];
   },
 &nbsp;
-<span class="fstat-no" title="function not covered" >  as</span>ync create(taskId, userId, content) {
-    const query = <span class="cstat-no" title="statement not covered" >`</span>
-      INSERT INTO comments (task_id, user_id, content)
+  async create(taskId, userId, text) {
+    const query = `
+      INSERT INTO comments (task_id, user_id, text)
       VALUES ($1, $2, $3)
       RETURNING *
     `;
-    const result = <span class="cstat-no" title="statement not covered" >await pool.query(query, [taskId, userId, content]);</span>
-<span class="cstat-no" title="statement not covered" >    return result.rows[0];</span>
+    const result = await pool.query(query, [taskId, userId, text]);
+    return result.rows[0];
   },
 &nbsp;
-<span class="fstat-no" title="function not covered" >  as</span>ync remove(commentId) {
-    const query = <span class="cstat-no" title="statement not covered" >'DELETE FROM comments WHERE id = $1';</span>
-<span class="cstat-no" title="statement not covered" >    await pool.query(query, [commentId]);</span>
+  async remove(commentId) {
+    const query = 'DELETE FROM comments WHERE id = $1';
+    await pool.query(query, [commentId]);
   },
 };
 &nbsp;
-module.exports = Comment;</pre></td></tr></table></pre>
+module.exports = Comment;
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-07-18T06:06:23.201Z
+                at 2025-07-18T23:18:53.019Z
             </div>
         <script src="../prettify.js"></script>
         <script>

@@ -569,7 +569,9 @@ document.addEventListener("DOMContentLoaded", () => {
         due_date: DOM.taskDateTimeInput.value ? DOM.taskDateTimeInput.value.split('T')[0] : null,
         date_time: DOM.taskDateTimeInput.value || null,
         reminder_minutes: parseInt(DOM.taskReminderSelect.value) || 15,
-        priority: DOM.taskPriorityInput.value,
+        priority: DOM.taskPriorityInput.value
+  ? DOM.taskPriorityInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  : null,
         status: "pendente",
         category: DOM.taskCategoryInput.value.trim()
       };

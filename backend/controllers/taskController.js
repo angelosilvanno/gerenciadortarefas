@@ -14,15 +14,22 @@ exports.getTasks = async (req, res) => {
 
 exports.createTask = async (req, res) => {
   try {
+
+    console.log("Dados recebidos:", req.body);
+    console.log("Usuário autenticado:", req.user);
+
     const { title } = req.body;
     const userId = req.user.id;
 
     const existingTask = await Task.findByTitle(userId, title);
     if (existingTask) {
+      console.log("Tarefa duplicada detectada");
       return res.status(409).json({ message: "Já existe uma tarefa com este título." });
     }
 
     const newTask = await Task.create(userId, req.body);
+    console.log("Tarefa criada:", newTask);
+
     const user = await User.findById(userId);
     const userName = user ? user.name : "Usuário desconhecido";
 
@@ -36,8 +43,8 @@ exports.createTask = async (req, res) => {
 
     res.status(201).json(newTask);
   } catch (err) {
-    console.error("Erro ao criar tarefa:", err);
-    res.status(500).json({ message: "Erro interno do servidor" });
+    console.error("Erro crítico ao criar tarefa:", err.message, err.stack);
+    res.status(500).json({ message: "Erro interno do servidor", detalhe: err.message  });
   }
 };
 
@@ -99,7 +106,7 @@ exports.updateTask = async (req, res) => {
 };
 
 exports.deleteTask = async (req, res) => {
-  console.log("🛠️ Entrou no deleteTask()");
+  console.log("Entrou no deleteTask()");
   console.log("req.user.id:", req.user.id);
   console.log("req.params.id:", req.params.id);
 

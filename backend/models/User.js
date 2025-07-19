@@ -15,16 +15,17 @@ const User = {
       );
       return result.rows[0];
     } catch (error) {
-      if (error.code === '23505') { // Código de erro do PostgreSQL para violação de chave única
+      // Trata erros de violação de chave única (duplicado)
+      if (error.code === '23505') {
         if (error.constraint === 'users_name_key') {
           throw new Error('Este nome de usuário já está em uso.');
-        }
-        if (error.constraint === 'users_email_key') {
+        } else if (error.constraint === 'users_email_key') {
           throw new Error('Este e-mail já está em uso.');
         }
       }
-      // Para outros erros, propaga o erro original
-      throw error;
+
+      // Outros erros são lançados normalmente
+      throw new Error(error.message || 'Erro ao criar usuário.');
     }
   },
 

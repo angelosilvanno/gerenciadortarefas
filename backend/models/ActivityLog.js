@@ -16,7 +16,7 @@ const ActivityLog = {
     const query = `
       INSERT INTO activity_logs (task_id, user_id, user_name, action, description)
       VALUES ($1, $2, $3, $4, $5)
-      RETURNING *;
+      RETURNING id, task_id, user_id, user_name, description, created_at;
     `;
     const values = [taskId, userId, userName, action, description];
     const result = await pool.query(query, values);

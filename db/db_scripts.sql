@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS  comments (
 -- Tabela para armazenar o histórico de atividades de cada tarefa
 CREATE TABLE IF NOT EXISTS  activity_logs (
     id SERIAL PRIMARY KEY,
+    action VARCHAR(50),
     description TEXT NOT NULL,
     task_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,

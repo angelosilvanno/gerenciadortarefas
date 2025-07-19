@@ -89,11 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
     mainPanel: document.getElementById("main-panel"),
     showRegisterLink: document.getElementById("show-register"),
     showLoginLink: document.getElementById("show-login"),
-    forgotPasswordLink: document.getElementById("forgot-password"),
     logoutBtn: document.getElementById("logout-btn"),
     loginForm: document.getElementById("login-form"),
     registerForm: document.getElementById("register-form"),
-    forgotPasswordForm: document.getElementById("forgot-password-form"),
     taskForm: document.getElementById("task-form"),
     taskList: document.getElementById("task-list"),
     searchTasksInput: document.getElementById("search-tasks"),
@@ -107,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
     progressBar: document.getElementById("progress-bar"),
     progressText: document.getElementById("progress-text"),
     welcomeModalElement: document.getElementById("welcomeModal"),
-    forgotPasswordModalElement: document.getElementById("forgotPasswordModal"),
     deleteModalElement: document.getElementById("deleteModal"),
     confirmDeleteButton: document.getElementById("confirmDelete"),
     editTaskModalElement: document.getElementById("editTaskModal"),
@@ -320,15 +317,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function showForgotPasswordModal() {
-    if (DOM.forgotPasswordModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-      try {
-        const modal = bootstrap.Modal.getOrCreateInstance(DOM.forgotPasswordModalElement);
-        modal.show();
-      } catch (err) { console.error("Erro ao mostrar modal de esquecer senha:", err); }
-    }
-  }
-
   function normalizeStatus(status) {
     if (typeof status !== 'string') return "";
     return status.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "").toLowerCase();
@@ -521,38 +509,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (DOM.showRegisterLink) DOM.showRegisterLink.addEventListener("click", (e) => { e.preventDefault(); showRegisterPanel(); });
   if (DOM.showLoginLink) DOM.showLoginLink.addEventListener("click", (e) => { e.preventDefault(); showLoginPanel(); });
   if (DOM.logoutBtn) DOM.logoutBtn.addEventListener("click", handleLogout);
-  if (DOM.forgotPasswordLink) DOM.forgotPasswordLink.addEventListener("click", (e) => { e.preventDefault(); showForgotPasswordModal(); });
-
-  if (DOM.forgotPasswordForm) {
-    DOM.forgotPasswordForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-  
-      const email = DOM.forgotEmailInput.value.trim();
-  
-      if (!email || !emailRegex.test(email)) {
-        return showUIMessage("Por favor, insira um e-mail válido.");
-      }
-  
-      try {
-        const response = await fetch("http://localhost:3000/api/users/forgot-password", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email })
-        });
-  
-        const result = await response.json();
-  
-        showUIMessage(result.message || "Verifique sua caixa de entrada.", false);
-  
-        const modalInstance = bootstrap.Modal.getInstance(DOM.forgotPasswordModalElement);
-        if (modalInstance) modalInstance.hide();
-        DOM.forgotEmailInput.value = "";
-      } catch (err) {
-        console.error("Erro ao enviar recuperação de senha:", err);
-        showUIMessage("Erro ao enviar o e-mail de recuperação. Tente novamente.");
-      }
-    });
-  }
   
   if (DOM.registerForm) {
     DOM.registerForm.addEventListener("submit", async (e) => {

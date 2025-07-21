@@ -644,14 +644,15 @@ body.dark-mode #login-image {
   }
   
   body.dark #clear-completed-btn {
-    background-color: #dc3545;  
-    color: #f8d7da;             
-    border: 1px solid #5a1d1d;
+    background-color: #1c0606 !important; 
+    color: #f8d7da !important;             
+    border: 1px solid #3d1212 !important;
   }
   
   body.dark #clear-completed-btn:hover {
-    background-color: #4d1111;
-    color: #fce7e9;
+    background-color: #300909 !important;
+    color: #fce7e9 !important;
+    border-color: #4e1b1b !important;
   }
   
   

@@ -10,49 +10,43 @@ const Task = {
       status,
       category,
       date_time,
-      reminder_minutes
+      reminder_minutes,
+      fixed = false
     } = taskData;
-
+  
     if (due_date) {
       const hoje = new Date().toISOString().split('T')[0];
-
-      if (due_date < hoje) {
-        throw new Error('A data de vencimento não pode estar no passado');
-      }
+      if (due_date < hoje) throw new Error('A data de vencimento não pode estar no passado');
     }
-
+  
     const prioridadeNormalizada = priority?.toLowerCase()?.normalize("NFD").replace(/[\u0300-\u036f]/g, '');
-    const prioridadesMapeadas = {
-      baixa: 'baixa',
-      media: 'média',
-      alta: 'alta'
-    };
-
+    const prioridadesMapeadas = { baixa: 'baixa', media: 'média', alta: 'alta' };
+  
     if (!prioridadesMapeadas[prioridadeNormalizada]) {
       throw new Error('Prioridade inválida');
     }
-
+  
     const prioridadeFinal = prioridadesMapeadas[prioridadeNormalizada];
-
     const lembretesValidos = [15, 30];
     if (reminder_minutes && !lembretesValidos.includes(reminder_minutes)) {
       throw new Error('Lembrete inválido');
     }
-
+  
     const result = await pool.query(
       `INSERT INTO tasks 
-        (user_id, title, description, due_date, priority, status, category, date_time, reminder_minutes) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-        RETURNING *`,
-      [userId, title, description, due_date, prioridadeFinal, status, category, date_time, reminder_minutes]
+        (user_id, title, description, due_date, priority, status, category, date_time, reminder_minutes, fixed)
+       VALUES 
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING id, user_id, title, description, due_date, priority, status, category, date_time, reminder_minutes, fixed`,
+      [userId, title, description, due_date, prioridadeFinal, status, category, date_time, reminder_minutes, fixed]
     );
-
+  
     return result.rows[0];
   },
 
   async findByUserId(userId) {
     const result = await pool.query(
-      `SELECT id, user_id, title, description, due_date, priority, status, category, date_time, reminder_minutes 
+      `SELECT id, user_id, title, description, due_date, priority, status, category, date_time, reminder_minutes, fixed
        FROM tasks 
        WHERE user_id = $1 
        ORDER BY due_date ASC`,
@@ -60,6 +54,7 @@ const Task = {
     );
     return result.rows;
   },
+  
 
   async findById(taskId) {
     const result = await pool.query(

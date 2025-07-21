@@ -49,10 +49,13 @@ exports.createTask = async (req, res) => {
 };
 
 exports.updateTask = async (req, res) => {
+  console.log("Recebido no update:", req.body);
+
   try {
     const taskId = req.params.id;
     const userId = req.user.id;
     const { title } = req.body;
+    console.log("Dados recebidos na atualização:", req.body);
 
     if (title) {
       const existingTask = await Task.findByTitle(userId, title);

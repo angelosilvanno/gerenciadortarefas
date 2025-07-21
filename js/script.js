@@ -366,47 +366,58 @@ document.addEventListener("DOMContentLoaded", () => {
       "🌈 Agenda limpa, mente leve.",
       "📚 Nenhuma pendência. Que tal um bom livro?",
     ];
-
-    // Atualiza o título da aba com o número de tarefas pendentes
+  
     const pendentes = Array.isArray(tasksToDisplay)
-  ? tasksToDisplay.filter(t => normalizeStatus(t.status) === 'pendente').length
-  : 0;
-
-const emAndamento = Array.isArray(tasksToDisplay)
-  ? tasksToDisplay.filter(t => normalizeStatus(t.status) === 'emandamento').length
-  : 0;
-
-let titulo = "";
-
-if (pendentes > 0) titulo += `📌 (${pendentes}) `;
-if (emAndamento > 0) titulo += `⏳ (${emAndamento}) `;
-if (pendentes === 0 && emAndamento === 0) titulo = "✅ ";
-
-document.title = `${titulo}NexTask`;
-
-
+      ? tasksToDisplay.filter(t => normalizeStatus(t.status) === 'pendente').length
+      : 0;
+  
+    const emAndamento = Array.isArray(tasksToDisplay)
+      ? tasksToDisplay.filter(t => normalizeStatus(t.status) === 'emandamento').length
+      : 0;
+  
+    let titulo = "";
+    if (pendentes > 0) titulo += `📌 (${pendentes}) `;
+    if (emAndamento > 0) titulo += `⏳ (${emAndamento}) `;
+    if (pendentes === 0 && emAndamento === 0) titulo = "✅ ";
+    document.title = `${titulo}NexTask`;
+  
     if (!DOM.taskList) return;
-    const statusClassMap = { pendente: "task-status-pendente", emandamento: "task-status-em-andamento", concluida: "task-status-concluida" };
+  
+    const statusClassMap = {
+      pendente: "task-status-pendente",
+      emandamento: "task-status-em-andamento",
+      concluida: "task-status-concluida"
+    };
+  
     DOM.taskList.innerHTML = "";
+  
     if (!Array.isArray(tasksToDisplay) || tasksToDisplay.length === 0) {
       const mensagemAleatoria = mensagensPositivas[Math.floor(Math.random() * mensagensPositivas.length)];
-DOM.taskList.innerHTML = `<p class="text-center text-muted" id="no-tasks-message">${mensagemAleatoria}</p>`;
+      DOM.taskList.innerHTML = `<p class="text-center text-muted" id="no-tasks-message">${mensagemAleatoria}</p>`;
       updateProgress();
       return;
     }
+  
     const groupedByDate = {};
     tasksToDisplay.forEach(task => {
       const dateKey = task.due_date || 'Data Inválida';
       if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
       groupedByDate[dateKey].push(task);
     });
+  
     const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
-      if (a === 'Data Inválida') return 1; if (b === 'Data Inválida') return -1;
+      if (a === 'Data Inválida') return 1;
+      if (b === 'Data Inválida') return -1;
       return new Date(a) - new Date(b);
     });
+  
     sortedDates.forEach(date => {
       let formattedDate = date;
-      if (date !== 'Data Inválida') { const [y, m, d] = date.split("-"); formattedDate = `${d}/${m}/${y}`; }
+      if (date !== 'Data Inválida') {
+        const [y, m, d] = date.split("-");
+        formattedDate = `${d}/${m}/${y}`;
+      }
+  
       const dateHeaderWrapper = document.createElement("div");
       dateHeaderWrapper.className = "mt-4 mb-2 d-flex align-items-center justify-content-start";
       const datePill = document.createElement("span");
@@ -414,34 +425,56 @@ DOM.taskList.innerHTML = `<p class="text-center text-muted" id="no-tasks-message
       datePill.innerHTML = `🗓️ ${formattedDate}`;
       dateHeaderWrapper.appendChild(datePill);
       DOM.taskList.appendChild(dateHeaderWrapper);
-      groupedByDate[date].forEach(task => {
+  
+      const tasksSorted = groupedByDate[date].sort((a, b) => {
+        const aFixed = a.fixed ? 1 : 0;
+        const bFixed = b.fixed ? 1 : 0;
+        if (bFixed !== aFixed) return bFixed - aFixed;
+        return new Date(a.due_date) - new Date(b.due_date);
+      });
+  
+      tasksSorted.forEach(task => {
         const div = document.createElement("div");
         div.classList.add("task-card", "card", "p-3", "mb-2");
+  
         if (task.due_date) {
-            const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-            const [ano, mes, dia] = task.due_date.split("-").map(Number);
-            const dataTarefa = new Date(ano, mes - 1, dia);
-            if (dataTarefa < hoje && normalizeStatus(task.status) !== "concluida") { div.classList.add("tarefa-atrasada"); }
+          const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+          const [ano, mes, dia] = task.due_date.split("-").map(Number);
+          const dataTarefa = new Date(ano, mes - 1, dia);
+          if (dataTarefa < hoje && normalizeStatus(task.status) !== "concluida") {
+            div.classList.add("tarefa-atrasada");
+          }
         }
+  
         if (task.date_time && new Date(task.date_time) < new Date() && normalizeStatus(task.status) !== "concluida") {
           div.classList.add("tarefa-atrasada");
         }
+  
         const normStatus = normalizeStatus(task.status);
-        if (statusClassMap[normStatus]) { div.classList.add(statusClassMap[normStatus]); }
+        if (statusClassMap[normStatus]) div.classList.add(statusClassMap[normStatus]);
+  
         div.setAttribute("role", "listitem");
         div.setAttribute("data-priority", task.priority);
         div.setAttribute("data-status", task.status);
         div.setAttribute("data-id", task.id);
         div.setAttribute("data-datetime", task.date_time);
-        const categoryHtml = task.category ? `<span class="task-category-badge" data-category="${sanitizeInput(task.category)}">${sanitizeInput(task.category)}</span>` : "";
+  
+        const categoryHtml = task.category
+          ? `<span class="task-category-badge" data-category="${sanitizeInput(task.category)}">${sanitizeInput(task.category)}</span>`
+          : "";
         const metaHtml = categoryHtml ? `<div class="task-meta-wrapper">${categoryHtml}</div>` : "";
+  
+        const estrela = task.fixed ? '⭐' : '☆';
         div.innerHTML = `
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center flex-grow-1">
-              ${normStatus === "concluida" ? `<i class="bi bi-check-circle-fill text-success me-2 fs-5" title="Tarefa concluída"></i>` : `<input type="checkbox" class="form-check-input me-2 complete-checkbox" data-id="${task.id}" ${task.status === "concluída" ? "checked" : ""} aria-label="Marcar tarefa como concluída">`}
+              ${normStatus === "concluida"
+                ? `<i class="bi bi-check-circle-fill text-success me-2 fs-5" title="Tarefa concluída"></i>`
+                : `<input type="checkbox" class="form-check-input me-2 complete-checkbox" data-id="${task.id}" ${task.status === "concluída" ? "checked" : ""} aria-label="Marcar tarefa como concluída">`}
               <h5 class="mb-0 flex-grow-1 task-title" style="word-break: break-word;">${sanitizeInput(task.title)}</h5>
             </div>
             <div>
+              <button class="btn btn-light btn-sm me-2 star-btn" data-id="${task.id}" title="Fixar/desafixar tarefa">${estrela}</button>
               <button class="btn btn-warning btn-sm me-2 edit-btn" data-id="${task.id}" title="Editar tarefa"><i class="bi bi-pencil-fill"></i></button>
               <button class="btn btn-danger btn-sm delete-btn" data-id="${task.id}" title="Excluir tarefa"><i class="bi bi-trash-fill"></i></button>
             </div>
@@ -454,11 +487,27 @@ DOM.taskList.innerHTML = `<p class="text-center text-muted" id="no-tasks-message
           <small class="text-muted d-block"><strong>Prioridade:</strong> ${sanitizeInput(task.priority)} | <strong>Status:</strong> ${sanitizeInput(task.status)}</small>
           ${metaHtml}
         `;
+  
         DOM.taskList.appendChild(div);
+  
+        const starBtn = div.querySelector(".star-btn");
+        if (starBtn) {
+          starBtn.addEventListener("click", async () => {
+            try {
+              const updatedTask = { fixed: !task.fixed };
+              await apiService.updateTask(task.id, updatedTask);
+              await loadAndRenderTasks();
+            } catch (error) {
+              showUIMessage("Erro ao fixar/desafixar tarefa.", true);
+            }
+          });
+        }
       });
     });
+  
     updateProgress();
   }
+  
 
   async function loadComments(taskId) {
     if (!DOM.commentsList) return;
@@ -601,7 +650,8 @@ DOM.taskList.innerHTML = `<p class="text-center text-muted" id="no-tasks-message
   ? DOM.taskPriorityInput.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
   : null,
         status: "pendente",
-        category: DOM.taskCategoryInput.value.trim()
+        category: DOM.taskCategoryInput.value.trim(),
+        fixed: false
       };
 
       if (taskData.date_time) {
@@ -1079,7 +1129,7 @@ DOM.taskList.innerHTML = `<p class="text-center text-muted" id="no-tasks-message
 
 
  document.addEventListener('DOMContentLoaded', () => {
-  const clearCompletedBtn = document.getElementyById('clear-completed-btn');
+  const clearCompletedBtn = document.getElementById('clear-completed-btn');
   if (clearCompletedBtn) {
     clearCompletedBtn.addEventListener('click', async () => {
       const confirmacao = confirm('Deseja realmente excluir todas as tarefas concluídas?');

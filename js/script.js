@@ -358,11 +358,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderTasks(tasksToDisplay) {
+    const mensagensPositivas = [
+      "🎉 Você concluiu todas as tarefas! Aproveite seu tempo livre ✨",
+      "🌸 Tudo feito! Agora é hora de relaxar.",
+      "🧘 Respire fundo. Você está em dia com tudo!",
+      "☕ Você merece um descanso! Nenhuma tarefa no momento.",
+      "🌈 Agenda limpa, mente leve.",
+      "📚 Nenhuma pendência. Que tal um bom livro?",
+    ];
     if (!DOM.taskList) return;
     const statusClassMap = { pendente: "task-status-pendente", emandamento: "task-status-em-andamento", concluida: "task-status-concluida" };
     DOM.taskList.innerHTML = "";
     if (!Array.isArray(tasksToDisplay) || tasksToDisplay.length === 0) {
-      DOM.taskList.innerHTML = '<p class="text-center text-muted" id="no-tasks-message">Nenhuma tarefa para exibir.</p>';
+      const mensagemAleatoria = mensagensPositivas[Math.floor(Math.random() * mensagensPositivas.length)];
+DOM.taskList.innerHTML = `<p class="text-center text-muted" id="no-tasks-message">${mensagemAleatoria}</p>`;
       updateProgress();
       return;
     }
@@ -1048,5 +1057,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
  
  })
+
+
+ document.addEventListener('DOMContentLoaded', () => {
+  const clearCompletedBtn = document.getElementyById('clear-completed-btn');
+  if (clearCompletedBtn) {
+    clearCompletedBtn.addEventListener('click', async () => {
+      const confirmacao = confirm('Deseja realmente excluir todas as tarefas concluídas?');
+      if (!confirmacao) return;
+
+      try {
+        const tasks = await apiService.getTasks();
+        const concluidas = tasks.filter(tarefa => tarefa.status === 'concluída');
+
+        for (const tarefa of concluidas) {
+          await apiService.deleteTask(tarefa.id);
+        }
+
+        renderizarTarefas();
+        alert('Todas as tarefas concluídas foram removidas!');
+      } catch (erro) {
+        console.error('Erro ao limpar tarefas concluídas:', erro);
+        alert('Erro ao limpar tarefas concluídas.');
+      }
+    });
+  }
+ });
+
+
 };
 

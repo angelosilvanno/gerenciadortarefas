@@ -78,7 +78,7 @@
                       <label for="edit-priority" class="form-label">Prioridade</label>
                       <select class="form-select" id="edit-priority">
                         <option value="baixa">Baixa</option>
-                        <option value="média">Média</option>
+                        <option value="média">Média</option> 
                         <option value="alta">Alta</option>
                       </select>
                     </div>
@@ -317,7 +317,12 @@
   
             <div class="col-lg-7">
               <div class="border rounded shadow-sm p-3 bg-white h-100">
-                <h5>Lista de Tarefas</h5>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h5 class="mb-0">Lista de Tarefas</h5>
+                  <button id="clear-completed-btn" class="btn btn-sm">
+                    🗑️ Limpar Concluídas
+                  </button>
+                </div>                
                 <div id="task-list" role="list" style="max-height: 700px; overflow-y: auto; min-height: 200px;">
                   <p class="text-center text-muted d-none" id="no-tasks-message">Nenhuma tarefa para exibir.</p>
                 </div>

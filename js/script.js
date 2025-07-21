@@ -366,6 +366,25 @@ document.addEventListener("DOMContentLoaded", () => {
       "🌈 Agenda limpa, mente leve.",
       "📚 Nenhuma pendência. Que tal um bom livro?",
     ];
+
+    // Atualiza o título da aba com o número de tarefas pendentes
+    const pendentes = Array.isArray(tasksToDisplay)
+  ? tasksToDisplay.filter(t => normalizeStatus(t.status) === 'pendente').length
+  : 0;
+
+const emAndamento = Array.isArray(tasksToDisplay)
+  ? tasksToDisplay.filter(t => normalizeStatus(t.status) === 'emandamento').length
+  : 0;
+
+let titulo = "";
+
+if (pendentes > 0) titulo += `📌 (${pendentes}) `;
+if (emAndamento > 0) titulo += `⏳ (${emAndamento}) `;
+if (pendentes === 0 && emAndamento === 0) titulo = "✅ ";
+
+document.title = `${titulo}NexTask`;
+
+
     if (!DOM.taskList) return;
     const statusClassMap = { pendente: "task-status-pendente", emandamento: "task-status-em-andamento", concluida: "task-status-concluida" };
     DOM.taskList.innerHTML = "";

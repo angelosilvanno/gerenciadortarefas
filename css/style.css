@@ -654,5 +654,28 @@ body.dark-mode #login-image {
     color: #fce7e9 !important;
     border-color: #4e1b1b !important;
   }
+
+
+  .star-btn {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0.4rem;
+  }
+
+  .star-btn .bi-star {
+    color: #ffc107;
+    font-size: 1.1rem;
+  }
+
+  .star-btn .bi-star-fill {
+    color: #ffc107;
+    font-size: 1.1rem;
+  }
+
+  .star-btn:hover .bi-star,
+  .star-btn:hover .bi-star-fill {
+    transform: scale(1.2);
+    transition: transform 0.2 ease;
+  }
   
   

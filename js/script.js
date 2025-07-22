@@ -474,7 +474,9 @@ document.addEventListener("DOMContentLoaded", () => {
               <h5 class="mb-0 flex-grow-1 task-title" style="word-break: break-word;">${sanitizeInput(task.title)}</h5>
             </div>
             <div>
-              <button class="btn btn-light btn-sm me-2 star-btn" data-id="${task.id}" title="Fixar/desafixar tarefa">${estrela}</button>
+            <button class="btn btn-sm me-2 star-btn ${task.fixed ? 'btn-warning' : 'btn-outline-secondary'}" data-id="${task.id}" title="Fixar/desafixar tarefa">
+              <i class="bi ${task.fixed ? 'bi-star-fill' : 'bi-star'}"></i>
+            </button>
               <button class="btn btn-warning btn-sm me-2 edit-btn" data-id="${task.id}" title="Editar tarefa"><i class="bi bi-pencil-fill"></i></button>
               <button class="btn btn-danger btn-sm delete-btn" data-id="${task.id}" title="Excluir tarefa"><i class="bi bi-trash-fill"></i></button>
             </div>

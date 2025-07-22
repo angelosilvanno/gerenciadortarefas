@@ -14,46 +14,57 @@ CREATE TABLE IF NOT EXISTS tasks (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     due_date DATE,
+
     -- Regra para garantir que a prioridade seja um dos valores permitidos
     priority VARCHAR(50) DEFAULT 'média' CHECK (priority IN ('baixa', 'média', 'alta')),
+
     -- Regra para garantir que o status seja um dos valores permitidos
     status VARCHAR(50) DEFAULT 'pendente' CHECK (status IN ('pendente', 'em andamento', 'concluída')),
+
     category VARCHAR(100),
 
     -- Campos adicionados:
     date_time TIMESTAMP,
     reminder_minutes INTEGER DEFAULT 15,
+    fixed BOOLEAN DEFAULT false, 
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+
+    -- Garante que um usuário não tenha duas tarefas com o mesmo título
     CONSTRAINT tasks_user_id_title_key UNIQUE (user_id, title)
 );
 
 -- Tabela para armazenar os comentários de cada tarefa
-CREATE TABLE IF NOT EXISTS  comments (
+CREATE TABLE IF NOT EXISTS comments (
     id SERIAL PRIMARY KEY,
     content TEXT NOT NULL,
     task_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
     -- Liga o comentário a uma tarefa
     FOREIGN KEY (task_id) REFERENCES tasks (id) ON DELETE CASCADE,
+
     -- Liga o comentário a um usuário
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 -- Tabela para armazenar o histórico de atividades de cada tarefa
-CREATE TABLE IF NOT EXISTS  activity_logs (
+CREATE TABLE IF NOT EXISTS activity_logs (
     id SERIAL PRIMARY KEY,
     action VARCHAR(50),
     description TEXT NOT NULL,
     task_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
-    user_name VARCHAR(255), -- Nome do usuário para fácil exibição
+    user_name VARCHAR(255), 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
     -- Liga o log a uma tarefa
     FOREIGN KEY (task_id) REFERENCES tasks (id) ON DELETE CASCADE,
+
     -- Liga o log a um usuário
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );

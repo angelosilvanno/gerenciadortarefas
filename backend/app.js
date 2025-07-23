@@ -7,6 +7,7 @@ const app = express();
 
 const allowedOrigins = [
   'https://nexttaskweb.vercel.app',
+  'https://nextask-api.onrender.com',
   'http://127.0.0.1:5500',
   'http://localhost:5500',
 ];

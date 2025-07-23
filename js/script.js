@@ -872,17 +872,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (DOM.searchTasksInput) DOM.searchTasksInput.addEventListener("input", debounce(filterAndRender, 300));
   
-  if (DOM.clearCompletedBtn) {
-    DOM.clearCompletedBtn.addEventListener("click", async () => {
-      const completedTasks = tasksCache.filter(task => normalizeStatus(task.status) === 'concluida');
-      if (completedTasks.length === 0) return showUIMessage("Nenhuma tarefa concluída para limpar.", false);
+if (DOM.clearCompletedBtn) {
+  let clearCompletedHandler = null; 
+
+  DOM.clearCompletedBtn.addEventListener("click", () => {
+    const completedTasks = tasksCache.filter(task => normalizeStatus(task.status) === 'concluida');
+
+    if (completedTasks.length === 0) {
+      return showUIMessage("Nenhuma tarefa concluída para limpar.", false);
+    }
+
+    const modalBody = DOM.deleteModalElement.querySelector('.modal-body');
+    if (modalBody) {
+      modalBody.textContent = `Deseja realmente excluir as ${completedTasks.length} tarefas concluídas?`;
+    }
+
+    const modal = bootstrap.Modal.getOrCreateInstance(DOM.deleteModalElement);
+
+    if (clearCompletedHandler) {
+      DOM.confirmDeleteButton.removeEventListener('click', clearCompletedHandler);
+    }
+
+    clearCompletedHandler = async () => {
       try {
         await Promise.all(completedTasks.map(task => apiService.deleteTask(task.id)));
-        showUIMessage("Tarefas concluídas foram limpas.", false);
+        showUIMessage("Tarefas concluídas foram limpas com sucesso.", false);
         await loadAndRenderTasks();
-      } catch (error) { showUIMessage(error.message || "Erro ao limpar tarefas concluídas."); }
-    });
-  }
+      } catch (error) {
+        showUIMessage(error.message || "Erro ao limpar tarefas concluídas.", true);
+      } finally {
+        modal.hide(); 
+      }
+    };
+
+    DOM.confirmDeleteButton.addEventListener('click', clearCompletedHandler, { once: true });
+
+    modal.show();
+  });
+}
 
   if (DOM.exportTasksBtn) {
     DOM.exportTasksBtn.addEventListener("click", () => {
@@ -1128,33 +1155,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
  
  })
-
-
- document.addEventListener('DOMContentLoaded', () => {
-  const clearCompletedBtn = document.getElementById('clear-completed-btn');
-  if (clearCompletedBtn) {
-    clearCompletedBtn.addEventListener('click', async () => {
-      const confirmacao = confirm('Deseja realmente excluir todas as tarefas concluídas?');
-      if (!confirmacao) return;
-
-      try {
-        const tasks = await apiService.getTasks();
-        const concluidas = tasks.filter(tarefa => tarefa.status === 'concluída');
-
-        for (const tarefa of concluidas) {
-          await apiService.deleteTask(tarefa.id);
-        }
-
-        renderizarTarefas();
-        alert('Todas as tarefas concluídas foram removidas!');
-      } catch (erro) {
-        console.error('Erro ao limpar tarefas concluídas:', erro);
-        alert('Erro ao limpar tarefas concluídas.');
-      }
-    });
-  }
- });
-
 
 };
 

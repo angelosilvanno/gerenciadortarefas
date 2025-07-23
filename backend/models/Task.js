@@ -13,10 +13,19 @@ const Task = {
       reminder_minutes,
       fixed = false
     } = taskData;
-  
+
     if (due_date) {
-      const hoje = new Date().toISOString().split('T')[0];
-      if (due_date < hoje) throw new Error('A data de vencimento não pode estar no passado');
+      const hojeDate = new Date();
+
+      const ano = hojeDate.getFullYear();
+      const mes = String(hojeDate.getMonth() + 1).padStart(2, '0');
+      const dia = String(hojeDate.getDate()).padStart(2, '0');
+
+      const hojeString = `${ano}-${mes}-${dia}`;
+
+      if (due_date < hojeString) {
+        throw new Error('A data de vencimento não pode estar no passado');
+      }
     }
   
     const prioridadeNormalizada = priority?.toLowerCase()?.normalize("NFD").replace(/[\u0300-\u036f]/g, '');

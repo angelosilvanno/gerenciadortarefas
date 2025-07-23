@@ -14,15 +14,22 @@ exports.getTasks = async (req, res) => {
 
 exports.createTask = async (req, res) => {
   try {
+
+    console.log("Dados recebidos:", req.body);
+    console.log("Usuário autenticado:", req.user);
+
     const { title } = req.body;
     const userId = req.user.id;
 
     const existingTask = await Task.findByTitle(userId, title);
     if (existingTask) {
+      console.log("Tarefa duplicada detectada");
       return res.status(409).json({ message: "Já existe uma tarefa com este título." });
     }
 
     const newTask = await Task.create(userId, req.body);
+    console.log("Tarefa criada:", newTask);
+
     const user = await User.findById(userId);
     const userName = user ? user.name : "Usuário desconhecido";
 
@@ -42,10 +49,13 @@ exports.createTask = async (req, res) => {
 };
 
 exports.updateTask = async (req, res) => {
+  console.log("Recebido no update:", req.body);
+
   try {
     const taskId = req.params.id;
     const userId = req.user.id;
     const { title } = req.body;
+    console.log("Dados recebidos na atualização:", req.body);
 
     if (title) {
       const existingTask = await Task.findByTitle(userId, title);
@@ -99,16 +109,24 @@ exports.updateTask = async (req, res) => {
 };
 
 exports.deleteTask = async (req, res) => {
+  console.log("Entrou no deleteTask()");
+  console.log("req.user.id:", req.user.id);
+  console.log("req.params.id:", req.params.id);
+
   try {
     const deletedTask = await Task.delete(req.params.id, req.user.id);
 
     if (!deletedTask) {
+      console.log("Nenhuma tarefa deletada. Provavelmente não pertence ao usuário.");
       return res.status(404).json({ message: "Tarefa não encontrada ou não pertence ao usuário" });
     }
 
+    console.log("Tarefa deletada com sucesso!");
     res.status(204).send();
   } catch (err) {
     console.error("Erro ao deletar tarefa:", err);
     res.status(500).json({ message: "Erro interno do servidor" });
   }
 };
+
+

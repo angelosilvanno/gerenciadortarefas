@@ -1,19 +1,4 @@
 const pool = require("../db");
-function validarEPadronizarPrioridade(priority) {
-  const prioridadesMapeadas = {
-    baixa: 'baixa',
-    media: 'média',
-    alta: 'alta'
-  };
-
-  const prioridadePadronizada = prioridadesMapeadas[priority?.toLowerCase()];
-
-  if (!prioridadePadronizada) {
-    throw new Error(`Prioridade inválida: '${priority}'`);
-  }
-  
-  return prioridadePadronizada;
-}
 
 const Task = {
   async create(userId, taskData) {
@@ -31,9 +16,11 @@ const Task = {
 
     if (due_date) {
       const hojeDate = new Date();
+
       const ano = hojeDate.getFullYear();
       const mes = String(hojeDate.getMonth() + 1).padStart(2, '0');
       const dia = String(hojeDate.getDate()).padStart(2, '0');
+
       const hojeString = `${ano}-${mes}-${dia}`;
 
       if (due_date < hojeString) {
@@ -41,10 +28,16 @@ const Task = {
       }
     }
   
-    const prioridadeFinal = validarEPadronizarPrioridade(priority);
-    
+    const prioridadeNormalizada = priority?.toLowerCase()?.normalize("NFD").replace(/[\u0300-\u036f]/g, '');
+    const prioridadesMapeadas = { baixa: 'baixa', media: 'média', alta: 'alta' };
+  
+    if (!prioridadesMapeadas[prioridadeNormalizada]) {
+      throw new Error('Prioridade inválida');
+    }
+  
+    const prioridadeFinal = prioridadesMapeadas[prioridadeNormalizada];
     const lembretesValidos = [15, 30];
-    if (reminder_minutes && !lembretesValidos.includes(Number(reminder_minutes))) {
+    if (reminder_minutes && !lembretesValidos.includes(reminder_minutes)) {
       throw new Error('Lembrete inválido');
     }
   
@@ -71,6 +64,7 @@ const Task = {
     return result.rows;
   },
   
+
   async findById(taskId) {
     const result = await pool.query(
       "SELECT * FROM tasks WHERE id = $1",
@@ -86,10 +80,6 @@ const Task = {
   },
 
   async update(taskId, userId, updateData) {
-    if (updateData.priority) {
-      updateData.priority = validarEPadronizarPrioridade(updateData.priority);
-    }
-    
     const keys = Object.keys(updateData);
 
     if (keys.length === 0) {
@@ -110,11 +100,14 @@ const Task = {
   },
 
   async delete(taskId, userId) {
-    await pool.query(
-      "DELETE FROM tasks WHERE id = $1 AND user_id = $2",
+    const result = await pool.query(
+      "DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING id, user_id",
       [Number(taskId), Number(userId)]
     );
+
+    return result.rows[0];
   },
 };
 
 module.exports = Task;
+

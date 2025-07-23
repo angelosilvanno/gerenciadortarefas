@@ -1,4 +1,12 @@
-const { Pool } = require("pg");
+const { Pool, types } = require("pg");
+require('dotenv').config();
+
+types.setTypeParser(types.builtins.TIMESTAMP, (stringValue) => {
+  return stringValue;
+});
+types.setTypeParser(types.builtins.TIMESTAMPTZ, (stringValue) => {
+  return stringValue;
+});
 
 const isProduction = process.env.NODE_ENV === 'production';
 

@@ -791,13 +791,8 @@ document.addEventListener("DOMContentLoaded", () => {
     DOM.editTitleInput.value = task.title;
     DOM.editDescriptionInput.value = task.description;
     DOM.editDueDateInput.value = task.due_date;
-    
-    const priorityValue = task.priority ? task.priority.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
-    const statusValue = task.status ? task.status.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
-
-    DOM.editPriorityInput.value = priorityValue;
-    DOM.editStatusInput.value = statusValue;
-
+    DOM.editPriorityInput.value = task.priority;
+    DOM.editStatusInput.value = task.status;
     DOM.editCategoryInput.value = task.category || '';
 
     if (task.date_time) {

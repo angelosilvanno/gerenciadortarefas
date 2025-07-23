@@ -16,10 +16,10 @@ CREATE TABLE IF NOT EXISTS tasks (
     due_date DATE,
 
     -- Regra para garantir que a prioridade seja um dos valores permitidos
-    priority VARCHAR(50) DEFAULT 'média' CHECK (priority IN ('baixa', 'média', 'alta')),
+    priority VARCHAR(50) DEFAULT 'media' CHECK (priority IN ('baixa', 'media', 'alta')),
 
     -- Regra para garantir que o status seja um dos valores permitidos
-    status VARCHAR(50) DEFAULT 'pendente' CHECK (status IN ('pendente', 'em andamento', 'concluída')),
+    status VARCHAR(50) DEFAULT 'pendente' CHECK (status IN ('pendente', 'em andamento', 'concluida')),
 
     category VARCHAR(100),
 

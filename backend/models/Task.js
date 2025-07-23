@@ -1,45 +1,30 @@
 const pool = require("../db");
 
-function validarEPadronizarPrioridade(priority) {
-  if (!priority) return 'média';
-  const prioridadesMapeadas = {
-    baixa: 'baixa',
-    media: 'média',
-    alta: 'alta'
-  };
-  const prioridadePadronizada = prioridadesMapeadas[priority.toLowerCase()];
-  if (!prioridadePadronizada) {
+function padronizarPrioridade(priority) {
+  if (!priority) return 'media';
+  const prioridadeNormalizada = priority.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const prioridadesValidas = ['baixa', 'media', 'alta'];
+  if (!prioridadesValidas.includes(prioridadeNormalizada)) {
     throw new Error(`Prioridade inválida: '${priority}'`);
   }
-  return prioridadePadronizada;
+  return prioridadeNormalizada;
 }
 
-function validarEPadronizarStatus(status) {
+function padronizarStatus(status) {
   if (!status) return 'pendente';
-  const statusMapeados = {
-    pendente: 'pendente',
-    'em andamento': 'em andamento',
-    concluida: 'concluída'
-  };
-  const statusPadronizado = statusMapeados[status.toLowerCase()];
-  if (!statusPadronizado) {
+  const statusNormalizado = status.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const statusValidos = ['pendente', 'em andamento', 'concluida'];
+  if (!statusValidos.includes(statusNormalizado)) {
     throw new Error(`Status inválido: '${status}'`);
   }
-  return statusPadronizado;
+  return statusNormalizado;
 }
 
 const Task = {
   async create(userId, taskData) {
     const {
-      title,
-      description,
-      due_date,
-      priority,
-      status,
-      category,
-      date_time,
-      reminder_minutes,
-      fixed = false
+      title, description, due_date, priority, status,
+      category, date_time, reminder_minutes, fixed = false
     } = taskData;
 
     if (due_date) {
@@ -53,9 +38,9 @@ const Task = {
       }
     }
   
-    const prioridadeFinal = validarEPadronizarPrioridade(priority);
-    const statusFinal = validarEPadronizarStatus(status);
-
+    const prioridadeFinal = padronizarPrioridade(priority);
+    const statusFinal = padronizarStatus(status);
+    
     const lembretesValidos = [15, 30];
     if (reminder_minutes && !lembretesValidos.includes(Number(reminder_minutes))) {
       throw new Error('Lembrete inválido');
@@ -64,8 +49,7 @@ const Task = {
     const result = await pool.query(
       `INSERT INTO tasks 
         (user_id, title, description, due_date, priority, status, category, date_time, reminder_minutes, fixed)
-       VALUES 
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
       [userId, title, description, due_date, prioridadeFinal, statusFinal, category, date_time, reminder_minutes, fixed]
     );
@@ -75,10 +59,10 @@ const Task = {
 
   async update(taskId, userId, updateData) {
     if (updateData.priority) {
-      updateData.priority = validarEPadronizarPrioridade(updateData.priority);
+      updateData.priority = padronizarPrioridade(updateData.priority);
     }
     if (updateData.status) {
-      updateData.status = validarEPadronizarStatus(updateData.status);
+      updateData.status = padronizarStatus(updateData.status);
     }
     
     const keys = Object.keys(updateData);
@@ -97,7 +81,7 @@ const Task = {
 
   async delete(taskId, userId) {
     const result = await pool.query(
-      "DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING id, user_id",
+      "DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING id",
       [Number(taskId), Number(userId)]
     );
     return result.rows[0];
@@ -105,7 +89,7 @@ const Task = {
 
   async findByUserId(userId) {
     const result = await pool.query(
-      `SELECT * FROM tasks WHERE user_id = $1 ORDER BY due_date ASC`,
+      `SELECT * FROM tasks WHERE user_id = $1 ORDER BY fixed DESC, due_date ASC`,
       [userId]
     );
     return result.rows;

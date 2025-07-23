@@ -6,13 +6,17 @@ console.log('TESTE - DB_USER:', process.env.DB_USER);
 
 require('dotenv').config();
 const { Pool } = require("pg");
+require('dotenv').config();
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+const connectionString = isProduction 
+    ? process.env.DATABASE_URL 
+    : `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
 
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT
+  connectionString,
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
 });
 
 module.exports = pool;

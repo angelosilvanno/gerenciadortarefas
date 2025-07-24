@@ -1,6 +1,10 @@
 <h1 align="center">🧪 Projeto de Teste de Software</h1>
 <h1 align="center">📃 Gerenciamento de Tarefa: NextTask</h1>
 
+<p align="center">
+  🚀 Acesse o sistema em produção: <a href="https://nextask-app.onrender.com/">nextask-app.onrender.com</a>
+</p>
+
 <p align="justify">🧭 Um gerenciador de tarefas online projetado para ajudar os usuários a organizar suas atividades diárias de forma eficiente e intuitiva.</p>
 
 ## ✍🏽 Introdução
@@ -14,7 +18,6 @@
 * 🔐 **Autenticação de Usuário:**
   * Cadastro de novos usuários com nome de usuário, e-mail e senha.
   * Login seguro para usuários existentes.
-  * Funcionalidade de "Esqueci minha senha" (envia mensagem de confirmação).
 
 * ✅ **Gerenciamento de Tarefas:**
   * **Criação de Tarefas:** Adicione novas tarefas com título, descrição detalhada, data e hora de vencimento, prioridade (baixa, média, alta), lembrete e status inicial (pendente).
@@ -41,6 +44,8 @@
   * **📱 Responsividade:** Funciona bem em desktop e mobile.
   * **🔎 Feedbacks Visuais:** Alertas de sucesso/erro.
   * **👋 Modal de Boas-vindas:** Apresentação inicial para novos usuários.
+  * **⭐ Fixar Tarefas no Topo: Priorize tarefas importantes clicando na estrela (⭐).
+  * **😊 Mensagens Positivas sem Tarefas: Quando não há tarefas cadastradas, o sistema exibe mensagens motivacionais e positivas para incentivar o usuário, tornando a experiência mais leve e acolhedora.
 
 ## 🧪 Testes Aplicados
 

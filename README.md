@@ -44,8 +44,8 @@
   * **📱 Responsividade:** Funciona bem em desktop e mobile.
   * **🔎 Feedbacks Visuais:** Alertas de sucesso/erro.
   * **👋 Modal de Boas-vindas:** Apresentação inicial para novos usuários.
-  * **⭐ Fixar Tarefas no Topo: Priorize tarefas importantes clicando na estrela (⭐).
-  * **😊 Mensagens Positivas sem Tarefas: Quando não há tarefas cadastradas, o sistema exibe mensagens motivacionais e positivas para incentivar o usuário, tornando a experiência mais leve e acolhedora.
+  * **⭐ Fixar Tarefas no Topo:** Priorize tarefas importantes clicando na estrela (⭐).
+  * **😊 Mensagens Positivas sem Tarefas:** Quando não há tarefas cadastradas, o sistema exibe mensagens motivacionais e positivas para incentivar o usuário, tornando a experiência mais leve e acolhedora.
 
 ## 🧪 Testes Aplicados
 

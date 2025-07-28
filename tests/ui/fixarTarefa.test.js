@@ -68,14 +68,14 @@ describe("Fixar tarefa no topo", () => {
 
   test("Clicar na estrela altera o estado fixado", () => {
     const tarefas = JSON.parse(localStorage.getItem("tasksCache"));
-    const tarefa = tarefas[1]; // Tarefa 2 inicialmente não fixada
+    const tarefa = tarefas[1]; 
 
     // Simula clique
     tarefa.fixed = !tarefa.fixed;
     localStorage.setItem("tasksCache", JSON.stringify(tarefas));
 
     const tarefasAtualizadas = JSON.parse(localStorage.getItem("tasksCache"));
-    expect(tarefasAtualizadas[1].fixed).toBe(true); // Agora está fixada
+    expect(tarefasAtualizadas[1].fixed).toBe(true); 
   });
 });
 
